@@ -1,0 +1,49 @@
+{
+  "enabledPlugins": {
+    "sailes-app-builder@sailes": false
+  },
+  "permissions": {
+    "allow": [
+      "Bash(node tools/gb/gb.js:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": [
+      "Edit(./.godot/**)",
+      "Write(./.godot/**)",
+      "Edit(./.ai/specs/implemented/**)",
+      "Read(./**/*.keystore)",
+      "Read(./export_credentials.cfg)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(butler push:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/session-start.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/guard-protected-paths.sh\""
+          }
+        ]
+      }
+    ]
+  }
+}

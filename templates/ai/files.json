@@ -1,0 +1,12 @@
+{
+  "_comment": "Header-only files generated into .ai/ by gb scaffold. Never overwritten when present.",
+  "backlog.md": "# Backlog\n\nDeferred ideas, later ladder rungs, tech debt. Each row names what would bring it back.\n\n| Idea | Why deferred | Trigger to revisit |\n|---|---|---|\n",
+  "lessons.md": "# Lessons\n\nContext / Problem / Rule / Applies-to. A lesson that recurs becomes a check.\n",
+  "STATE.md": "# Session state\nLast-commit: \n\n## Verified facts\n\n## General rules\n\n## Open failures\n\n## Lessons learned\n\n## Last session\n",
+  "specs/AGENTS.md": "# Specs\n\n- Name: `{YYYY-MM-DD}-{kebab-title}.md`, first lines `# Title` + `Status: draft|approved|in-progress|implemented`.\n- Live specs sit here; implemented ones are `git mv`'d to `implemented/`, abandoned ones to `archived/`.\n- Written with `.ai/skills/spec-writing/`.\n",
+  "specs/implemented/.gitkeep": "",
+  "specs/archived/.gitkeep": "",
+  "incidents/README.md": "# Incidents\n\nOne file per broken behaviour: `{YYYY-MM-DD}-{kebab}.md` with `Status: OPEN|FIXED`, the reproduction (`gb` command + log), hypotheses tried, the proven cause.\n",
+  "adr/template.md": "# ADR-NNN: {decision}\n\nDate:\nStatus: accepted | superseded\n\n## Context\n\n## Decision\n\n## Alternatives considered\n\n## Consequences\n",
+  "assets/REGISTER.md": "# Asset register\n\nEvery asset in `assets/` has a row here, added in the same commit. See `.ai/checklists/assets-and-licences.md`.\n\n| Path | Source | Author | Licence | Attribution needed | Added |\n|---|---|---|---|---|---|\n"
+}

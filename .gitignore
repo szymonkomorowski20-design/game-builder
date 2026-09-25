@@ -1,0 +1,7 @@
+# Godot caches and generated files created by running the test fixtures
+tests/fixtures/**/.godot/
+tests/fixtures/**/*.uid
+tests/fixtures/**/.ai/
+node_modules/
+.claude/settings.local.json
+.claude/worktrees/

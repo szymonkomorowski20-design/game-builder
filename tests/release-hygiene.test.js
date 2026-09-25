@@ -1,0 +1,62 @@
+'use strict';
+
+// Versions agree everywhere; the CHANGELOG has an entry for the current version; every skill has
+// valid frontmatter whose name matches its folder; every reference file a SKILL.md names exists.
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.join(__dirname, '..');
+const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
+const VERSION = read('VERSION').trim();
+
+test('VERSION, plugin.json, marketplace.json and package.json agree', () => {
+  assert.equal(JSON.parse(read('.claude-plugin/plugin.json')).version, VERSION);
+  assert.equal(JSON.parse(read('.claude-plugin/marketplace.json')).plugins[0].version, VERSION);
+  assert.equal(JSON.parse(read('package.json')).version, VERSION);
+});
+
+test('CHANGELOG has a heading for the current version in the format the hook parses', () => {
+  assert.match(read('CHANGELOG.md'), new RegExp(`^## ${VERSION.replace(/\./g, '\\.')} — \\d{4}-\\d{2}-\\d{2}`, 'm'));
+});
+
+const skills = fs.readdirSync(path.join(ROOT, 'skills'));
+
+test('every skill has frontmatter with a matching name and a description with triggers', () => {
+  for (const s of skills) {
+    const body = read(`skills/${s}/SKILL.md`);
+    const fm = /^---\n([\s\S]*?)\n---/.exec(body.replace(/\r\n/g, '\n'));
+    assert.ok(fm, `${s}: frontmatter`);
+    assert.match(fm[1], new RegExp(`^name: ${s}$`, 'm'), `${s}: name`);
+    assert.match(fm[1], /^description: .{80,}$/m, `${s}: description`);
+    assert.match(fm[1], /Triggers/, `${s}: triggers`);
+  }
+});
+
+// A plain YAML scalar breaks on ": " or " #". Claude Code then loads the skill with EMPTY metadata
+// (no name, no description → never triggered) and says nothing at runtime. Found by
+// `claude plugin validate` on 2026-09-25 in game-start ("orchestrator: runs").
+test('skill descriptions contain no YAML-breaking ": " or " #" (includes the template spec-writing skill)', () => {
+  const files = skills.map((s) => `skills/${s}/SKILL.md`).concat(['templates/ai/skills/spec-writing/SKILL.md']);
+  for (const f of files) {
+    const line = read(f).split(/\r?\n/).find((l) => l.startsWith('description: '));
+    const value = line.slice('description: '.length);
+    assert.doesNotMatch(value, /: /, `${f}: ": " in description`);
+    assert.doesNotMatch(value, / #/, `${f}: " #" in description`);
+  }
+});
+
+test('reference files named in a SKILL.md exist next to it', () => {
+  for (const s of skills) {
+    const dir = path.join(ROOT, 'skills', s);
+    const body = read(`skills/${s}/SKILL.md`);
+    for (const m of body.matchAll(/`([a-z0-9-]+\.md)`/g)) {
+      if (['SKILL.md', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'STATUS.md'].includes(m[1])) continue;
+      const local = path.join(dir, m[1]);
+      const sibling = skills.some((o) => fs.existsSync(path.join(ROOT, 'skills', o, m[1])));
+      assert.ok(fs.existsSync(local) || sibling, `${s}: referenced ${m[1]} not found`);
+    }
+  }
+});
