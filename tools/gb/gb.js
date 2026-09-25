@@ -780,7 +780,9 @@ function cmdScaffold(argv) {
   if (!g.bin) process.stdout.write('WARN    Godot not found — input actions not added; set GODOT_BIN and run: godot --headless --path . --script tools/gb/setup_input.gd\n');
   if (!o.dryRun && g.bin) {
     const imp = runGodot(g.bin, ['--headless', '--path', o.dir, '--import'], o.dir, 300000);
-    process.stdout.write(`IMPORT  ${imp.code === 0 && !parseLog(imp.log).errors.length ? 'ok' : 'had errors — run gb verify'} (Godot ${g.version})\n`);
+    const impErrors = parseLog(imp.log).errors;
+    process.stdout.write(`IMPORT  ${imp.code === 0 && !impErrors.length ? 'ok' : `exit ${imp.code}, ${impErrors.length} error(s) — run gb verify`} (Godot ${g.version})\n`);
+    for (const e of impErrors.slice(0, 5)) process.stdout.write(`        ${e.kind}: ${e.message}${e.at ? `  [${e.at}]` : ''}\n`);
   }
   process.stdout.write(`\nNext: write .ai/brief.md, git init + first commit, then: node tools/gb/gb.js doctor && node tools/gb/gb.js verify\n`);
   return report.some((l) => l.startsWith('FAIL')) ? 1 : 0;

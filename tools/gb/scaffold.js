@@ -43,7 +43,7 @@ function projectGodot(o) {
     '[application]',
     '',
     `config/name="${o.name.replace(/"/g, '\\"')}"`,
-    'run/main_scene="res://scenes/main.tscn"',
+    `run/main_scene="${o.templateInfo ? o.templateInfo.main_scene : 'res://scenes/main.tscn'}"`,
     `config/features=PackedStringArray("${o.engine}", "${RENDERERS[o.renderer]}")`,
     '',
     '[autoload]',
@@ -56,7 +56,9 @@ function projectGodot(o) {
     '',
     `window/size/viewport_width=${o.width}`,
     `window/size/viewport_height=${o.height}`,
-    ...(pixel && o.width * 4 <= 1920 ? [`window/size/window_width_override=${o.width * 4}`, `window/size/window_height_override=${o.height * 4}`] : []),
+    ...(o.templateInfo && o.templateInfo.window
+      ? [`window/size/window_width_override=${o.templateInfo.window[0]}`, `window/size/window_height_override=${o.templateInfo.window[1]}`]
+      : pixel && o.width * 4 <= 1920 ? [`window/size/window_width_override=${o.width * 4}`, `window/size/window_height_override=${o.height * 4}`] : []),
     `window/stretch/mode="${pixel ? 'viewport' : 'canvas_items'}"`,
     `window/stretch/aspect="${pixel ? 'keep' : 'expand'}"`,
     '',
@@ -234,8 +236,19 @@ function plan(o) {
   };
 
   add('project.godot', projectGodot(o));
-  add('scenes/main.tscn', mainScene(o));
-  copy('scripts/main.gd', path.join(TPL, 'project', 'scripts', 'main.gd'));
+  if (o.templateInfo) {
+    // A starter game replaces the placeholder main scene; its own files (scenes, scripts, data,
+    // tests, its implemented spec) are copied as-is.
+    const tdir = path.join(TPL, 'games', o.template);
+    for (const e of fs.readdirSync(tdir, { withFileTypes: true })) {
+      if (e.name === 'template.json') continue;
+      if (e.isDirectory()) copyTree(e.name, path.join(tdir, e.name));
+      else copy(e.name, path.join(tdir, e.name));
+    }
+  } else {
+    add('scenes/main.tscn', mainScene(o));
+    copy('scripts/main.gd', path.join(TPL, 'project', 'scripts', 'main.gd'));
+  }
   copy('autoload/events.gd', path.join(TPL, 'project', 'autoload', 'events.gd'));
   add('assets/.gitkeep', '');
   add('data/.gitkeep', '');
@@ -322,7 +335,15 @@ function parseScaffoldArgs(argv) {
     else if (a === '--engine') o.engine = v();
     else if (a === '--adopt') o.adopt = true;
     else if (a === '--dry-run') o.dryRun = true;
+    else if (a === '--template') o.template = v();
     else throw new Error(`scaffold: unknown option ${a}`);
+  }
+  if (o.template) {
+    const f = path.join(TPL, 'games', o.template, 'template.json');
+    if (!fs.existsSync(f)) throw new Error(`scaffold: unknown template "${o.template}" (have: ${listTemplates().join(', ') || 'none'})`);
+    o.templateInfo = JSON.parse(fs.readFileSync(f, 'utf8'));
+    o.dim = o.templateInfo.dim;
+    if (!o.width && o.templateInfo.viewport) [o.width, o.height] = o.templateInfo.viewport;
   }
   if (!['2d', '3d'].includes(o.dim)) throw new Error('scaffold: --dim must be 2d or 3d');
   o.renderer = o.renderer || (o.dim === '3d' ? 'forward_plus' : 'gl_compatibility');
@@ -334,4 +355,12 @@ function parseScaffoldArgs(argv) {
   return o;
 }
 
-module.exports = { scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, exportPresets, RENDERERS };
+function listTemplates() {
+  try {
+    return fs.readdirSync(path.join(TPL, 'games')).filter((d) => fs.existsSync(path.join(TPL, 'games', d, 'template.json')));
+  } catch {
+    return [];
+  }
+}
+
+module.exports = { listTemplates, scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, exportPresets, RENDERERS };

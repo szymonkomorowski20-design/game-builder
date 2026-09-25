@@ -1,0 +1,10 @@
+{
+  "name": "platformer-2d",
+  "description": "Side-view 2D platformer starter: tuned movement (coyote time, jump buffer, variable jump), a short level with coins and a goal, 8 behaviour scenarios + unit tests.",
+  "dim": "2d",
+  "main_scene": "res://scenes/level/level_1.tscn",
+  "viewport": [640, 360],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut"
+}

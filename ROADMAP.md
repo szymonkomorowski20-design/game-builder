@@ -48,7 +48,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [ ] Paczki startowe CC0 per gatunek z fal 1–4
 
 ## Etap 5 — Szablony startowe gier
-- [ ] Platformówka 2D, top-down 2D, puzzle na siatce, 3D TPS/FPS, karty — każdy z testami i licencjami
+- [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy
+- [ ] Top-down 2D, puzzle na siatce, 3D TPS/FPS, karty — każdy z testami i licencjami
 
 ## Etap 6 — Role i pozostałe skille
 - [ ] Role: lead/producent, explorer, researcher, game-designer, art-director, gameplay-dev, ui-dev, tech-artist, level-designer, audio-integrator, tester, checker, playtester-qa, docs-author, balancer

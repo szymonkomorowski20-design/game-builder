@@ -1,0 +1,28 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Resource" path="res://data/player_tuning.tres" id="2_tuning"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(14, 22)
+
+[node name="Player" type="CharacterBody2D" groups=["gb_track"]]
+script = ExtResource("1_player")
+tuning = ExtResource("2_tuning")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="Body" type="ColorRect" parent="."]
+offset_left = -7.0
+offset_top = -11.0
+offset_right = 7.0
+offset_bottom = 11.0
+color = Color(0.45, 0.75, 1, 1)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+limit_left = 0
+limit_top = -200
+limit_right = 1440
+limit_bottom = 360
+position_smoothing_enabled = true

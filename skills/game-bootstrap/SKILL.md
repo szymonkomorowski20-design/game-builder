@@ -41,8 +41,9 @@ Commit to the spine for the session — **SPEC → HUMAN → VERIFIED → PLAYAB
    ```
    node <plugin>/tools/gb/gb.js scaffold --dir <folder> --name "<title>" --dim 2d|3d \
      [--renderer forward_plus|mobile|gl_compatibility] [--pixel-art] [--width W --height H] \
-     [--tests gut|gdunit4|none] [--lfs]
+     [--tests gut|gdunit4|none] [--lfs] [--template platformer-2d]
    ```
+   With `--template`, the starter game replaces the placeholder scene (dimension/resolution come from the template); read its implemented spec in `.ai/specs/implemented/` with the human before the first spec.
    It creates `project.godot`, a placeholder main scene, the `Events` autoload, default input actions (via Godot), `tools/gb/`, stamped `AGENTS.md`, `CLAUDE.md`, `README.md`, `STATUS.md`, the full `.ai/` tree (specs, adr + ADR-001, checklists, asset register, STATE/lessons/backlog, local `spec-writing` skill) and `.claude/` guardrails (settings with Sailes disabled for this repo, session-start + protected-path hooks), then imports the project. Read its report: every line is CREATED or KEPT.
 3. Write `.ai/brief.md` from the confirmed brief (it must contain the Decisions Ledger with nothing pending).
 4. Review `AGENTS.md` "Project" section against the manifest; add genre-specific notes only if they are judgment rules (keep it short — it is a map).

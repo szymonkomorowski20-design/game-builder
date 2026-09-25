@@ -106,9 +106,33 @@ test('tools update refreshes framework files only and keeps ignore-errors.txt', 
   assert.match(again.stdout, /already matches/);
 });
 
+test('templates: platformer-2d is listed; an unknown template is rejected with the list', () => {
+  assert.ok(sc.listTemplates().includes('platformer-2d'));
+  assert.throws(() => sc.parseScaffoldArgs(['--template', 'mmo']), /unknown template "mmo".*platformer-2d/);
+  const o = sc.parseScaffoldArgs(['--dir', tmp(), '--template', 'platformer-2d', '--engine', '4.7']);
+  assert.equal(o.dim, '2d');
+  assert.deepEqual([o.width, o.height], [640, 360]);
+  const report = sc.scaffold(o);
+  assert.ok(!report.some((l) => /scenes\/main\.tscn|scripts\/main\.gd/.test(l)), 'no placeholder main scene');
+  assert.match(fs.readFileSync(path.join(o.dir, 'project.godot'), 'utf8'), /run\/main_scene="res:\/\/scenes\/level\/level_1\.tscn"/);
+  assert.ok(fs.existsSync(path.join(o.dir, '.ai', 'specs', 'implemented', 'template-platformer-2d.md')));
+  assert.ok(!fs.existsSync(path.join(o.dir, 'template.json')));
+});
+
 // ---- end-to-end with the real engine ----
 const haveGodot = spawnSync(process.execPath, [GB, 'godot', '--path', path.join(__dirname, 'fixtures', 'ok')], { encoding: 'utf8' }).status !== 2;
 const skip = haveGodot ? false : 'no Godot binary found — e2e skipped';
+
+test('e2e: platformer-2d template passes its own 9 scenarios and unit tests out of the box', { skip, timeout: 900000 }, () => {
+  const dir = path.join(tmp(), 'plat');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'Plat', '--template', 'platformer-2d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /IMPORT {2}ok/);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(v.status, 0, v.stdout);
+  assert.match(v.stdout, /PASS scenarios \(9\/9 passing\)/);
+  assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
+});
 
 test('e2e: scaffold → brief → git commit → doctor DONE → verify PASS', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'game');

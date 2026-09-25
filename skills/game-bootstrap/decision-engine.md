@@ -11,6 +11,15 @@ Every **decision** below is a card (`game-discovery/decision-card.md`); facts ar
 | Other (Unreal, Bevy, raylib, web) | fits specific needs | no verification layer here |
 Pin the exact Godot version from the installed binary (`gb godot`); the project's `config/features` records it.
 
+## Q1b — Start from a template? (decision)
+Templates are tested starting points: code, scenes, tuning resource, behaviour scenarios and an
+implemented spec describing them (`gb scaffold --template <name>`; list: `templates/games/`).
+| Option | ✅ | ⚠️ |
+|---|---|---|
+| **Template** matching the brief (e.g. `platformer-2d`) | tuned movement + tests on day one; the first spec changes a working game | the template's structure becomes yours — read its spec first; placeholder art |
+| Empty project | nothing to unlearn; unusual genres | movement/feel built and tested from scratch |
+Recommend a template only when its genre matches the brief's core loop.
+
 ## Q2 — Dimension & camera (usually already in the brief → confirm)
 2D side / 2D top-down / 2D isometric / 3D third-person / 3D first-person / 3D top-down.
 

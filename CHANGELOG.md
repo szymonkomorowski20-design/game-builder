@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0 — 2026-09-25 · platformer-2d starter template (stage 5, first template)
+- `gb scaffold --template platformer-2d`: tested side-view platformer starter — acceleration/friction run, jump defined by height + time to apex (`JumpMath`), faster fall, variable jump, coyote time, jump buffer, all numbers in `PlayerTuning` (`data/player_tuning.tres`); level with gap, platforms, 5 coins, goal, respawn; HUD; implemented spec with Tuning table; 3 unit tests + 8 behaviour scenarios (P1–P8).
+- Found by the template's own scenarios: whole-step gravity overshot the designed jump (75.25 px vs 72) → trapezoid integration after the jump impulse (72.07 px); the player walked off the level after the goal (seen in the p8 screenshot) → right wall + freeze at goal, expectation added.
+- game-bootstrap: template decision card (Q1b), `--template` flag; scaffold prints concrete import errors.
+
 ## 0.3.0 — 2026-09-25 · spec → implement → test (stage 3)
 - Skills: `game-spec` (Open Questions gate, Tuning table, runnable Done-when, playtest gates; template), `game-pre-implement` (game compatibility surfaces: @export renames, saves, input actions, res:// paths, replays/baselines; physics/determinism/perf risks), `game-implement` (RED first, gb verify every step, look at shots, playtest gate, tuning loop, never re-record to green, keep tools current), `game-test` (spec-first derivation, frozen plan, four instruments, detection proof tiers, anti-flake; techniques + plan template).
 - Router and game-start route through the new skills; AGENTS.md template task router; scaffold adds `.ai/test-plans/` and `.ai/runs/`.
