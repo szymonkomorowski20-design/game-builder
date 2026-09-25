@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://08-weapon/weapon.gd" id="1_weapon"]
+[ext_resource type="PackedScene" path="res://07-projectile/projectile.tscn" id="2_proj"]
+[ext_resource type="Script" path="res://06-hitbox-hurtbox/hurtbox.gd" id="3_hurt"]
+[ext_resource type="Script" path="res://05-health/health.gd" id="4_health"]
+
+[sub_resource type="RectangleShape2D" id="r"]
+size = Vector2(24, 48)
+
+[node name="Range" type="Node2D"]
+
+[node name="Weapon" type="Node2D" parent="."]
+position = Vector2(60, 180)
+script = ExtResource("1_weapon")
+projectile_scene = ExtResource("2_proj")
+
+[node name="Target" type="Node2D" parent="."]
+position = Vector2(400, 180)
+
+[node name="Health" type="Node" parent="Target"]
+script = ExtResource("4_health")
+max_health = 3
+invulnerability_time = 0.0
+
+[node name="Hurtbox" type="Area2D" parent="Target" node_paths=PackedStringArray("health")]
+script = ExtResource("3_hurt")
+health = NodePath("../Health")
+
+[node name="Shape" type="CollisionShape2D" parent="Target/Hurtbox"]
+shape = SubResource("r")

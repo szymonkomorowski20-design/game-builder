@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[node name="ParallaxDemo" type="Node2D"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+
+[node name="Far" type="Parallax2D" parent="."]
+scroll_scale = Vector2(0.2, 1)
+repeat_size = Vector2(640, 0)
+
+[node name="Hills" type="ColorRect" parent="Far"]
+offset_top = 200.0
+offset_right = 640.0
+offset_bottom = 260.0
+color = Color(0.2, 0.25, 0.4, 1)
+
+[node name="Near" type="Parallax2D" parent="."]
+scroll_scale = Vector2(0.6, 1)
+repeat_size = Vector2(640, 0)
+
+[node name="Trees" type="ColorRect" parent="Near"]
+offset_top = 250.0
+offset_right = 640.0
+offset_bottom = 300.0
+color = Color(0.15, 0.35, 0.2, 1)

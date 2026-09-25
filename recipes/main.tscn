@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[node name="Recipes" type="Node2D"]
+
+[node name="Label" type="Label" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+text = "game-builder recipes — see recipes/README.md; every recipe has its own scene and tests."

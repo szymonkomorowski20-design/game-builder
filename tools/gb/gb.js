@@ -286,6 +286,15 @@ function parseGutTotals(log) {
 function stepTest(ctx) {
   const fw = detectTestFramework(ctx.dir);
   if (!fw) return { step: 'test', status: 'skip', reasons: ['no test framework installed (addons/gut or addons/gdUnit4) — node <plugin>/tools/gb/gb.js tests install'], ms: 0, errors: [], warnings: [] };
+  const countTests = (d) => {
+    let n = 0;
+    for (const e of (() => { try { return fs.readdirSync(d, { withFileTypes: true }); } catch { return []; } })()) {
+      if (e.isDirectory()) n += countTests(path.join(d, e.name));
+      else if (/^test_.*\.gd$/.test(e.name)) n += 1;
+    }
+    return n;
+  };
+  if (countTests(path.join(ctx.dir, 'tests')) === 0) return { step: 'test', status: 'skip', reasons: ['no test_*.gd files under tests/'], ms: 0, framework: fw, errors: [], warnings: [] };
   const junit = path.join(ctx.outDir, 'junit.xml');
   fs.mkdirSync(ctx.outDir, { recursive: true });
   const args = fw === 'gut'

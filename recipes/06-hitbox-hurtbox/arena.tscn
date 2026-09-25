@@ -1,0 +1,33 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://06-hitbox-hurtbox/hitbox.gd" id="1_hit"]
+[ext_resource type="Script" path="res://06-hitbox-hurtbox/hurtbox.gd" id="2_hurt"]
+[ext_resource type="Script" path="res://05-health/health.gd" id="3_health"]
+
+[sub_resource type="RectangleShape2D" id="r"]
+size = Vector2(20, 20)
+
+[node name="Arena" type="Node2D"]
+
+[node name="Dummy" type="Node2D" parent="."]
+position = Vector2(300, 180)
+
+[node name="Health" type="Node" parent="Dummy"]
+script = ExtResource("3_health")
+max_health = 3
+invulnerability_time = 0.3
+
+[node name="Hurtbox" type="Area2D" parent="Dummy" node_paths=PackedStringArray("health")]
+script = ExtResource("2_hurt")
+health = NodePath("../Health")
+
+[node name="Shape" type="CollisionShape2D" parent="Dummy/Hurtbox"]
+shape = SubResource("r")
+
+[node name="Sword" type="Area2D" parent="."]
+position = Vector2(100, 180)
+script = ExtResource("1_hit")
+damage = 2
+
+[node name="Shape" type="CollisionShape2D" parent="Sword"]
+shape = SubResource("r")
