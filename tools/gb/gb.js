@@ -36,12 +36,24 @@ const os = require('os');
 const { spawnSync } = require('child_process');
 
 const USAGE = `Usage: node tools/gb/gb.js <command> [options]
+ Verify
+  verify [--quick]         import -> check -> lint -> run -> test -> scenarios -> replays (--quick: up to test)
   godot                    locate Godot; print version and whether it matches the project
   import                   headless import of all resources (fresh clone / new assets)
   check                    load every .gd in one boot; fail on any parse/compile error
+  lint                     broken res:// refs, Godot 3 APIs, assets missing from the licence register, harness
   run [--frames N] [--scene res://x.tscn]   run headless for N frames; fail on log errors
-  test                     run GUT or gdUnit4 if installed (skip if neither)
-  verify                   import -> check -> run -> test; writes .ai/verify/last.json
+  test                     GUT (or gdUnit4) tests in res://tests (test_*.gd); JUnit in .ai/verify/junit.xml
+  scenario [res://tests/scenarios/x.gd] [--window]   bot-player scenarios (all when no path)
+  replay [tests/replays/x.json]                      replay recordings headless; final state must match
+ Play & measure (open a window)
+  record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
+  shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0.01]
+  perf [--seconds 10] [--scene X] [--headless]      frame/process/physics time, nodes, draw calls vs .ai/perf-budget.json
+  export [--preset "Web"]  export presets from export_presets.cfg (templates must be installed)
+ Setup (plugin copy of gb)
+  scaffold …  ·  harness install  ·  tests install [gut]  ·  doctor
+ Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
 Options: --path <project dir> (default: nearest dir with project.godot) · --json
@@ -260,15 +272,272 @@ function detectTestFramework(dir) {
   return null;
 }
 
+/** GUT's "Totals" block → numbers. Null when the block is missing (the run did not finish). */
+function parseGutTotals(log) {
+  const num = (label) => {
+    const m = new RegExp(`^${label}\\s+(\\d+)`, 'm').exec(log);
+    return m ? Number(m[1]) : null;
+  };
+  const tests = num('Tests');
+  if (tests === null) return null;
+  return { scripts: num('Scripts'), tests, passing: num('Passing Tests') || 0, failing: num('Failing Tests') || 0, pending: num('Pending') || 0, risky: num('Risky') || 0 };
+}
+
 function stepTest(ctx) {
   const fw = detectTestFramework(ctx.dir);
-  if (!fw) return { step: 'test', status: 'skip', reasons: ['no test framework installed (addons/gut or addons/gdUnit4)'], ms: 0, errors: [], warnings: [] };
+  if (!fw) return { step: 'test', status: 'skip', reasons: ['no test framework installed (addons/gut or addons/gdUnit4) — node <plugin>/tools/gb/gb.js tests install'], ms: 0, errors: [], warnings: [] };
+  const junit = path.join(ctx.outDir, 'junit.xml');
+  fs.mkdirSync(ctx.outDir, { recursive: true });
   const args = fw === 'gut'
-    ? ['--headless', '--path', ctx.dir, '-s', 'res://addons/gut/gut_cmdln.gd', '-gdir=res://tests', '-ginclude_subdirs', '-gexit']
+    ? ['--headless', '--path', ctx.dir, '-s', 'res://addons/gut/gut_cmdln.gd', '-gdir=res://tests', '-ginclude_subdirs', '-gprefix=test_', '-gsuffix=.gd', `-gjunit_xml_file=${junit}`, '-gexit']
     : ['--headless', '--path', ctx.dir, '-s', 'res://addons/gdUnit4/bin/GdUnitCmdTool.gd', '-a', 'res://tests', '--ignoreHeadlessMode'];
   const r = runGodot(ctx.bin, args, ctx.dir, ctx.timeouts.test);
-  const res = stepResult('test', r, { framework: fw }, ctx.ignores);
+  const totals = fw === 'gut' ? parseGutTotals(r.log) : null;
+  // The test framework is the judge of a test run: engine ERROR lines printed by code under test
+  // (deliberate error-path tests) are the framework's to count, so they are reported, not re-judged.
+  const parsed = parseLog(r.log, ctx.ignores);
+  const reasons = [];
+  let status = 'ok';
+  if (r.spawnError || r.timedOut) { status = 'fail'; reasons.push(r.timedOut ? 'timed out' : r.spawnError); }
+  if (r.code !== 0) { status = 'fail'; reasons.push(`exit code ${r.code}`); }
+  if (fw === 'gut' && !totals) { status = 'fail'; reasons.push('no GUT summary in the log (run did not finish, or a test script failed to parse)'); }
+  if (totals && totals.failing > 0) reasons.push(`${totals.failing} failing of ${totals.tests}`);
+  if (totals && totals.tests === 0) reasons.push('no tests found in res://tests (files must be test_*.gd extending GutTest)');
+  const failingTests = [...r.log.matchAll(/^- (test_\S+)\s*\n\s*\[Failed\]:\s*(.*)$/gm)].map((m) => ({ kind: 'TEST FAILED', message: `${m[1]}: ${m[2].trim()}`, at: null }));
+  return { step: 'test', status, reasons, ms: r.ms, framework: fw, totals, junit: fs.existsSync(junit) ? junit : null, errors: failingTests.concat(status === 'fail' && !failingTests.length ? parsed.errors : []).slice(0, 50), warnings: [], logTail: r.log.split(/\r?\n/).filter(Boolean).slice(-15) };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Harness-driven steps: scenarios, replays, shots, perf
+// ---------------------------------------------------------------------------------------------
+
+const PLUGIN_ROOT = path.resolve(HERE, '..', '..');
+const HARNESS_ARGS_FRAME_CAP = 60 * 300; // hard stop after 5 simulated minutes
+
+function hasHarness(dir) {
+  const pg = safeRead(path.join(dir, 'project.godot')) || '';
+  return fs.existsSync(path.join(dir, 'addons', 'gb_harness', 'harness.gd')) && /^GbHarness=/m.test(pg);
+}
+
+/** Run the game with harness user args. window=false → --headless. fixedFps makes render frames deterministic. */
+function gameRun(ctx, { window = false, scene = null, cap = HARNESS_ARGS_FRAME_CAP, userArgs = [], fixedFps = 60, timeout = ctx.timeouts.run } = {}) {
+  const args = [];
+  if (!window) args.push('--headless');
+  args.push('--path', ctx.dir);
+  if (fixedFps) args.push('--fixed-fps', String(fixedFps));
+  if (cap) args.push('--quit-after', String(cap));
+  if (scene) args.push(scene);
+  args.push('--', ...userArgs);
+  return runGodot(ctx.bin, args, ctx.dir, timeout);
+}
+
+function listFiles(dir, re) {
+  try {
+    return fs.readdirSync(dir).filter((f) => re.test(f)).sort();
+  } catch {
+    return [];
+  }
+}
+
+function stepScenarios(ctx, { only = null, window = false } = {}) {
+  const dir = path.join(ctx.dir, 'tests', 'scenarios');
+  const files = only ? [only] : listFiles(dir, /\.gd$/).map((f) => `res://tests/scenarios/${f}`);
+  if (!files.length) return { step: 'scenarios', status: 'skip', reasons: ['no scenarios in tests/scenarios/'], ms: 0, errors: [], warnings: [] };
+  if (!hasHarness(ctx.dir)) return { step: 'scenarios', status: 'fail', reasons: ['gb_harness not installed — node <plugin>/tools/gb/gb.js harness install'], ms: 0, errors: [], warnings: [] };
+  const t0 = Date.now();
+  const results = [];
+  const errors = [];
+  for (const f of files) {
+    const r = gameRun(ctx, { window, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`] });
+    const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
+    const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
+    const logErrors = parseLog(r.log, ctx.ignores).errors;
+    const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut;
+    results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m });
+    if (!m) errors.push({ kind: 'SCENARIO', message: `${f}: did not finish (no GB_SCENARIO line — crash, timeout or frame cap)`, at: null });
+    for (const e of expectFails) errors.push({ kind: 'EXPECT', message: `${path.basename(f)}: ${e}`, at: null });
+    for (const e of logErrors) errors.push({ ...e, message: `${path.basename(f)}: ${e.message}` });
+  }
+  const failed = results.filter((x) => x.result === 'FAIL');
+  return { step: 'scenarios', status: failed.length ? 'fail' : 'ok', reasons: failed.length ? [`${failed.length} of ${results.length} failed`] : [], ms: Date.now() - t0, results, count: results.length, errors, warnings: [] };
+}
+
+function stepReplays(ctx, { only = null } = {}) {
+  const dir = path.join(ctx.dir, 'tests', 'replays');
+  const files = only ? [path.resolve(only)] : listFiles(dir, /\.json$/).map((f) => path.join(dir, f));
+  if (!files.length) return { step: 'replays', status: 'skip', reasons: ['no recordings in tests/replays/ (node tools/gb/gb.js record <name>)'], ms: 0, errors: [], warnings: [] };
+  if (!hasHarness(ctx.dir)) return { step: 'replays', status: 'fail', reasons: ['gb_harness not installed'], ms: 0, errors: [], warnings: [] };
+  const t0 = Date.now();
+  const results = [];
+  const errors = [];
+  for (const f of files) {
+    let scene = null;
+    try { scene = JSON.parse(fs.readFileSync(f, 'utf8')).scene || null; } catch { /* harness reports it */ }
+    const r = gameRun(ctx, { scene, userArgs: [`--gb-replay=${f}`, `--gb-out=${ctx.outDir}`] });
+    const m = /GB_REPLAY_DONE frames=(\d+) events=(\d+) tracked=(\w+) match=(\w+)/.exec(r.log);
+    const logErrors = parseLog(r.log, ctx.ignores).errors;
+    const pass = !!m && m[4] === 'true' && !logErrors.length;
+    results.push({ replay: path.basename(f), result: pass ? 'PASS' : 'FAIL', tracked: m ? m[3] === 'true' : null, match: m ? m[4] === 'true' : null });
+    if (!m) errors.push({ kind: 'REPLAY', message: `${path.basename(f)}: did not finish`, at: null });
+    else if (m[4] !== 'true') {
+      const exp = /GB_REPLAY_EXPECTED (.*)/.exec(r.log);
+      const act = /GB_REPLAY_ACTUAL\s+(.*)/.exec(r.log);
+      errors.push({ kind: 'REPLAY', message: `${path.basename(f)}: final state differs — expected [${exp ? exp[1] : '?'}] got [${act ? act[1] : '?'}]`, at: null });
+    }
+    for (const e of logErrors) errors.push({ ...e, message: `${path.basename(f)}: ${e.message}` });
+  }
+  const failed = results.filter((x) => x.result === 'FAIL');
+  return { step: 'replays', status: failed.length ? 'fail' : 'ok', reasons: failed.length ? [`${failed.length} of ${results.length} failed`] : [], ms: Date.now() - t0, results, count: results.length, errors, warnings: [] };
+}
+
+function stepLint(ctx) {
+  const t0 = Date.now();
+  const { lint } = require('./lint.js');
+  const r = lint(ctx.dir);
+  return {
+    step: 'lint', status: r.errors.length ? 'fail' : 'ok', reasons: r.errors.length ? [`${r.errors.length} problem(s)`] : [], ms: Date.now() - t0,
+    errors: r.errors.map((e) => ({ kind: e.rule, message: e.message, at: e.file })),
+    warnings: r.warnings.map((e) => ({ kind: e.rule, message: e.message, at: e.file })),
+  };
+}
+
+function imgDiff(ctx, a, b, diffOut, tolerance) {
+  const r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--script', path.join(HERE, 'imgdiff.gd'), '--', `--a=${a}`, `--b=${b}`, `--diff=${diffOut}`, `--tolerance=${tolerance}`], ctx.dir, 120000);
+  const m = /GB_IMGDIFF size_match=(\w+).*?differing=(-?\d+) total=(-?\d+) ratio=([\d.]+)/.exec(r.log);
+  return m ? { sizeMatch: m[1] === 'true', differing: Number(m[2]), total: Number(m[3]), ratio: Number(m[4]) } : null;
+}
+
+function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0.01, tolerance = 0.1 } = {}) {
+  if (!hasHarness(ctx.dir)) return { step: 'shot', status: 'fail', reasons: ['gb_harness not installed'], ms: 0, errors: [], warnings: [] };
+  const shotsDir = path.join(ctx.outDir, 'shots');
+  const t0 = Date.now();
+  const r = gameRun(ctx, { window: true, scene, cap: frames + 5, userArgs: [`--gb-shot=${frames}:${name}`, `--gb-out=${shotsDir}`] });
+  const m = /GB_SHOT name=\S+ path=(.+?) size=(\d+)x(\d+) err=(\d+)/.exec(r.log);
+  const res = stepResult('shot', r, { name, frames }, ctx.ignores);
+  res.ms = Date.now() - t0;
+  if (!m || m[4] !== '0') { res.status = 'fail'; res.reasons.push('no screenshot written (needs a desktop session with a window)'); return res; }
+  res.file = m[1];
+  const baseDir = path.join(ctx.dir, 'tests', 'baselines');
+  const baseline = path.join(baseDir, `${name}.png`);
+  if (accept) {
+    fs.mkdirSync(baseDir, { recursive: true });
+    fs.copyFileSync(res.file, baseline);
+    res.baseline = 'accepted';
+  } else if (compare) {
+    if (!fs.existsSync(baseline)) { res.status = 'fail'; res.reasons.push(`no baseline tests/baselines/${name}.png — review the shot, then --accept`); return res; }
+    const d = imgDiff(ctx, baseline, res.file, path.join(shotsDir, `${name}.diff.png`), tolerance);
+    res.diff = d;
+    if (!d || !d.sizeMatch || d.ratio > threshold) {
+      res.status = 'fail';
+      res.reasons.push(d ? (d.sizeMatch ? `${(d.ratio * 100).toFixed(2)}% pixels differ (> ${threshold * 100}%) — see ${name}.diff.png` : 'size differs from baseline') : 'diff failed');
+    }
+  }
   return res;
+}
+
+function stepPerf(ctx, { name = 'perf', seconds = 10, scene = null, window = true } = {}) {
+  if (!hasHarness(ctx.dir)) return { step: 'perf', status: 'fail', reasons: ['gb_harness not installed'], ms: 0, errors: [], warnings: [] };
+  const perfDir = path.join(ctx.outDir, 'perf');
+  const frames = Math.round(seconds * 60) + 30;
+  const r = gameRun(ctx, { window, scene, cap: frames, fixedFps: 0, userArgs: [`--gb-perf=${name}`, `--gb-out=${perfDir}`], timeout: (seconds + 60) * 1000 });
+  const res = stepResult('perf', r, { name, window }, ctx.ignores);
+  const file = path.join(perfDir, `${name}.json`);
+  if (!fs.existsSync(file)) { res.status = 'fail'; res.reasons.push('no perf report written'); return res; }
+  const summary = JSON.parse(fs.readFileSync(file, 'utf8'));
+  res.summary = summary;
+  res.file = file;
+  const budget = safeRead(path.join(ctx.dir, '.ai', 'perf-budget.json'));
+  if (budget) {
+    const b = JSON.parse(budget);
+    const checks = [['frame_ms_p95', summary.frame_ms && summary.frame_ms.p95], ['process_ms_p95', summary.process_ms && summary.process_ms.p95], ['physics_ms_p95', summary.physics_ms && summary.physics_ms.p95], ['draw_calls_max', summary.draw_calls && summary.draw_calls.max], ['nodes_max', summary.nodes && summary.nodes.max], ['static_memory_mb_max', summary.static_memory_mb && summary.static_memory_mb.max]];
+    for (const [k, v] of checks) {
+      if (b[k] == null || v == null) continue;
+      if (!window && (k === 'frame_ms_p95' || k === 'draw_calls_max')) continue; // meaningless headless
+      if (v > b[k]) { res.status = 'fail'; res.reasons.push(`${k} ${v.toFixed(2)} > budget ${b[k]}`); }
+    }
+  }
+  return res;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Installers (plugin copy only: they carry vendored files)
+// ---------------------------------------------------------------------------------------------
+
+function copyDir(src, dst) {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const e of fs.readdirSync(src, { withFileTypes: true })) {
+    const s = path.join(src, e.name);
+    const d = path.join(dst, e.name);
+    if (e.isDirectory()) copyDir(s, d);
+    else if (!fs.existsSync(d)) fs.copyFileSync(s, d);
+  }
+}
+
+function setProjectSetting(ctx, args) {
+  const r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--script', path.join(HERE, 'project_setting.gd'), '--', ...args], ctx.dir, 120000);
+  return /GB_SETTING changed=(\d+) err=0/.exec(r.log) ? 'ok' : `failed: ${r.log.split(/\r?\n/).filter(Boolean).slice(-3).join(' | ')}`;
+}
+
+function installHarness(ctx) {
+  const src = path.join(PLUGIN_ROOT, 'templates', 'addons', 'gb_harness');
+  if (!fs.existsSync(src)) throw new UserError('harness install runs from the plugin copy of gb.');
+  copyDir(src, path.join(ctx.dir, 'addons', 'gb_harness'));
+  const s = setProjectSetting(ctx, ['--autoload=GbHarness=res://addons/gb_harness/harness.gd']);
+  return [`harness: addons/gb_harness copied (existing files kept); autoload GbHarness ${s}`];
+}
+
+function installTests(ctx, fw) {
+  if (fw !== 'gut') throw new UserError('Only GUT is vendored with game-builder (tests install gut). gdUnit4: install it from the Godot Asset Library; gb test detects it.');
+  const src = path.join(PLUGIN_ROOT, 'vendor', 'gut', 'addons', 'gut');
+  if (!fs.existsSync(src)) throw new UserError('tests install runs from the plugin copy of gb.');
+  const version = (safeRead(path.join(PLUGIN_ROOT, 'vendor', 'gut', 'VERSION')) || '?').trim();
+  copyDir(src, path.join(ctx.dir, 'addons', 'gut'));
+  const s = setProjectSetting(ctx, ['--enable-plugin=res://addons/gut/plugin.cfg']);
+  const imp = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--import'], ctx.dir, ctx.timeouts.import);
+  return [`tests: GUT ${version} copied to addons/gut; editor plugin ${s}; import ${imp.code === 0 ? 'ok' : 'had errors'}`];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Export
+// ---------------------------------------------------------------------------------------------
+
+function parsePresets(text) {
+  const presets = [];
+  let cur = null;
+  for (const line of String(text || '').split(/\r?\n/)) {
+    const h = /^\[preset\.(\d+)\]$/.exec(line.trim());
+    if (h) { cur = { index: Number(h[1]) }; presets.push(cur); continue; }
+    if (/^\[/.test(line.trim())) { cur = null; continue; }
+    const kv = /^(name|platform|export_path)="(.*)"$/.exec(line.trim());
+    if (cur && kv) cur[kv[1]] = kv[2];
+  }
+  return presets;
+}
+
+function templatesDir(version) {
+  const base = process.platform === 'win32' ? path.join(process.env.APPDATA || '', 'Godot') : process.platform === 'darwin' ? path.join(os.homedir(), 'Library', 'Application Support', 'Godot') : path.join(os.homedir(), '.local', 'share', 'godot');
+  return path.join(base, 'export_templates', version.replace(/\.official.*$/, '').replace(/^(\d+\.\d+\.\d+|\d+\.\d+)\.(\w+)$/, '$1.$2'));
+}
+
+function stepExport(ctx, presetName) {
+  const presets = parsePresets(safeRead(path.join(ctx.dir, 'export_presets.cfg')));
+  if (!presets.length) return [{ step: 'export', status: 'fail', reasons: ['no export_presets.cfg (scaffold creates Windows Desktop + Web)'], ms: 0, errors: [], warnings: [] }];
+  const chosen = presetName ? presets.filter((p) => p.name === presetName) : presets;
+  if (!chosen.length) return [{ step: 'export', status: 'fail', reasons: [`no preset named "${presetName}" (have: ${presets.map((p) => p.name).join(', ')})`], ms: 0, errors: [], warnings: [] }];
+  const tdir = templatesDir(ctx.godotVersion);
+  return chosen.map((p) => {
+    const out = path.join(ctx.dir, p.export_path || `build/${p.name}`);
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    const r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--export-release', p.name, out], ctx.dir, 900000);
+    const res = stepResult(`export:${p.name}`, r, { output: out }, ctx.ignores);
+    if (/export templates|szablon/i.test(r.log) && res.status === 'fail') {
+      res.reasons.unshift(`export templates for ${p.platform} are missing in ${tdir} — install them once: Godot editor → Editor → Manage Export Templates → Download and Install`);
+      res.missingTemplates = true;
+    }
+    if (res.status === 'ok' && (!fs.existsSync(out) || fs.statSync(out).size === 0)) { res.status = 'fail'; res.reasons.push(`no output at ${out}`); }
+    if (res.status === 'ok') res.bytes = fs.statSync(out).size;
+    return res;
+  });
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -305,6 +574,15 @@ function parseArgs(argv) {
     else if (a === '--path') opts.path = argv[++i];
     else if (a === '--frames') opts.frames = Number(argv[++i]);
     else if (a === '--scene') opts.scene = argv[++i];
+    else if (a === '--window') opts.window = true;
+    else if (a === '--name') opts.name = argv[++i];
+    else if (a === '--seconds') opts.seconds = Number(argv[++i]);
+    else if (a === '--compare') opts.compare = true;
+    else if (a === '--accept') opts.accept = true;
+    else if (a === '--threshold') opts.threshold = Number(argv[++i]);
+    else if (a === '--preset') opts.preset = argv[++i];
+    else if (a === '--headless') opts.headless = true;
+    else if (a === '--quick') opts.quick = true;
     else opts._.push(a);
   }
   return opts;
@@ -322,6 +600,7 @@ function context(opts) {
   return {
     dir, want, mainScene: projectMainScene(text), bin: g.bin, godotVersion: g.version, versionMatches: g.matches,
     ignores: loadIgnoreFile(dir),
+    outDir: path.join(dir, '.ai', 'verify'),
     timeouts: { import: 300000, check: 180000, run: 180000, test: 900000 },
   };
 }
@@ -330,10 +609,23 @@ class UserError extends Error {}
 
 function printStep(s) {
   const tag = s.status === 'ok' ? 'PASS' : s.status === 'skip' ? 'SKIP' : 'FAIL';
-  const extra = s.step === 'check' && s.files != null ? ` (${s.files} scripts)` : s.step === 'run' ? ` (${s.frames} frames, ${s.scene || 'main scene'})` : s.framework ? ` (${s.framework})` : '';
+  let extra = '';
+  if (s.step === 'check' && s.files != null) extra = ` (${s.files} scripts)`;
+  else if (s.step === 'run') extra = ` (${s.frames} frames, ${s.scene || 'main scene'})`;
+  else if (s.step === 'test' && s.totals) extra = ` (${s.framework}: ${s.totals.passing}/${s.totals.tests} passing)`;
+  else if (s.framework) extra = ` (${s.framework})`;
+  else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
+  else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''})`;
+  else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
+  else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output})`;
   process.stdout.write(`${tag} ${s.step}${extra} — ${s.ms} ms${s.reasons.length ? ' — ' + s.reasons.join('; ') : ''}\n`);
   for (const e of s.errors.slice(0, 10)) process.stdout.write(`     ${e.kind}: ${e.message}${e.at ? `  [${e.at}]` : ''}\n`);
   if (s.errors.length > 10) process.stdout.write(`     … ${s.errors.length - 10} more\n`);
+  if (s.step === 'lint') for (const w of s.warnings.slice(0, 10)) process.stdout.write(`     warn ${w.kind}: ${w.message}  [${w.at}]\n`);
+}
+
+function fmtNum(v, digits = 2) {
+  return typeof v === 'number' ? v.toFixed(digits) : '?';
 }
 
 function writeReport(dir, report) {
@@ -368,11 +660,37 @@ function main(argv) {
     return ctx.versionMatches ? 0 : 1;
   }
 
+  if (cmd === 'harness' || cmd === 'tests') {
+    const sub = opts._.shift();
+    if (sub !== 'install') throw new UserError(`Usage: gb ${cmd} install${cmd === 'tests' ? ' [gut]' : ''}`);
+    const lines = cmd === 'harness' ? installHarness(ctx) : installTests(ctx, opts._[0] || 'gut');
+    process.stdout.write(lines.join('\n') + '\n');
+    return lines.some((l) => /failed/.test(l)) ? 1 : 0;
+  }
+
+  if (cmd === 'record') {
+    if (!hasHarness(ctx.dir)) throw new UserError('gb_harness not installed — node <plugin>/tools/gb/gb.js harness install');
+    const name = opts._[0] || opts.name || `play-${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}`;
+    const outDir = path.join(ctx.dir, 'tests', 'replays');
+    fs.mkdirSync(outDir, { recursive: true });
+    process.stdout.write(`Recording "${name}" — the game window opens; play, then close the window.\n`);
+    const r = gameRun(ctx, { window: true, scene: opts.scene, cap: 0, fixedFps: 0, userArgs: [`--gb-record=${name}`, `--gb-out=${outDir}`, `--gb-seed=${opts.seed || 12345}`], timeout: 3600000 });
+    const m = /GB_RECORD path=(.+?) events=(\d+) frames=(\d+)/.exec(r.log);
+    process.stdout.write(m ? `RECORDED ${m[2]} input events over ${m[3]} physics frames → ${m[1]}\nReplay it any time: node tools/gb/gb.js replay ${path.relative(ctx.dir, m[1])}\n` : 'FAIL no recording written\n');
+    return m ? 0 : 1;
+  }
+
   let steps;
   if (cmd === 'import') steps = [stepImport(ctx)];
   else if (cmd === 'check') steps = [stepCheck(ctx)];
+  else if (cmd === 'lint') steps = [stepLint(ctx)];
   else if (cmd === 'run') steps = [stepRun(ctx, opts.frames || 120, opts.scene)];
   else if (cmd === 'test') steps = [stepTest(ctx)];
+  else if (cmd === 'scenario') steps = [stepScenarios(ctx, { only: opts._[0] || null, window: !!opts.window })];
+  else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
+  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01 })];
+  else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
+  else if (cmd === 'export') steps = stepExport(ctx, opts.preset);
   else if (cmd === 'verify') {
     steps = [stepImport(ctx)];
     // A parse error surfaces during import already; still run check so the report names every
@@ -380,8 +698,15 @@ function main(argv) {
     // not run at all (no binary, timeout) stops here.
     const imp = steps[0];
     if (imp.status === 'ok' || !imp.reasons.some((r) => /could not start|timed out/.test(r))) steps.push(stepCheck(ctx));
+    steps.push(stepLint(ctx));
     if (steps.every((s) => s.status !== 'fail')) steps.push(stepRun(ctx, opts.frames || 120, opts.scene));
-    if (steps.every((s) => s.status !== 'fail')) steps.push(stepTest(ctx));
+    if (steps.every((s) => s.status !== 'fail')) {
+      steps.push(stepTest(ctx));
+      if (!opts.quick) {
+        steps.push(stepScenarios(ctx));
+        steps.push(stepReplays(ctx));
+      }
+    }
   } else {
     throw new UserError(`Unknown command: ${cmd}`);
   }
@@ -417,9 +742,16 @@ function cmdScaffold(argv) {
   if (o.adopt && !fs.existsSync(existing)) throw new UserError('--adopt needs an existing project.godot in --dir.');
   const g = pickGodot(o.adopt ? projectEngineVersion(fs.readFileSync(existing, 'utf8')) : null);
   if (!o.engine) o.engine = o.adopt ? projectEngineVersion(fs.readFileSync(existing, 'utf8')) || '4.7' : (g.version ? parseGodotVersion(g.version).majorMinor : '4.7');
+  const full = g.version && /^(\d+\.\d+(?:\.\d+)?)/.exec(g.version);
+  o.engineFull = full && full[1].startsWith(o.engine) ? full[1] : o.engine;
   fs.mkdirSync(o.dir, { recursive: true });
   const runner = g.bin ? (args) => runGodot(g.bin, args, o.dir, 180000).log : null;
   const report = sc.scaffold(o, { runGodot: runner, dryRun: o.dryRun });
+  if (o.adopt && !o.dryRun && g.bin) {
+    const actx = { dir: o.dir, bin: g.bin, timeouts: { import: 300000 } };
+    report.push(...installHarness(actx).map((l) => `INSTALL ${l}`));
+    if (o.tests === 'gut' && !detectTestFramework(o.dir)) report.push(...installTests(actx, 'gut').map((l) => `INSTALL ${l}`));
+  }
   process.stdout.write(report.join('\n') + '\n');
   if (!g.bin) process.stdout.write('WARN    Godot not found — input actions not added; set GODOT_BIN and run: godot --headless --path . --script tools/gb/setup_input.gd\n');
   if (!o.dryRun && g.bin) {
@@ -436,8 +768,10 @@ const DOCTOR_FILES = [
   '.ai/specs/implemented', '.ai/specs/archived', '.ai/adr/template.md', '.ai/assets/REGISTER.md',
   '.ai/skills/spec-writing/SKILL.md', '.ai/checklists/testing.md', '.ai/checklists/playtest.md',
   '.ai/checklists/assets-and-licences.md', '.ai/checklists/release.md',
-  'tools/gb/gb.js', 'tools/gb/check_all.gd', 'tools/gb/.gdignore',
-  '.claude/settings.json', '.claude/hooks/session-start.sh', '.claude/hooks/guard-protected-paths.sh',
+  'tools/gb/gb.js', 'tools/gb/lint.js', 'tools/gb/check_all.gd', 'tools/gb/imgdiff.gd', 'tools/gb/.gdignore',
+  '.claude/settings.json', '.claude/hooks/session-start.sh', '.claude/hooks/guard-protected-paths.sh', '.claude/hooks/check-on-edit.sh',
+  'addons/gb_harness/harness.gd', 'addons/gb_harness/scenario.gd', 'tests/scenarios', 'tests/replays',
+  'export_presets.cfg', '.ai/perf-budget.json', '.github/workflows/verify.yml',
 ];
 
 function cmdDoctor(opts) {
@@ -464,6 +798,12 @@ function cmdDoctor(opts) {
   const pg = safeRead(path.join(dir, 'project.godot')) || '';
   (/^\s*move_left=/m.test(pg) && /^\s*jump=/m.test(pg) ? ok : warn)('input actions (move_*/jump/action/pause) in project.godot');
   (projectMainScene(pg) ? ok : miss)('run/main_scene set');
+  (/^GbHarness="\*res:\/\/addons\/gb_harness\/harness\.gd"/m.test(pg) ? ok : miss)('GbHarness autoload registered');
+  const tmpl = templatesDir(pickGodot(projectEngineVersion(pg)).version || '');
+  for (const p of parsePresets(safeRead(path.join(dir, 'export_presets.cfg')))) {
+    if (p.platform === 'Web' && !fs.existsSync(path.join(tmpl, 'web_nothreads_release.zip'))) warn(`export templates for Web not installed (${tmpl}) — Godot editor → Manage Export Templates`);
+    if (p.platform === 'Windows Desktop' && !fs.readdirSync(fs.existsSync(tmpl) ? tmpl : dir).some((f) => /^windows_release/.test(f))) warn('export templates for Windows not installed');
+  }
 
   const git = spawnSync('git', ['-C', dir, 'rev-list', '--count', 'HEAD'], { encoding: 'utf8' });
   if (git.status === 0 && Number(git.stdout.trim()) > 0) ok(`git initialized, ${git.stdout.trim()} commit(s)`);

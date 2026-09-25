@@ -28,6 +28,10 @@ func _walk(dir: String, out: Array) -> void:
 func _init() -> void:
 	var files: Array = []
 	_walk("res://", files)
+	# Never load this checker itself: re-loading the running SceneTree script (a project copy of
+	# tools/gb without its .gdignore) hangs or crashes Godot 4.7.2 — measured 2026-09-25.
+	var own_path: String = get_script().resource_path
+	files = files.filter(func(f: String) -> bool: return f != own_path and not f.begins_with("res://tools/gb/"))
 	files.sort()
 	var bad := 0
 	for f in files:

@@ -1,0 +1,34 @@
+name: verify
+
+# Runs the same instrument the agent uses locally: node tools/gb/gb.js verify (headless).
+# Godot version comes from project.godot's config/features; bump GODOT_VERSION when the project does.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: "{{GODOT_FULL}}"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Download Godot (official build)
+        run: |
+          curl -sSL -o godot.zip "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          echo "GODOT_BIN=$PWD/Godot_v${GODOT_VERSION}-stable_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Verify
+        run: node tools/gb/gb.js verify
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gb-verify
+          path: .ai/verify/

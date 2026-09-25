@@ -33,8 +33,8 @@ Keyboard+mouse / gamepad / touch. Scaffold creates keyboard + gamepad actions (`
 ## Q6 — Test framework (decision)
 | Option | ✅ | ⚠️ |
 |---|---|---|
-| **GUT** (recommended) | pure GDScript, mature, simple CLI (`gut_cmdln.gd`), many tutorials | assertion style older |
-| gdUnit4 | richer assertions, scene runner, mocks; GDScript and C# | larger addon; CLI flags differ |
+| **GUT** (recommended) | pure GDScript, mature, simple CLI (`gut_cmdln.gd`); vendored with game-builder (9.7.1, tested on Godot 4.7.2) — installs offline, `gb test` parses its totals | assertion style older |
+| gdUnit4 | richer assertions, scene runner, mocks; GDScript and C# | not vendored — install from the Asset Library yourself; `gb test` detects and runs it |
 | none for now | nothing to install | logic regressions only caught by playing; `gb test` stays SKIP |
 
 ## Q7 — Git LFS (decision)

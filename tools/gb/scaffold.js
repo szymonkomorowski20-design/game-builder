@@ -49,7 +49,9 @@ function projectGodot(o) {
     '[autoload]',
     '',
     'Events="*res://autoload/events.gd"',
+    'GbHarness="*res://addons/gb_harness/harness.gd"',
     '',
+    ...(o.tests === 'gut' ? ['[editor_plugins]', '', 'enabled=PackedStringArray("res://addons/gut/plugin.cfg")', ''] : []),
     '[display]',
     '',
     `window/size/viewport_width=${o.width}`,
@@ -125,6 +127,56 @@ const IGNORE_ERRORS = `# One regular expression per line: log lines matching the
 # make verify pass is forbidden (AGENTS.md hard safety rules).
 `;
 
+const TESTS_README = `# Tests
+
+| Folder | What | Run |
+|---|---|---|
+| \`unit/\` (any \`test_*.gd\`) | GUT unit tests for logic | \`node tools/gb/gb.js test\` |
+| \`scenarios/\` | bot-player scenarios (extend \`GbScenario\`) | \`node tools/gb/gb.js scenario\` |
+| \`replays/\` | recordings of real play (\`gb record <name>\`) — regression tests | \`node tools/gb/gb.js replay\` |
+| \`baselines/\` | accepted screenshots (\`gb shot --accept\`) | \`node tools/gb/gb.js shot --compare\` |
+
+\`node tools/gb/gb.js verify\` runs unit tests, scenarios and replays. Put the nodes that matter
+(player, enemies, score holder) in the group \`gb_track\` so a replay also compares their final
+position and health/score/state.
+`;
+
+const PERF_BUDGET = JSON.stringify({
+  _comment: 'gb perf fails when a measured value exceeds its budget. frame_ms and draw_calls are only checked in a window run.',
+  frame_ms_p95: 16.7,
+  process_ms_p95: 8,
+  physics_ms_p95: 4,
+  draw_calls_max: 2000,
+  nodes_max: 20000,
+  static_memory_mb_max: 1024,
+}, null, 2) + '\n';
+
+function exportPresets() {
+  const preset = (idx, name, out) => `[preset.${idx}]
+
+name="${name}"
+platform="${name}"
+runnable=true
+dedicated_server=false
+custom_features=""
+export_filter="all_resources"
+include_filter=""
+exclude_filter="tools/*, tests/*, addons/gut/*"
+export_path="${out}"
+script_export_mode=2
+`;
+  return `${preset(0, 'Windows Desktop', 'build/windows/game.exe')}
+[preset.0.options]
+
+binary_format/embed_pck=true
+
+${preset(1, 'Web', 'build/web/index.html')}
+[preset.1.options]
+
+variant/thread_support=false
+`;
+}
+
 function readme(o) {
   return `# ${o.name}
 
@@ -174,6 +226,12 @@ function plan(o) {
   const files = [];
   const add = (rel, content, mode) => files.push({ rel, content, mode });
   const copy = (rel, src) => files.push({ rel, src });
+  const copyTree = (relDir, srcDir) => {
+    for (const e of fs.readdirSync(srcDir, { withFileTypes: true })) {
+      if (e.isDirectory()) copyTree(`${relDir}/${e.name}`, path.join(srcDir, e.name));
+      else copy(`${relDir}/${e.name}`, path.join(srcDir, e.name));
+    }
+  };
 
   add('project.godot', projectGodot(o));
   add('scenes/main.tscn', mainScene(o));
@@ -181,12 +239,21 @@ function plan(o) {
   copy('autoload/events.gd', path.join(TPL, 'project', 'autoload', 'events.gd'));
   add('assets/.gitkeep', '');
   add('data/.gitkeep', '');
-  add('tests/README.md', '# Tests\n\nRun with `node tools/gb/gb.js test`. Test files: `test_*.gd`. See `.ai/checklists/testing.md`.\n');
+  add('tests/README.md', TESTS_README);
+  copy('tests/scenarios/smoke.gd', path.join(TPL, 'project', 'tests', 'scenarios', 'smoke.gd'));
+  add('tests/replays/.gitkeep', '');
+  add('tests/baselines/.gitkeep', '');
+  if (o.tests === 'gut') copy('tests/unit/test_example.gd', path.join(TPL, 'project', 'tests', 'unit', 'test_example.gd'));
+  copyTree('addons/gb_harness', path.join(TPL, 'addons', 'gb_harness'));
+  if (o.tests === 'gut') copyTree('addons/gut', path.join(PLUGIN, 'vendor', 'gut', 'addons', 'gut'));
+  add('export_presets.cfg', exportPresets());
+  add('.ai/perf-budget.json', PERF_BUDGET);
+  add('.github/workflows/verify.yml', fs.readFileSync(path.join(TPL, 'repo', 'ci-verify.yml'), 'utf8').replace('{{GODOT_FULL}}', o.engineFull || o.engine));
   add('.gitignore', GITIGNORE);
   add('.gitattributes', gitattributes(o.lfs));
   add('.editorconfig', EDITORCONFIG);
 
-  for (const f of ['gb.js', 'check_all.gd', 'setup_input.gd']) copy(`tools/gb/${f}`, path.join(__dirname, f));
+  for (const f of ['gb.js', 'lint.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd']) copy(`tools/gb/${f}`, path.join(__dirname, f));
   add('tools/gb/.gdignore', '');
   add('tools/gb/ignore-errors.txt', IGNORE_ERRORS);
 
@@ -204,6 +271,7 @@ function plan(o) {
   copy('.claude/settings.json', path.join(TPL, 'claude', 'settings.json'));
   copy('.claude/hooks/session-start.sh', path.join(TPL, 'claude', 'hooks', 'session-start.sh'));
   copy('.claude/hooks/guard-protected-paths.sh', path.join(TPL, 'claude', 'hooks', 'guard-protected-paths.sh'));
+  copy('.claude/hooks/check-on-edit.sh', path.join(TPL, 'claude', 'hooks', 'check-on-edit.sh'));
   return files;
 }
 
@@ -212,12 +280,15 @@ function plan(o) {
  * Even then nothing existing is overwritten (the general rule), but skipping these keeps the
  * report honest: an adopted project does not get a placeholder main scene "KEPT" next to its own.
  */
-const GAME_FILES = new Set(['project.godot', 'scenes/main.tscn', 'scripts/main.gd', 'autoload/events.gd', 'assets/.gitkeep', 'data/.gitkeep']);
+const GAME_FILES = new Set(['project.godot', 'scenes/main.tscn', 'scripts/main.gd', 'autoload/events.gd', 'assets/.gitkeep', 'data/.gitkeep', 'export_presets.cfg']);
+// Adopt installs these through `gb harness install` / `gb tests install`, which also register
+// them with the engine (autoload, editor plugin) instead of copying files the project never loads.
+const GAME_DIRS = ['addons/gb_harness/', 'addons/gut/'];
 
 function scaffold(o, { runGodot = null, dryRun = false } = {}) {
   const report = [];
   for (const f of plan(o)) {
-    if (o.adopt && GAME_FILES.has(f.rel)) continue;
+    if (o.adopt && (GAME_FILES.has(f.rel) || GAME_DIRS.some((d) => f.rel.startsWith(d)))) continue;
     const dst = path.join(o.dir, f.rel);
     if (fs.existsSync(dst)) { report.push(`KEPT    ${f.rel}`); continue; }
     report.push(`CREATED ${f.rel}`);
@@ -263,4 +334,4 @@ function parseScaffoldArgs(argv) {
   return o;
 }
 
-module.exports = { scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, RENDERERS };
+module.exports = { scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, exportPresets, RENDERERS };

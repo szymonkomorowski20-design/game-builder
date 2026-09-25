@@ -8,7 +8,7 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 > Żadnego kodu bez zatwierdzonego speca · kluczowe decyzje podejmujesz Ty · „gotowe” = zielony `gb verify` ·
 > każda faza da się uruchomić i zagrać · bramek między fazami nie przeskakujemy.
 
-## Co jest w wersji 0.1.0 (etap 1)
+## Co jest w wersji 0.2.0 (etapy 1–2)
 
 | Element | Do czego służy |
 |---|---|
@@ -49,12 +49,20 @@ W nowym, pustym folderze w Claude Code napisz np. *„zróbmy grę — platform�
 ## Narzędzie `gb`
 
 ```
-node tools/gb/gb.js verify        # import → skrypty → uruchomienie → testy (raport .ai/verify/last.json)
+node tools/gb/gb.js verify        # import → skrypty → lint → uruchomienie → testy GUT → scenariusze bota → nagrania
 node tools/gb/gb.js doctor        # czy repo gry ma wszystko, czego wymaga metoda
-node tools/gb/gb.js run --scene res://scenes/level_1.tscn --frames 300
+node tools/gb/gb.js scenario      # bot-gracz: tests/scenarios/*.gd (press/tap/wait + oczekiwania)
+node tools/gb/gb.js record skok   # TY grasz, gb nagrywa → tests/replays/skok.json
+node tools/gb/gb.js replay        # odtwarza nagrania bez okna; stan końcowy musi się zgadzać
+node tools/gb/gb.js shot --name menu --compare   # zrzut ekranu vs zaakceptowany wzorzec
+node tools/gb/gb.js perf --seconds 10            # czas klatki, węzły, draw calls vs budżet
+node tools/gb/gb.js export --preset "Windows Desktop"
 node tools/gb/gb.js kb "coyote time CharacterBody2D"
 node tools/gb/gb.js assets "wybuch" --typ audio
 ```
+
+Harness (`addons/gb_harness`) jest w grze nieaktywny — działa tylko, gdy `gb` uruchamia grę z flagami `--gb-*`.
+Dlaczego własne `gb`, a nie serwer MCP: [docs/mcp-evaluation.md](docs/mcp-evaluation.md).
 
 ## Rozwój pluginu
 

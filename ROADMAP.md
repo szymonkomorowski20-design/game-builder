@@ -20,17 +20,17 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Evale: 5 scenariuszy napisanych
 - [ ] Evale uruchomione na świeżych subagentach (wymaga zgody na uruchamianie subagentów)
 
-## Etap 2 — Warstwa weryfikacji
-- [ ] Instalacja GUT / gdUnit4 do `addons/` (przypięta wersja zgodna z 4.7) przez `gb`, runner w `gb test`, raport JUnit/JSON
-- [ ] Determinizm: stały krok fizyki, ziarno RNG w trybie testu
-- [ ] Nagrywanie i odtwarzanie wejścia (replay) + bot-gracz (skrypty scenariuszy: „idź w prawo 2 s, skocz”) z asercjami stanu
-- [ ] Zrzuty ekranu w trybie Movie Maker (`--write-movie`, `--fixed-fps`) + porównanie z baseline + ocena wizualna modelem
-- [ ] Pomiar wydajności (monitory Performance → JSON) i budżety
-- [ ] Walidatory: zepsute `res://`, assety spoza rejestru licencji, nieużywane assety, rozmiary tekstur, API Godota 3
-- [ ] Test eksportu (`--export-release`) na Windows i web
-- [ ] Hooki w repo gry: lint/format (gdtoolkit) po edycji, szybkie testy przy zakończeniu
-- [ ] CI (GitHub Actions) z Godotem: verify + eksport
-- [ ] Ocena gotowych serwerów MCP dla Godota
+## Etap 2 — Warstwa weryfikacji ✅ (0.2.0)
+- [x] GUT 9.7.1 dołączony do pluginu i instalowany przez `gb` (scaffold / `tests install`), `gb test` z podsumowaniem i JUnit; gdUnit4 tylko wykrywany (instalacja ręczna)
+- [x] Determinizm: stały krok fizyki, ziarno RNG w trybie testu
+- [x] Nagrywanie i odtwarzanie wejścia (replay) + bot-gracz (skrypty scenariuszy: „idź w prawo 2 s, skocz”) z asercjami stanu
+- [x] Zrzuty ekranu z viewportu (okno, `--fixed-fps`) + porównanie z baseline (`imgdiff.gd`) + instrukcja: agent ogląda PNG przed akceptacją
+- [x] Pomiar wydajności (monitory Performance → JSON) i budżety
+- [x] Walidatory: zepsute `res://`, assety spoza rejestru licencji, nieużywane assety, rozmiary tekstur, API Godota 3
+- [x] Eksport (`gb export`): Windows sprawdzony (109 MB .exe); Web gotowy, ale na tym komputerze brak szablonów web — `gb` i `doctor` to wykrywają
+- [x] Hook po edycji `.gd/.tscn/.tres`: `gb check` + `gb lint`, błąd wraca do agenta od razu (gdtoolkit i hook Stop — świadomie pominięte: wymagałyby Pythona/pakietów i wydłużały każdą turę)
+- [x] CI (GitHub Actions): Godot Linux (adres sprawdzony) → `gb verify`, raport jako artefakt; eksport w CI — nie (szablony ~1 GB); workflow jeszcze nie uruchomiony na GitHubie (sprawdzi go dogfooding w etapie 8)
+- [x] Ocena gotowych serwerów MCP dla Godota
 
 ## Etap 3 — Spec → implement → test
 - [ ] `game-spec` (globalny odpowiednik lokalnego spec-writing), `game-pre-implement`, `game-implement`, `game-test`

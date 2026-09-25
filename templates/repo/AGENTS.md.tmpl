@@ -20,11 +20,16 @@
 - Brief: `.ai/brief.md` · Decisions: `.ai/adr/`
 
 ## Verification (every task)
-- `node tools/gb/gb.js verify` — import → check (all scripts) → run main scene headless → tests. Writes `.ai/verify/last.json`. Paste the summary lines as evidence.
-- `node tools/gb/gb.js run --scene res://path.tscn --frames 300` — run one scene.
-- `node tools/gb/gb.js godot` — which Godot binary is used and whether it matches this project's version.
+- `node tools/gb/gb.js verify` — import → check (all scripts) → lint → run main scene headless → unit tests → scenarios → replays. Writes `.ai/verify/last.json`. Paste the summary lines as evidence. A SKIP is reported as "not covered", never as a pass.
+- Edits to `.gd/.tscn/.tres` are checked automatically (PostToolUse hook: `gb check` + `gb lint`); fix what it reports in the same turn.
+- **Unit tests** (GUT): `tests/**/test_*.gd` extending `GutTest`, `gb test`. Tests first for logic (damage, inventory, save data, state machines).
+- **Scenarios** (bot player): `tests/scenarios/*.gd` extending `GbScenario` — `press/tap/hold/wait/node/expect_*`; time is in physics frames, so they are deterministic. `gb scenario [path] [--window]`.
+- **Replays**: the human plays with `gb record <name>` → `tests/replays/<name>.json`; `gb replay` re-runs it headless and compares the final state of nodes in group `gb_track` (position, health/hp/score/state). A replay that stops matching after a change is a regression — or an intended change the human confirms, after which they re-record.
+- **Screenshots**: `gb shot --name X [--scene ...] --compare` against `tests/baselines/X.png`; accept a reviewed shot with `--accept`. Look at the PNG yourself before accepting.
+- **Performance**: `gb perf --seconds 10 [--scene ...]` vs `.ai/perf-budget.json` (frame time is only meaningful with a window).
+- **Export**: `gb export [--preset "Web"]` (templates must be installed in the editor once).
 - Runtime errors do NOT change Godot's exit code; `gb` reads the log. Never judge a run by the exit code alone.
-- Tests first for logic (damage, inventory, save data, state machines): write or identify a failing test before implementing.
+- The global RNG is seeded by the harness in test runs; a `RandomNumberGenerator` you create must take its seed from `GbHarness.seed_value` when `GbHarness.active`, or scenarios/replays stop being deterministic.
 - Feel (speed, jump, camera, timing) cannot be verified by a script. Put the numbers in data/exported variables, then ask the human to play.
 
 ## Godot conventions

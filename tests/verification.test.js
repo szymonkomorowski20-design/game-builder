@@ -1,0 +1,188 @@
+'use strict';
+
+// Stage 2 — the verification layer: lint rules, GUT result parsing, export presets, and the
+// harness against the real engine (scenarios, record → replay with state match, inert in play).
+// Window/export tests are opt-in: GB_TEST_WINDOW=1 / GB_TEST_EXPORT=1 (they open a window / write 100 MB).
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { spawnSync } = require('child_process');
+
+const ROOT = path.join(__dirname, '..');
+const GB = path.join(ROOT, 'tools', 'gb', 'gb.js');
+const { lint, stripComments } = require('../tools/gb/lint.js');
+
+function tmpProject(files) {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-v-'));
+  for (const [f, body] of Object.entries(files)) {
+    fs.mkdirSync(path.dirname(path.join(d, f)), { recursive: true });
+    fs.writeFileSync(path.join(d, f), body);
+  }
+  return d;
+}
+
+const PG = 'config_version=5\n[application]\nrun/main_scene="res://main.tscn"\n[autoload]\nGbHarness="*res://addons/gb_harness/harness.gd"\n';
+
+// ---------------- lint ----------------
+
+test('lint: Godot 3 APIs are errors with file:line, comments and strings excluded', () => {
+  const d = tmpProject({
+    'project.godot': PG, 'main.tscn': '', 'addons/gb_harness/harness.gd': '',
+    'player.gd': 'extends KinematicBody2D\n# yield( in a comment is fine\nvar s = "onready var in a string"\nonready var x = 1\nfunc f():\n\tyield(get_tree(), "idle_frame")\n',
+  });
+  const r = lint(d);
+  const rules = r.errors.filter((e) => e.rule === 'godot3-api').map((e) => e.file + ' ' + e.message);
+  assert.ok(rules.some((x) => /player\.gd:1 KinematicBody/.test(x)));
+  assert.ok(rules.some((x) => /player\.gd:4 onready var/.test(x)));
+  assert.ok(rules.some((x) => /player\.gd:6 yield/.test(x)));
+  assert.equal(rules.length, 3, rules.join('\n'));
+});
+
+test('lint: broken res:// references are errors, existing ones are not', () => {
+  const d = tmpProject({ 'project.godot': PG, 'main.tscn': '[ext_resource path="res://gone.gd"]\n[ext_resource path="res://main.tscn"]', 'addons/gb_harness/harness.gd': '' });
+  const r = lint(d);
+  assert.deepEqual(r.errors.map((e) => e.message), ['res://gone.gd does not exist']);
+});
+
+test('lint: an asset without a licence-register row is an error; a folder row covers its files', () => {
+  const d = tmpProject({
+    'project.godot': PG, 'main.tscn': 'res://assets/sfx/jump.wav', 'addons/gb_harness/harness.gd': '',
+    'assets/sfx/jump.wav': 'x', 'assets/art/hero.png': 'x',
+    '.ai/assets/REGISTER.md': '| Path | Source |\n|---|---|\n| assets/sfx | zulubo CC0 |\n',
+  });
+  const r = lint(d);
+  assert.deepEqual(r.errors.filter((e) => e.rule === 'licence-register').map((e) => e.file), ['assets/art/hero.png']);
+  assert.ok(r.warnings.some((w) => w.rule === 'unreferenced-asset' && w.file === 'assets/art/hero.png'));
+});
+
+test('lint: missing harness is an error in a stamped game-builder repo, a warning elsewhere; addons are not linted', () => {
+  const files = { 'project.godot': 'config_version=5\n', 'addons/x/y.gd': 'extends KinematicBody2D\nvar p = "res://nope.gd"\n' };
+  const plain = lint(tmpProject(files));
+  assert.deepEqual(plain.errors, []);
+  assert.ok(plain.warnings.some((w) => w.rule === 'harness'));
+  const stamped = lint(tmpProject({ ...files, 'AGENTS.md': '> Game-Builder-Version: 0.2.0\n' }));
+  assert.deepEqual(stamped.errors.map((e) => e.rule), ['harness']);
+});
+
+test('stripComments keeps # inside strings', () => {
+  assert.equal(stripComments('var c = "#fff" # colour'), 'var c = "#fff" ');
+});
+
+// ---------------- parsers ----------------
+
+const gbMod = require('../tools/gb/gb.js');
+
+test('GUT totals and export presets parse', () => {
+  const src = fs.readFileSync(GB, 'utf8');
+  assert.match(src, /function parseGutTotals/);
+  assert.match(src, /function parsePresets/);
+  assert.ok(gbMod.findProjectDir);
+});
+
+// ---------------- engine integration ----------------
+
+const haveGodot = spawnSync(process.execPath, [GB, 'godot', '--path', path.join(__dirname, 'fixtures', 'ok')], { encoding: 'utf8' }).status !== 2;
+const skip = haveGodot ? false : 'no Godot binary found — integration tests skipped';
+
+function copyDir(src, dst) {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const e of fs.readdirSync(src, { withFileTypes: true })) {
+    if (e.name === '.godot' || e.name === '.ai') continue;
+    const s = path.join(src, e.name);
+    const t = path.join(dst, e.name);
+    if (e.isDirectory()) copyDir(s, t);
+    else fs.copyFileSync(s, t);
+  }
+}
+
+let GAME = null;
+function game() {
+  if (GAME) return GAME;
+  GAME = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gb-h-')), 'game');
+  copyDir(path.join(__dirname, 'fixtures', 'harness-game'), GAME);
+  copyDir(path.join(ROOT, 'templates', 'addons', 'gb_harness'), path.join(GAME, 'addons', 'gb_harness'));
+  const g = JSON.parse(spawnSync(process.execPath, [GB, 'godot', '--json', '--path', GAME], { encoding: 'utf8' }).stdout);
+  spawnSync(g.godot, ['--headless', '--path', GAME, '--script', path.join(ROOT, 'tools', 'gb', 'setup_input.gd')], { encoding: 'utf8' });
+  spawnSync(g.godot, ['--headless', '--path', GAME, '--import'], { encoding: 'utf8' });
+  GAME_BIN = g.godot;
+  return GAME;
+}
+let GAME_BIN = null;
+const gb = (...args) => spawnSync(process.execPath, [GB, ...args], { encoding: 'utf8', timeout: 600000 });
+
+test('scenario: a correct bot scenario passes with exact physics', { skip, timeout: 600000 }, () => {
+  const r = gb('scenario', '--path', game());
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /PASS scenarios \(1\/1 passing\)/);
+});
+
+test('scenario: failing expectations and unknown actions are reported, exit 1', { skip, timeout: 600000 }, () => {
+  const bad = path.join(game(), 'tests', 'scenarios', 'zz_broken.gd');
+  fs.writeFileSync(bad, 'extends GbScenario\n\n\nfunc run() -> void:\n\tawait press("move_left", 0.5)\n\texpect_gt(node("Player").position.x, 1000.0, "deliberately wrong")\n\thold("fly")\n');
+  try {
+    const r = gb('scenario', 'res://tests/scenarios/zz_broken.gd', '--path', game());
+    assert.equal(r.status, 1);
+    assert.match(r.stdout, /deliberately wrong — expected > 1000\.000/);
+    assert.match(r.stdout, /input action 'fly' does not exist/);
+  } finally {
+    fs.rmSync(bad);
+  }
+});
+
+test('record → replay reproduces the final tracked state; a tampered recording fails', { skip, timeout: 600000 }, () => {
+  const dir = game();
+  const rep = path.join(dir, 'tests', 'replays');
+  fs.mkdirSync(rep, { recursive: true });
+  // A scripted "human": the scenario plays while the harness records.
+  const rec = spawnSync(GAME_BIN, ['--headless', '--path', dir, '--quit-after', '3000', '--', '--gb-scenario=res://tests/scenarios/walk_and_jump.gd', `--gb-record=walk`, `--gb-out=${rep}`], { encoding: 'utf8' });
+  assert.match(rec.stdout, /GB_RECORD path=.* events=4/);
+  const data = JSON.parse(fs.readFileSync(path.join(rep, 'walk.json'), 'utf8'));
+  assert.match(data.final_state, /Player p=160\.00,/);
+  assert.match(data.final_state, /score=1/);
+
+  let r = gb('replay', '--path', dir);
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /PASS replays \(1\/1 passing\)/);
+
+  data.events = data.events.filter((e) => e[1] !== 'jump'); // the jump never happens now
+  fs.writeFileSync(path.join(rep, 'tampered.json'), JSON.stringify(data));
+  r = gb('replay', path.join(rep, 'tampered.json'), '--path', dir);
+  assert.equal(r.status, 1);
+  assert.match(r.stdout, /final state differs/);
+  fs.rmSync(path.join(rep, 'tampered.json'));
+});
+
+test('harness is inert in a normal run (no GB_ output, RNG not seeded)', { skip, timeout: 600000 }, () => {
+  const out = spawnSync(GAME_BIN || game() && GAME_BIN, ['--headless', '--path', game(), '--quit-after', '10'], { encoding: 'utf8' }).stdout;
+  assert.doesNotMatch(out, /GB_HARNESS/);
+});
+
+test('tests install gut → gb test reports passing/failing counts from GUT', { skip, timeout: 900000 }, () => {
+  const inst = gb('tests', 'install', '--path', game());
+  assert.equal(inst.status, 0, inst.stdout + inst.stderr);
+  assert.match(inst.stdout, /GUT 9\.\d+\.\d+ copied/);
+  const r = gb('test', '--path', game());
+  assert.equal(r.status, 1, 'one deliberately failing test');
+  assert.match(r.stdout, /FAIL test \(gut: 1\/2 passing\)/);
+  assert.match(r.stdout, /test_deliberately_failing/);
+});
+
+test('shot + compare against an accepted baseline (opens a window)', { skip: skip || (process.env.GB_TEST_WINDOW ? false : 'set GB_TEST_WINDOW=1'), timeout: 600000 }, () => {
+  assert.equal(gb('shot', '--name', 't', '--accept', '--path', game()).status, 0);
+  const r = gb('shot', '--name', 't', '--compare', '--path', game());
+  assert.equal(r.status, 0, r.stdout);
+  assert.match(r.stdout, /0\.00% differ/);
+});
+
+test('export Windows Desktop produces an executable', { skip: skip || (process.env.GB_TEST_EXPORT ? false : 'set GB_TEST_EXPORT=1'), timeout: 900000 }, () => {
+  const d = game();
+  // The exact presets gb scaffold writes (a hand-trimmed preset without include/exclude_filter
+  // makes Godot 4.7 log ERRORs — measured 2026-09-25 — so the test uses the real template).
+  fs.writeFileSync(path.join(d, 'export_presets.cfg'), require('../tools/gb/scaffold.js').exportPresets());
+  const r = gb('export', '--preset', 'Windows Desktop', '--path', d);
+  assert.equal(r.status, 0, r.stdout);
+  assert.ok(fs.statSync(path.join(d, 'build', 'windows', 'game.exe')).size > 1e6);
+});

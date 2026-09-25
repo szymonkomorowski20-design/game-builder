@@ -84,7 +84,8 @@ test('verify: a healthy project passes every step', { skip }, () => {
   const { code, report } = verify('ok');
   assert.equal(code, 0);
   assert.equal(report.result, 'PASS');
-  assert.deepEqual(report.steps.map((s) => s.step), ['import', 'check', 'run', 'test']);
+  assert.deepEqual(report.steps.map((s) => s.step), ['import', 'check', 'lint', 'run', 'test', 'scenarios', 'replays']);
+  assert.deepEqual(report.steps.filter((s) => s.status === 'skip').map((s) => s.step), ['test', 'scenarios', 'replays'], 'uncovered steps are SKIP, never PASS');
   assert.equal(report.steps.find((s) => s.step === 'check').failedScripts.length, 0);
 });
 

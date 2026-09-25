@@ -48,7 +48,7 @@ Commit to the spine for the session — **SPEC → HUMAN → VERIFIED → PLAYAB
 4. Review `AGENTS.md` "Project" section against the manifest; add genre-specific notes only if they are judgment rules (keep it short — it is a map).
 5. `git init` (if needed), `git add -A`, first commit: `chore: bootstrap <title> (game-builder <version>)`.
 
-Test framework: the choice is recorded now (ADR-001, AGENTS.md). Installing GUT/gdUnit4 into `addons/` is part of the verification layer (roadmap stage 2); until it is installed `gb test` reports **SKIP**, and you say so — a SKIP is never reported as a pass.
+The verification layer comes with the project: `addons/gb_harness` (autoload `GbHarness`, inert in normal play — scenarios, record/replay, screenshots, perf), GUT (vendored, pinned; with `--tests gut`), a smoke scenario, an example unit test, `export_presets.cfg` (Windows Desktop + Web), `.ai/perf-budget.json`, the CI workflow and the check-on-edit hook. With `--tests none`, `gb test` reports **SKIP** and you say so — a SKIP is never reported as a pass. Web export needs the Web export templates installed once in the Godot editor; `gb doctor` warns when they are missing.
 
 ## Step 4 — Knowledge base wiring
 
