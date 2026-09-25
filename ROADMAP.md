@@ -32,10 +32,11 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] CI (GitHub Actions): Godot Linux (adres sprawdzony) → `gb verify`, raport jako artefakt; eksport w CI — nie (szablony ~1 GB); workflow jeszcze nie uruchomiony na GitHubie (sprawdzi go dogfooding w etapie 8)
 - [x] Ocena gotowych serwerów MCP dla Godota
 
-## Etap 3 — Spec → implement → test
-- [ ] `game-spec` (globalny odpowiednik lokalnego spec-writing), `game-pre-implement`, `game-implement`, `game-test`
-- [ ] Bramka „człowiek zagrał” w implementacji, run log, STATUS.md na bramkach
-- [ ] Dowód: klon Ponga zbudowany wyłącznie pluginem
+## Etap 3 — Spec → implement → test ✅ (0.3.0)
+- [x] `game-spec`, `game-pre-implement`, `game-implement`, `game-test` (+ szablony, techniki)
+- [x] Bramka „człowiek zagrał” w implementacji, run log, STATUS.md na bramkach, pamięć STATE.md
+- [x] Dowód: Pong zbudowany pluginem w 3 fazach (docs/dogfood/pong.md) — metoda złapała regres i usterkę wizualną
+- [ ] Werdykt gracza z bramek fazy 2 i 3 Ponga + nagranie meczu (czeka na człowieka)
 
 ## Etap 4 — Wiedza, fala 05
 - [ ] Dokumentacja Godota w wersji przypiętej (gałąź 4.7, nie rozwojowa)

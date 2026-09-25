@@ -71,8 +71,8 @@ Detect from the filesystem and confirm if ambiguous — **trust the filesystem**
 - For a new game the first spec is the **prototype**: the core loop with placeholder art, one level/arena, win/lose — nothing else.
 - **Gate:** the human approves the spec before any gameplay code.
 
-### Then — implementation
-Phase by phase per the spec. Each phase ends in a **playable build** + green `gb verify` + the human playing it at the gates the spec marks. This orchestrator's job ends when the spec is approved.
+### Then — implementation (skill-backed)
+`game-pre-implement` (readiness report) → `game-implement` (phase by phase, `gb verify` every step, playtest gate per phase) → `game-test` (tests derived from the spec, frozen with the human). Phase by phase per the spec. Each phase ends in a **playable build** + green `gb verify` + the human playing it at the gates the spec marks. This orchestrator's job ends when the spec is approved.
 
 ## Hard rules
 

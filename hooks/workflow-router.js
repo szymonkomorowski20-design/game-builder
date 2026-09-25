@@ -87,7 +87,8 @@ function main() {
     route =
       `Spec(s) in flight at \`.ai/specs/\`: ${shown}${more}.${drift}\n` +
       `Read the relevant one BEFORE proposing work. If the request is covered by it, continue at its ` +
-      `current phase (phase by phase, each phase ending in a playable build and a green \`gb verify\`). ` +
+      `current phase — \`game-pre-implement\` if it was not risk-checked yet, otherwise \`game-implement\` ` +
+      `(phase by phase, each phase ending in a playable build and a green \`gb verify\`). ` +
       `If it is NOT covered, it is new scope: route to \`game-discovery\` and say so rather than quietly widening a spec.`;
   } else {
     route =
@@ -106,8 +107,8 @@ function main() {
     `[game-builder] This repo runs the game-builder workflow (AGENTS.md stamped), so it governs this session — ` +
       `including after a context reset. It takes precedence over any web-app workflow (e.g. Sailes) that may also ` +
       `announce itself here: this is a game.\n\n` +
-      `Pipeline: game-start → [wayfinder] → game-discovery → game-bootstrap → spec (.ai/skills/spec-writing) → ` +
-      `implement phase by phase → human playtest gate → release.\n` +
+      `Pipeline: game-start → game-discovery → game-bootstrap → game-spec (local .ai/skills/spec-writing) → ` +
+      `game-pre-implement → game-implement (phase by phase, gb verify every step) → game-test → human playtest gate → release.\n` +
       `BROKEN ≠ MISSING: if the request is about something failing (crash, error in the log, physics glitch, FPS drop), ` +
       `reproduce it with \`gb\` first; do not treat it as new scope.\n\n` +
       `ROUTING (from the repo's state on disk):\n${route}\n${incidentBlock}\n` +

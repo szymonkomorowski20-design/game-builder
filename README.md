@@ -8,13 +8,14 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 > Żadnego kodu bez zatwierdzonego speca · kluczowe decyzje podejmujesz Ty · „gotowe” = zielony `gb verify` ·
 > każda faza da się uruchomić i zagrać · bramek między fazami nie przeskakujemy.
 
-## Co jest w wersji 0.2.0 (etapy 1–2)
+## Co jest w wersji 0.3.0 (etapy 1–3)
 
 | Element | Do czego służy |
 |---|---|
 | `game-start` | Pokazuje mapę całego procesu i kieruje: nowa gra / nowa mechanika / przejęcie istniejącego projektu |
 | `game-discovery` | Wywiad o koncepcji: fantazja gracza, pętla rozgrywki, platforma, sterowanie, grafika; **drabina zakresu** tnie „MMO z otwartym światem” do pierwszej grywalnej wersji |
 | `game-bootstrap` | Karty decyzji (silnik, renderer, rozdzielczość, testy, LFS) → `gb scaffold` generuje projekt → `gb doctor` + `gb verify` dowodzą, że działa |
+| `game-spec` · `game-pre-implement` · `game-implement` · `game-test` | Spec z tabelą strojenia i bramkami gry → raport gotowości → budowa faza po fazie (test najpierw, `gb verify` po każdym kroku, zrzuty oglądane) → testy wyprowadzone ze speca i zatwierdzone przez Ciebie |
 | `gb` (narzędzie) | Import, sprawdzenie wszystkich skryptów, uruchomienie gry bez okna i czytanie logu, testy, raport; wyszukiwanie w bazie gry-wiedza |
 | Hooki sesji | Na starcie każdej sesji w repo gry: gdzie jesteśmy w procesie, wynik ostatniej weryfikacji, twarde zasady |
 

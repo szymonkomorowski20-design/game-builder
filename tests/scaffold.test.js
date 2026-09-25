@@ -92,6 +92,20 @@ test('adopt mode never generates game files', () => {
   assert.equal(fs.readFileSync(path.join(o.dir, 'project.godot'), 'utf8'), 'config_version=5\n');
 });
 
+test('tools update refreshes framework files only and keeps ignore-errors.txt', () => {
+  const o = opts();
+  sc.scaffold(o);
+  fs.writeFileSync(path.join(o.dir, 'tools', 'gb', 'gb.js'), '// old');
+  fs.writeFileSync(path.join(o.dir, 'tools', 'gb', 'ignore-errors.txt'), '# mine\nfoo\n');
+  const r = spawnSync(process.execPath, [GB, 'tools', 'update', '--path', o.dir], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  assert.match(r.stdout, /UPDATED tools\/gb: gb\.js/);
+  assert.equal(fs.readFileSync(path.join(o.dir, 'tools', 'gb', 'gb.js'), 'utf8'), fs.readFileSync(GB, 'utf8'));
+  assert.equal(fs.readFileSync(path.join(o.dir, 'tools', 'gb', 'ignore-errors.txt'), 'utf8'), '# mine\nfoo\n');
+  const again = spawnSync(process.execPath, [GB, 'tools', 'update', '--path', o.dir], { encoding: 'utf8' });
+  assert.match(again.stdout, /already matches/);
+});
+
 // ---- end-to-end with the real engine ----
 const haveGodot = spawnSync(process.execPath, [GB, 'godot', '--path', path.join(__dirname, 'fixtures', 'ok')], { encoding: 'utf8' }).status !== 2;
 const skip = haveGodot ? false : 'no Godot binary found — e2e skipped';

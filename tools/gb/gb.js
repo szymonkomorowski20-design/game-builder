@@ -44,7 +44,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   lint                     broken res:// refs, Godot 3 APIs, assets missing from the licence register, harness
   run [--frames N] [--scene res://x.tscn]   run headless for N frames; fail on log errors
   test                     GUT (or gdUnit4) tests in res://tests (test_*.gd); JUnit in .ai/verify/junit.xml
-  scenario [res://tests/scenarios/x.gd] [--window]   bot-player scenarios (all when no path)
+  scenario [res://tests/scenarios/x.gd] [--window] [--accept | --compare]   bot-player scenarios; with a window their shot() calls are saved and can be accepted/compared
   replay [tests/replays/x.json]                      replay recordings headless; final state must match
  Play & measure (open a window)
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
@@ -339,7 +339,28 @@ function listFiles(dir, re) {
   }
 }
 
-function stepScenarios(ctx, { only = null, window = false } = {}) {
+/** Scenario screenshots (GB_SHOT lines) → accepted into tests/baselines/, or compared against them. */
+function handleScenarioShots(ctx, log, { accept, compare, threshold = 0.01, tolerance = 0.1 }) {
+  const out = [];
+  const baseDir = path.join(ctx.dir, 'tests', 'baselines');
+  for (const m of log.matchAll(/GB_SHOT name=(\S+) path=(.+?) size=\d+x\d+ err=0/g)) {
+    const [, name, file] = m;
+    const baseline = path.join(baseDir, `${name}.png`);
+    if (accept) {
+      fs.mkdirSync(baseDir, { recursive: true });
+      fs.copyFileSync(file, baseline);
+      out.push({ name, result: 'accepted' });
+    } else if (compare) {
+      if (!fs.existsSync(baseline)) { out.push({ name, result: 'FAIL', reason: `no baseline tests/baselines/${name}.png — look at the shot, then --accept` }); continue; }
+      const d = imgDiff(ctx, baseline, file, file.replace(/\.png$/, '.diff.png'), tolerance);
+      const ok = d && d.sizeMatch && d.ratio <= threshold;
+      out.push({ name, result: ok ? 'PASS' : 'FAIL', ratio: d ? d.ratio : null, reason: ok ? null : (d ? `${(d.ratio * 100).toFixed(2)}% pixels differ` : 'diff failed') });
+    } else out.push({ name, result: 'taken', file });
+  }
+  return out;
+}
+
+function stepScenarios(ctx, { only = null, window = false, accept = false, compare = false, threshold = 0.01 } = {}) {
   const dir = path.join(ctx.dir, 'tests', 'scenarios');
   const files = only ? [only] : listFiles(dir, /\.gd$/).map((f) => `res://tests/scenarios/${f}`);
   if (!files.length) return { step: 'scenarios', status: 'skip', reasons: ['no scenarios in tests/scenarios/'], ms: 0, errors: [], warnings: [] };
@@ -352,8 +373,10 @@ function stepScenarios(ctx, { only = null, window = false } = {}) {
     const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
     const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
     const logErrors = parseLog(r.log, ctx.ignores).errors;
-    const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut;
-    results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m });
+    const shots = window ? handleScenarioShots(ctx, r.log, { accept, compare, threshold }) : [];
+    for (const s of shots.filter((x) => x.result === 'FAIL')) errors.push({ kind: 'SHOT', message: `${path.basename(f)}: ${s.name} — ${s.reason}`, at: null });
+    const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut && !shots.some((x) => x.result === 'FAIL');
+    results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots });
     if (!m) errors.push({ kind: 'SCENARIO', message: `${f}: did not finish (no GB_SCENARIO line — crash, timeout or frame cap)`, at: null });
     for (const e of expectFails) errors.push({ kind: 'EXPECT', message: `${path.basename(f)}: ${e}`, at: null });
     for (const e of logErrors) errors.push({ ...e, message: `${path.basename(f)}: ${e.message}` });
@@ -644,6 +667,7 @@ function main(argv) {
   if (argv[0] === 'kb') return kbSearch(argv.slice(1));
   if (argv[0] === 'assets') return kbSearch(['--assety', ...argv.slice(1)]);
   if (argv[0] === 'scaffold') return cmdScaffold(argv.slice(1));
+  if (argv[0] === 'tools' && argv[1] === 'update') return cmdToolsUpdate(parseArgs(argv.slice(2)));
   if (argv[0] === 'doctor') return cmdDoctor(parseArgs(argv.slice(1)));
   const opts = parseArgs(argv);
   const cmd = opts._.shift();
@@ -686,7 +710,7 @@ function main(argv) {
   else if (cmd === 'lint') steps = [stepLint(ctx)];
   else if (cmd === 'run') steps = [stepRun(ctx, opts.frames || 120, opts.scene)];
   else if (cmd === 'test') steps = [stepTest(ctx)];
-  else if (cmd === 'scenario') steps = [stepScenarios(ctx, { only: opts._[0] || null, window: !!opts.window })];
+  else if (cmd === 'scenario') steps = [stepScenarios(ctx, { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold || 0.01 })];
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
   else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01 })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
@@ -762,6 +786,30 @@ function cmdScaffold(argv) {
   return report.some((l) => l.startsWith('FAIL')) ? 1 : 0;
 }
 
+/** Framework files a game repo carries in tools/gb/ — replaced by `gb tools update`; ignore-errors.txt is the repo's own. */
+const TOOL_FILES = ['gb.js', 'lint.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd'];
+
+function toolsOutdated(dir) {
+  if (!fs.existsSync(path.join(PLUGIN_ROOT, 'templates'))) return null; // running from a repo copy: nothing to compare with
+  return TOOL_FILES.filter((f) => {
+    const a = safeRead(path.join(HERE, f));
+    const b = safeRead(path.join(dir, 'tools', 'gb', f));
+    return a !== null && a !== b;
+  });
+}
+
+function cmdToolsUpdate(opts) {
+  if (!fs.existsSync(path.join(PLUGIN_ROOT, 'templates'))) throw new UserError('tools update runs from the plugin copy of gb: node <plugin>/tools/gb/gb.js tools update --path <game>');
+  const dir = opts.path ? path.resolve(opts.path) : findProjectDir(process.cwd());
+  if (!dir) throw new UserError('No project.godot found (pass --path).');
+  const changed = toolsOutdated(dir);
+  fs.mkdirSync(path.join(dir, 'tools', 'gb'), { recursive: true });
+  for (const f of changed) fs.copyFileSync(path.join(HERE, f), path.join(dir, 'tools', 'gb', f));
+  if (!fs.existsSync(path.join(dir, 'tools', 'gb', '.gdignore'))) fs.writeFileSync(path.join(dir, 'tools', 'gb', '.gdignore'), '');
+  process.stdout.write(changed.length ? `UPDATED tools/gb: ${changed.join(', ')} (ignore-errors.txt untouched)\n` : 'tools/gb already matches the plugin\n');
+  return 0;
+}
+
 const DOCTOR_FILES = [
   'project.godot', 'AGENTS.md', 'CLAUDE.md', 'README.md', 'STATUS.md', '.gitignore', '.gitattributes',
   '.ai/brief.md', '.ai/STATE.md', '.ai/lessons.md', '.ai/backlog.md', '.ai/specs/AGENTS.md',
@@ -813,6 +861,9 @@ function cmdDoctor(opts) {
   const g = pickGodot(want);
   if (!g.bin) miss('Godot binary found (set GODOT_BIN)');
   else (g.matches ? ok : warn)(`Godot ${g.version} ${g.matches ? 'matches' : 'does NOT match'} project engine ${want}`);
+
+  const outdated = toolsOutdated(dir);
+  if (outdated && outdated.length) warn(`tools/gb differs from the plugin (${outdated.join(', ')}) — node <plugin>/tools/gb/gb.js tools update --path .`);
 
   const fw = detectTestFramework(dir);
   (fw ? ok : warn)(`test framework ${fw || 'not installed yet (gb test → SKIP)'}`);
