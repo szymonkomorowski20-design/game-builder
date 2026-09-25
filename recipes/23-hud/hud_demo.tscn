@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://23-hud/hud.gd" id="1_hud"]
+[ext_resource type="Script" path="res://05-health/health.gd" id="2_health"]
+
+[node name="HudDemo" type="Node2D"]
+
+[node name="Player" type="Node2D" parent="."]
+position = Vector2(320, 200)
+
+[node name="Health" type="Node" parent="Player"]
+script = ExtResource("2_health")
+max_health = 5
+invulnerability_time = 0.0
+
+[node name="Hud" type="CanvasLayer" parent="." node_paths=PackedStringArray("health")]
+script = ExtResource("1_hud")
+health = NodePath("../Player/Health")
+
+[node name="HpBar" type="ProgressBar" parent="Hud"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 176.0
+offset_bottom = 32.0
+show_percentage = false
+
+[node name="CoinsLabel" type="Label" parent="Hud"]
+offset_left = 16.0
+offset_top = 40.0
+text = "HUD_COINS"

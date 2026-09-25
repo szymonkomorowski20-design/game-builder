@@ -1,0 +1,6 @@
+keys,en,pl
+MENU_PLAY,Play,Graj
+MENU_QUIT,Quit,Wyjdź
+HUD_COINS,Coins: {n},Monety: {n}
+GREETING,"Hello, {name}!","Cześć, {name}!"
+ONLY_EN,Only in English,

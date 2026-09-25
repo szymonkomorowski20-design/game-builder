@@ -27,6 +27,11 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 
+[internationalization]
+
+locale/translations=PackedStringArray("res://22-localization/strings.en.translation", "res://22-localization/strings.pl.translation")
+locale/fallback="en"
+
 [input]
 
 move_left={

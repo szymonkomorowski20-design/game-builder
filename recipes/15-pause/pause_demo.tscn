@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://15-pause/pause_menu.gd" id="1_menu"]
+[ext_resource type="Script" path="res://15-pause/spinner.gd" id="2_spin"]
+
+[node name="PauseDemo" type="Node2D"]
+
+[node name="Spinner" type="Node2D" parent="."]
+position = Vector2(320, 180)
+script = ExtResource("2_spin")
+
+[node name="Box" type="Polygon2D" parent="Spinner"]
+polygon = PackedVector2Array(-20, -20, 20, -20, 20, 20, -20, 20)
+
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+script = ExtResource("1_menu")
+
+[node name="Dim" type="ColorRect" parent="PauseMenu"]
+offset_right = 640.0
+offset_bottom = 360.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Label" type="Label" parent="PauseMenu"]
+offset_left = 280.0
+offset_top = 170.0
+text = "PAUSED"

@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[node name="Spark" type="Node2D"]
+
+[node name="Dot" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)

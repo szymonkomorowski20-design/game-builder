@@ -1,0 +1,14 @@
+{
+	"start": {"speaker": "Guard", "text": "Halt! Nobody enters the castle.", "next": "ask"},
+	"ask": {
+		"speaker": "Guard",
+		"text": "What do you want?",
+		"choices": [
+			{"text": "Show the royal seal", "next": "seal", "if": "has_seal"},
+			{"text": "Offer gold", "next": "bribe", "if": "!guard_bribed"},
+			{"text": "Leave", "next": ""}
+		]
+	},
+	"seal": {"speaker": "Guard", "text": "My apologies. Go ahead.", "set": {"castle_open": true}},
+	"bribe": {"speaker": "Guard", "text": "Hm. I saw nothing.", "set": {"guard_bribed": true, "castle_open": true}}
+}
