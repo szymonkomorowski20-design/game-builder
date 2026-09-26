@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://26-navigation/nav_chaser.gd" id="1_chaser"]
+
+[sub_resource type="NavigationPolygon" id="nav"]
+vertices = PackedVector2Array(0, 0, 288, 0, 288, 272, 0, 272, 288, 360, 0, 360, 352, 272, 352, 360, 352, 0, 640, 0, 640, 272, 640, 360)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(3, 2, 4, 5), PackedInt32Array(2, 6, 7, 4), PackedInt32Array(6, 10, 11, 7), PackedInt32Array(8, 9, 10, 6)])
+
+[sub_resource type="RectangleShape2D" id="wall"]
+size = Vector2(40, 260)
+
+[sub_resource type="CircleShape2D" id="body"]
+radius = 8.0
+
+[node name="NavDemo" type="Node2D"]
+
+[node name="Region" type="NavigationRegion2D" parent="."]
+navigation_polygon = SubResource("nav")
+
+[node name="Wall" type="StaticBody2D" parent="."]
+position = Vector2(320, 130)
+
+[node name="Shape" type="CollisionShape2D" parent="Wall"]
+shape = SubResource("wall")
+
+[node name="Look" type="Polygon2D" parent="Wall"]
+color = Color(0.4, 0.4, 0.45, 1)
+polygon = PackedVector2Array(-20, -130, 20, -130, 20, 130, -20, 130)
+
+[node name="Chaser" type="CharacterBody2D" parent="."]
+position = Vector2(100, 100)
+motion_mode = 1
+script = ExtResource("1_chaser")
+
+[node name="Shape" type="CollisionShape2D" parent="Chaser"]
+shape = SubResource("body")
+
+[node name="Agent" type="NavigationAgent2D" parent="Chaser"]
+path_desired_distance = 6.0
+target_desired_distance = 6.0

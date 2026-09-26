@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://24-enemy-ai/enemy_ai.gd" id="1_ai"]
+
+[sub_resource type="CircleShape2D" id="body"]
+radius = 8.0
+
+[sub_resource type="RectangleShape2D" id="wall"]
+size = Vector2(10, 360)
+
+[node name="EnemyDemo" type="Node2D"]
+
+[node name="Wall" type="StaticBody2D" parent="."]
+position = Vector2(230, 180)
+
+[node name="Shape" type="CollisionShape2D" parent="Wall"]
+shape = SubResource("wall")
+
+[node name="Player" type="Node2D" parent="."]
+position = Vector2(600, 180)
+
+[node name="Enemy" type="CharacterBody2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(100, 180)
+collision_layer = 2
+motion_mode = 1
+script = ExtResource("1_ai")
+target = NodePath("../Player")
+patrol_points = PackedVector2Array(100, 180, 200, 180)
+
+[node name="Shape" type="CollisionShape2D" parent="Enemy"]
+shape = SubResource("body")
+
+[node name="Body" type="Polygon2D" parent="Enemy"]
+color = Color(0.9, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
