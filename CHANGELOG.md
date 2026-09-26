@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0 — 2026-09-26 · grid puzzle template (stage 5)
+- `gb scaffold --template grid-puzzle-2d`: push-box puzzle starter — rules as a pure model with undo, levels in a `LevelSet` resource (exported with the game, unlike loose .txt files), single step per key press, restart, next level, win; a BFS solver proves every shipped level solvable and pins its par. 6 unit tests + 4 scenarios G1–G4 (the scenarios play the solver's solutions as real key taps), green at scaffold time.
+- Caught while building it: a hand-designed level was unsolvable (the solvability test failed, the level was redesigned) and guessed pars were wrong (pars now come from the solver). Detection proven: moving while a key is held turns G1 red. Screenshot looked at.
+
 ## 0.9.0 — 2026-09-26 · top-down template (stage 5)
 - `gb scaffold --template topdown-2d`: tested top-down arena starter — 8-direction movement with acceleration (normalized diagonals), shooting at a cooldown, enemies that chase and hurt on contact, invulnerability after a hit, two waves, heart pickup, win/lose/restart, HUD; all numbers in `TopDownTuning` (`data/topdown_tuning.tres`); implemented spec with Tuning table; 1 unit test file (3 tests) + 8 behaviour scenarios T1–T8, green at scaffold time. Detection proven: invulnerability 0 turns T5 red, a player without wall collision turns T2 red; screenshot looked at (HUD, walls, pillar, chasing enemies).
 - game-bootstrap template card lists both templates with their core loops and tests; e2e test scaffolds and verifies the new template.

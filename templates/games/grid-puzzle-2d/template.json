@@ -1,0 +1,10 @@
+{
+  "name": "grid-puzzle-2d",
+  "description": "Grid push-box puzzle starter: rules as a pure model with undo, a BFS solver that proves every level solvable and gives par moves, 3 levels in a LevelSet resource, input by single steps, restart, next level, win; unit tests + behaviour scenarios.",
+  "dim": "2d",
+  "main_scene": "res://scenes/board.tscn",
+  "viewport": [640, 360],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut"
+}

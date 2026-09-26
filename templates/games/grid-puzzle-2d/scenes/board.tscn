@@ -1,0 +1,33 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/puzzle/board.gd" id="1_board"]
+[ext_resource type="Resource" path="res://data/levels.tres" id="2_levels"]
+
+[node name="Board" type="Node2D" groups=["gb_track"]]
+script = ExtResource("1_board")
+level_set = ExtResource("2_levels")
+
+[node name="Back" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="Background" type="ColorRect" parent="Back"]
+offset_right = 640.0
+offset_bottom = 360.0
+mouse_filter = 2
+color = Color(0.1, 0.1, 0.13, 1)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Info" type="Label" parent="HUD"]
+offset_left = 16.0
+offset_top = 12.0
+text = "Poziom"
+
+[node name="Message" type="Label" parent="HUD"]
+visible = false
+offset_left = 160.0
+offset_top = 300.0
+offset_right = 480.0
+offset_bottom = 350.0
+horizontal_alignment = 1
+text = "Koniec"
