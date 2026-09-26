@@ -10,8 +10,11 @@ Repo: `Desktop/gb-pong` (local git; commits 50da709 → 0767d5b).
 | Phase | Evidence | Playtest gate |
 |---|---|---|
 | 1 — paddles | `gb verify` PASS, unit 11/11, scenarios 3/3; B1 detection proof (clamp removed → unit + scenario red) | none in spec |
-| 2 — ball | PASS, scenarios 5/5 incl. no tunnelling at 900 px/s; B4 + B5 detection proofs | **open — waiting for the human** |
-| 3 — points/win/restart | PASS, scenarios 8/8 incl. visual V1; B6 + B7 detection proofs | **open — waiting for the human** |
+| 2 — ball | PASS, scenarios 5/5 incl. no tunnelling at 900 px/s; B4 + B5 detection proofs | closed without a play verdict (owner decision, 2026-09-26) |
+| 3 — points/win/restart | PASS, scenarios 8/8 incl. visual V1; B6 + B7 detection proofs | closed without a play verdict (owner decision, 2026-09-26) |
+
+## Closing
+On 2026-09-26 the owner chose to close Pong as a finished method test instead of playing it: its job (proving the pipeline on a real game) was done, and the human playtest gate will be exercised on the stage-8 game instead. The gates are therefore **closed without a verdict** — not "passed". No match replay was recorded.
 
 ## What the method caught that "read the code" would not
 1. **A new state broke an older scenario** (SERVE held the ball; `place_ball` did not enter PLAY). The phase-2 scenario failed after phase-3 code — the regression suite doing its job. Fixed in code; test unchanged.

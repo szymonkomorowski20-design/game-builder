@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/combat_view.gd" id="1_view"]
+[ext_resource type="Resource" path="res://data/cards.tres" id="2_cards"]
+[ext_resource type="Resource" path="res://data/combat_tuning.tres" id="3_tuning"]
+
+[node name="Combat" type="Control" groups=["gb_track"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("1_view")
+card_set = ExtResource("2_cards")
+tuning = ExtResource("3_tuning")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.12, 0.11, 0.15, 1)
+
+[node name="EnemyInfo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 20.0
+text = "Przeciwnik"
+
+[node name="Enemy" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 60.0
+offset_right = 370.0
+offset_bottom = 150.0
+color = Color(0.8, 0.3, 0.35, 1)
+
+[node name="PlayerInfo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 180.0
+text = "Ty"
+
+[node name="Hand" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 210.0
+offset_right = 520.0
+offset_bottom = 330.0
+theme_override_constants/separation = 6
+
+[node name="EndTurn" type="Button" parent="."]
+layout_mode = 0
+offset_left = 530.0
+offset_top = 290.0
+offset_right = 626.0
+offset_bottom = 330.0
+focus_mode = 0
+text = "Koniec tury"
+
+[node name="Message" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 400.0
+offset_top = 80.0
+offset_right = 620.0
+offset_bottom = 140.0
+horizontal_alignment = 1
+text = "Koniec"

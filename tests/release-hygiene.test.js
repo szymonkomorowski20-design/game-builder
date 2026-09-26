@@ -23,6 +23,19 @@ test('CHANGELOG has a heading for the current version in the format the hook par
 });
 
 const skills = fs.readdirSync(path.join(ROOT, 'skills'));
+
+test('every eval has all fields and names files that exist', () => {
+  const evals = fs.readdirSync(path.join(ROOT, 'evals')).filter((f) => f.endsWith('.md') && f !== 'README.md');
+  assert.ok(evals.length >= 20, `evals: ${evals.length}`);
+  for (const f of evals) {
+    const body = read(`evals/${f}`);
+    for (const field of ['# Eval:', 'Skill under test:', 'Files:', 'Setup:', 'Expected (binary):', 'Failure looks like:', 'Last run:']) {
+      assert.ok(body.includes(field), `${f}: missing "${field}"`);
+    }
+    const files = /^Files:\s+(.+)$/m.exec(body)[1].split(',').map((s) => s.trim()).filter(Boolean);
+    for (const p of files) assert.ok(fs.existsSync(path.join(ROOT, p)), `${f}: ${p} does not exist`);
+  }
+});
 const agents = fs.readdirSync(path.join(ROOT, 'agents')).filter((f) => f.endsWith('.md'));
 
 test('every agent has YAML-safe frontmatter, a matching name, tools, and review roles cannot Write/Edit', () => {

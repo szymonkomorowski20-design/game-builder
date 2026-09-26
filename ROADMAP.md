@@ -36,9 +36,9 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] `game-spec`, `game-pre-implement`, `game-implement`, `game-test` (+ szablony, techniki)
 - [x] Bramka „człowiek zagrał” w implementacji, run log, STATUS.md na bramkach, pamięć STATE.md
 - [x] Dowód: Pong zbudowany pluginem w 3 fazach (docs/dogfood/pong.md) — metoda złapała regres i usterkę wizualną
-- [ ] Werdykt gracza z bramek fazy 2 i 3 Ponga + nagranie meczu (czeka na człowieka)
+- [x] Pong zamknięty jako zakończony test metody (decyzja właściciela 2026-09-26) — bramki zamknięte bez werdyktu gracza; bramka człowieka zostanie sprawdzona na grze z etapu 8
 
-## Etap 4 — Wiedza, fala 05 (0.5.0 — w toku)
+## Etap 4 — Wiedza, fala 05 (0.5.0–0.8.0; zostały dodatki)
 - [x] Dokumentacja Godota w wersji przypiętej (gałąź 4.7) — w BAZA-AI (fala 05) + referencja zmian 4.4–4.7 z oficjalnych przewodników migracji
 - [x] Biblioteka przepisów mechanik: 35 z 98 testami GUT i 11 scenariuszami; `gb recipe list/add` kopiuje je z testami do gry (dowód e2e)
 - [ ] Kolejne przepisy do ~45: AnimationTree, multiplayer, checkpointy, ruchome platformy, dash/knockback, minimapa, dostępność
@@ -54,9 +54,10 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy
 - [x] Top-down 2D (0.9.0): arena, strzelanie, fale, wrogowie z obrażeniami kontaktowymi, 3 testy + 8 scenariuszy T1–T8, dowody wykrycia
 - [x] Puzzle na siatce (0.10.0): model + undo + solver BFS dowodzący rozwiązywalności poziomów, 6 testów + 4 scenariusze
-- [ ] Karty, 3D TPS/FPS — każdy z testami i licencjami
+- [x] Karty (0.11.0): walka karciana, energia, zamiary przeciwnika, dane kart, 11 testów (z kontraktem balansu) + 4 scenariusze
+- [ ] 3D TPS/FPS — z testami i licencjami
 
-## Etap 6 — Role i pozostałe skille (0.6.0 — w toku)
+## Etap 6 — Role i pozostałe skille ✅ (0.6.0–0.8.0)
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement
 - [x] Skille: game-audio, game-assets, game-playtest, game-diagnose, game-release
 - [x] `gb export --smoke` (gotowy build uruchomiony bez okna, dowód wykrycia zasobu zgubionego przez filtr eksportu), `gb credits` (CREDITS.md z rejestru, blokada NC/ND/nieznanych licencji)
@@ -67,7 +68,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Przepis 39 multiplayer (serwer autorytatywny, test w jednym procesie) — dalej: spawner/synchronizer
 
 ## Etap 7 — Evale
-- [ ] ~20 scenariuszy (zakres, licencje, API Godota 3, `_physics_process`, dane zamiast magicznych liczb, tester przed kodem, qa uruchamia grę, migracja zapisów…) + fixtures, sędzia sprawdzony na celowo zepsutej grze
+- [x] 20 scenariuszy napisanych (evals/), test higieny formatu
+- [ ] Uruchomienie na świeżych subagentach i ocena (wymaga zgody właściciela na uruchamianie subagentów)
 
 ## Etap 8 — Dogfooding
 - [ ] Platformówka i top-down zbudowane pluginem; wnioski wpisane do skilli; adopcja NEMORAX

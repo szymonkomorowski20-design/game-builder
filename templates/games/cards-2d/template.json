@@ -1,0 +1,10 @@
+{
+  "name": "cards-2d",
+  "description": "Card combat starter (deckbuilder-style): seeded deck, hand of 5, energy per turn, attack/block cards as data, enemy with visible cycling intents, win/lose/restart; pure combat model with unit tests + behaviour scenarios driven by real input.",
+  "dim": "2d",
+  "main_scene": "res://scenes/combat.tscn",
+  "viewport": [640, 360],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut"
+}

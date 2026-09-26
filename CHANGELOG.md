@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.11.0 — 2026-09-26 · card template, 20 evals
+- `gb scaffold --template cards-2d`: card combat starter (deckbuilder-style) — seeded deck (recipe 31), hand of 5, energy per turn, attack/block cards and the starting deck as data (`data/cards.tres`), enemy with cycling visible intents, block, win/lose/restart; pure `Combat` model; keyboard/gamepad (select, play, end turn) and mouse. 11 unit tests (incl. a balance contract: greedy play wins within 5 turns) + 4 scenarios C1–C4 played through input only, green at scaffold time. Detection proven (block not absorbing, energy not spent); the screenshot review found the selected card marked by colour alone → now also by ▶.
+- Evals: 12 new scenarios for the behaviours added in 0.5–0.10 (ripped sounds refused, 4.7 API changes, Tuning instead of literals, Run result line, checker finds what is missing, playtester never judges feel, diagnose reproduces first, release never publishes, save migration, flaky is a defect, recipe first, web audio limits) — 20 in total; a hygiene test checks every eval's fields and referenced files.
+- Pong closed as a finished method test on the owner's decision (gates closed without a play verdict).
+
 ## 0.10.0 — 2026-09-26 · grid puzzle template (stage 5)
 - `gb scaffold --template grid-puzzle-2d`: push-box puzzle starter — rules as a pure model with undo, levels in a `LevelSet` resource (exported with the game, unlike loose .txt files), single step per key press, restart, next level, win; a BFS solver proves every shipped level solvable and pins its par. 6 unit tests + 4 scenarios G1–G4 (the scenarios play the solver's solutions as real key taps), green at scaffold time.
 - Caught while building it: a hand-designed level was unsolvable (the solvability test failed, the level was redesigned) and guessed pars were wrong (pars now come from the solver). Detection proven: moving while a key is held turns G1 red. Screenshot looked at.
