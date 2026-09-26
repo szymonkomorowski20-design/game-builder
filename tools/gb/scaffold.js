@@ -61,6 +61,8 @@ function projectGodot(o) {
       : pixel && o.width * 4 <= 1920 ? [`window/size/window_width_override=${o.width * 4}`, `window/size/window_height_override=${o.height * 4}`] : []),
     `window/stretch/mode="${pixel ? 'viewport' : 'canvas_items'}"`,
     `window/stretch/aspect="${pixel ? 'keep' : 'expand'}"`,
+    // integer scaling keeps pixels square and crisp (Godot 4.7 docs: display/window/stretch/scale_mode)
+    ...(pixel ? ['window/stretch/scale_mode="integer"'] : []),
     '',
     '[rendering]',
     '',
@@ -266,7 +268,7 @@ function plan(o) {
   add('.gitattributes', gitattributes(o.lfs));
   add('.editorconfig', EDITORCONFIG);
 
-  for (const f of ['gb.js', 'lint.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd']) copy(`tools/gb/${f}`, path.join(__dirname, f));
+  for (const f of ['gb.js', 'lint.js', 'credits.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd']) copy(`tools/gb/${f}`, path.join(__dirname, f));
   add('tools/gb/.gdignore', '');
   add('tools/gb/ignore-errors.txt', IGNORE_ERRORS);
 

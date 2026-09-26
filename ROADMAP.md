@@ -54,9 +54,11 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy
 - [ ] Top-down 2D, puzzle na siatce, 3D TPS/FPS, karty — każdy z testami i licencjami
 
-## Etap 6 — Role i pozostałe skille
-- [ ] Role: lead/producent, explorer, researcher, game-designer, art-director, gameplay-dev, ui-dev, tech-artist, level-designer, audio-integrator, tester, checker, playtester-qa, docs-author, balancer
-- [ ] Skille: gry-assety, audio, animacja, feel, balans, level-design, ai-npc, narracja, zapis, wydajność, dostępność-lokalizacja, playtest, shadery-vfx, prawo/licencje, art-direction, ui, diagnose, release, docs, port, wayfinder
+## Etap 6 — Role i pozostałe skille (0.6.0 — w toku)
+- [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement
+- [x] Skille: game-audio, game-assets, game-playtest, game-diagnose, game-release
+- [x] `gb export --smoke` (gotowy build uruchomiony bez okna, dowód wykrycia zasobu zgubionego przez filtr eksportu), `gb credits` (CREDITS.md z rejestru, blokada NC/ND/nieznanych licencji)
+- [ ] Skille: feel/juice, balans, level-design, ai-npc, narracja, zapis, wydajność, dostępność-lokalizacja, shadery-vfx, ui, docs, port
 - [ ] Katalog modułów opcjonalnych (multiplayer, Steamworks, osiągnięcia, zapis w chmurze, mody, proceduralne…)
 - [ ] Szablony: art bible, dokument audio, budżet wydajności, arkusz balansu, plan/raport playtestu, postmortem
 

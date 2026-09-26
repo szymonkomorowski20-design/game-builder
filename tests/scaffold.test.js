@@ -31,6 +31,7 @@ test('pixel art: low base resolution, viewport stretch, nearest filter, pixel sn
   assert.match(pg, /window\/stretch\/mode="viewport"/);
   assert.match(pg, /default_texture_filter=0/);
   assert.match(pg, /snap_2d_transforms_to_pixel=true/);
+  assert.match(pg, /window\/stretch\/scale_mode="integer"/);
   assert.match(pg, /window_width_override=1280/);
   assert.match(pg, /config\/features=PackedStringArray\("4\.7", "GL Compatibility"\)/);
 });
@@ -81,6 +82,30 @@ test('the repo copy of gb carries no scaffold (plugin-only)', () => {
   assert.ok(fs.existsSync(path.join(o.dir, 'tools', 'gb', 'gb.js')));
   assert.ok(!fs.existsSync(path.join(o.dir, 'tools', 'gb', 'scaffold.js')));
   assert.ok(fs.existsSync(path.join(o.dir, 'tools', 'gb', '.gdignore')));
+  // scaffold copies exactly the files `gb tools update` keeps current
+  const copied = fs.readdirSync(path.join(o.dir, 'tools', 'gb')).filter((f) => !['.gdignore', 'ignore-errors.txt'].includes(f)).sort();
+  assert.deepEqual(copied, [...require('../tools/gb/gb.js').TOOL_FILES].sort());
+});
+
+test('credits: CREDITS.md from the register; NC/unknown/proprietary licences and missing files fail', () => {
+  const C = require('../tools/gb/credits.js');
+  const reg = '| Path | Source | Author | Licence | Attribution needed | Added |\n|---|---|---|---|---|---|\n'
+    + '| assets/audio/jump.wav | https://kenney.nl | Kenney | CC0-1.0 | no | 2026-09-26 |\n'
+    + '| assets/music/theme.mp3 | mirror | Deceased Superior Technician | CC-BY | Music by DST (No Soap Radio), CC BY | 2026-09-26 |\n'
+    + '| assets/audio/hit.wav | forum | ? | royalty free | | 2026-09-26 |\n'
+    + '| assets/audio/boss.ogg | freesound | someone | CC-BY-NC-4.0 | x | 2026-09-26 |\n';
+  const rows = C.parseRegister(reg);
+  assert.equal(rows.length, 4);
+  const d = tmp();
+  for (const r of rows.slice(0, 3)) { fs.mkdirSync(path.dirname(path.join(d, r.path)), { recursive: true }); fs.writeFileSync(path.join(d, r.path), 'x'); }
+  const problems = C.check(rows, d);
+  assert.ok(problems.some((p) => /hit\.wav: no identifiable licence/.test(p)));
+  assert.ok(problems.some((p) => /boss\.ogg: non-commercial/.test(p)));
+  assert.ok(problems.some((p) => /boss\.ogg: listed in the register but not found/.test(p)));
+  assert.ok(!problems.some((p) => /jump\.wav|theme\.mp3/.test(p)));
+  const md = C.render(rows, 'Test');
+  assert.match(md, /Deceased Superior Technician\*\* — CC-BY/);
+  assert.match(md, /Music by DST \(No Soap Radio\), CC BY/);
 });
 
 test('adopt mode never generates game files', () => {

@@ -17,6 +17,7 @@ longer loads, or an asset that cannot ship.
 1. The spec (fully), `.ai/brief.md`, `AGENTS.md`, `.ai/lessons.md`, `.ai/STATE.md`.
 2. Current engine state: `node tools/gb/gb.js verify --quick` — the baseline. A red baseline is reported first; nothing new is built on a broken game.
 3. Map what the spec touches: scenes (`grep -rl` the scene/script names), autoloads (`project.godot [autoload]`), input actions (`[input]`), resources, save code. Large scope → read-only recon subagents, one area each.
+4. Check every engine API the spec names against `<plugin>/skills/game-implement/godot-4.4-4.7-changes.md` (renamed/changed since model training); an unfamiliar API or system → `game-builder:game-researcher`.
 
 ## Phase 2 — Compatibility audit (the game-specific surfaces)
 | Surface | Why it breaks silently | Check |

@@ -34,9 +34,11 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 ## Phase gate (binary)
 1. Run every Done-when command from the spec; paste outputs into the spec's phase **Evidence**.
 2. `gb doctor` has no MISS.
-3. **Playtest gate** (if marked): follow `.ai/checklists/playtest.md` — tell the human how to run it (F5 in the editor, or `gb export` build), what to try (3–5 things) and the current Tuning values. **Stop and wait** for their verdict: keep / tweak / cut per mechanic. Record it in the spec with date and commit.
-4. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
-5. Update root `STATUS.md` (phase, playable yes/no, verdict).
+3. **Independent review** — spawn the `game-builder:game-checker` agent with ONLY: the diff range (`git diff <phase-start>...HEAD`), the spec path, the frozen test-plan path. Not your summary, not your reasoning. CHANGES-REQUIRED → fix and re-run the checker; NITS → fix or record in backlog.
+4. **Machine playtest** — spawn `game-builder:game-playtester` with the spec path and phase: it runs the game, captures shots/audio, looks at them and returns a `Run result` per Done-when item plus the questions for the human. Any NOT VERIFIED → fix before the human plays.
+5. **Playtest gate** (if marked): follow `.ai/checklists/playtest.md` — tell the human how to run it (F5 in the editor, or `gb export` build), what to try (3–5 things) and the current Tuning values. **Stop and wait** for their verdict: keep / tweak / cut per mechanic. Record it in the spec with date and commit.
+6. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
+7. Update root `STATUS.md` (phase, playable yes/no, verdict).
 
 ## The tuning loop (after a "tweak" verdict)
 Change only Tuning-table values (exported vars/resources), update the table in the spec, `gb verify`, short playtest again. Not a new spec, not new code paths. If the human asks for new behaviour during tuning, that is new scope → Feature Brief → spec.

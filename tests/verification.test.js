@@ -198,3 +198,24 @@ test('export Windows Desktop produces an executable', { skip: skip || (process.e
   assert.equal(r.status, 0, r.stdout);
   assert.ok(fs.statSync(path.join(d, 'build', 'windows', 'game.exe')).size > 1e6);
 });
+
+test('export --smoke catches a resource that the export filter dropped (the editor run is fine)', { skip: skip || (process.env.GB_TEST_EXPORT ? false : 'set GB_TEST_EXPORT=1'), timeout: 900000 }, () => {
+  const main = 'extends Node2D\n\nfunc _ready() -> void:\n\tvar t := load("res://data/tuning.tres")\n\tprint("tuning loaded: ", t != null)\n';
+  const d = tmpProject({
+    'project.godot': 'config_version=5\n[application]\nrun/main_scene="res://main.tscn"\nconfig/features=PackedStringArray("4.7", "GL Compatibility")\n[rendering]\nrenderer/rendering_method="gl_compatibility"\n',
+    'main.tscn': '[gd_scene format=3]\n\n[ext_resource type="Script" path="res://main.gd" id="1"]\n\n[node name="Main" type="Node2D"]\nscript = ExtResource("1")\n',
+    'main.gd': main,
+    'data/tuning.tres': '[gd_resource type="Resource" format=3]\n\n[resource]\n',
+  });
+  // The editor/headless run loads the file fine…
+  assert.equal(gb('run', '--frames', '30', '--path', d).status, 0);
+  // …but this preset drops data/ from the build, which only the exported game reveals.
+  fs.writeFileSync(path.join(d, 'export_presets.cfg'), require('../tools/gb/scaffold.js').exportPresets().replace('exclude_filter="tools/*, tests/*, addons/gut/*"', 'exclude_filter="tools/*, tests/*, addons/gut/*, data/*"'));
+  const bad = gb('export', '--preset', 'Windows Desktop', '--smoke', '--path', d);
+  assert.equal(bad.status, 1, bad.stdout);
+  assert.match(bad.stdout, /error\(s\) in the exported build's log/);
+  fs.writeFileSync(path.join(d, 'export_presets.cfg'), require('../tools/gb/scaffold.js').exportPresets());
+  const good = gb('export', '--preset', 'Windows Desktop', '--smoke', '--path', d);
+  assert.equal(good.status, 0, good.stdout);
+  assert.match(good.stdout, /smoke run ok/);
+});

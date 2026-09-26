@@ -30,6 +30,8 @@ If `.ai/skills/spec-writing/SKILL.md` exists, follow it — it is this method tu
 3. List **Open Questions** — everything that changes design or scope and that the brief does not answer (e.g. "Czy odbicie piłki zależy od miejsca uderzenia w paletkę?", "Co się dzieje przy remisie?"). Ask them via `AskUserQuestion` in rounds of 3–4 with options and a recommendation. **Hard gate:** the spec is not finalised while any is open.
 
 ## Step 2 — Fill the spec
+Before designing a mechanic you have not built in this repo, check `node <plugin>/tools/gb/gb.js recipe list` (tested building blocks) and, for anything unfamiliar (an API, a system like navigation or adaptive music, an asset source), spawn the `game-builder:game-researcher` agent with the question — it returns sourced facts and what it could not establish. Reference the recipe in the phase that uses it.
+
 Walk `spec-template.md` section by section. Rules per section:
 - **Design**: inputs → states → feedback; states as a table incl. illegal transitions; proposed node tree with names (scenario/test authors will use them); signals/Events.
 - **Tuning table**: parameter · value · unit · where (script var / resource field) · range to try. Units always (px/s, tiles, s, frames).

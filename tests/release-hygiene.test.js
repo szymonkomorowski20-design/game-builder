@@ -23,6 +23,22 @@ test('CHANGELOG has a heading for the current version in the format the hook par
 });
 
 const skills = fs.readdirSync(path.join(ROOT, 'skills'));
+const agents = fs.readdirSync(path.join(ROOT, 'agents')).filter((f) => f.endsWith('.md'));
+
+test('every agent has YAML-safe frontmatter, a matching name, tools, and review roles cannot Write/Edit', () => {
+  assert.ok(agents.length >= 4);
+  for (const f of agents) {
+    const fm = /^---\n([\s\S]*?)\n---/.exec(read(`agents/${f}`).replace(/\r\n/g, '\n'));
+    assert.ok(fm, `${f}: frontmatter`);
+    assert.match(fm[1], new RegExp(`^name: ${f.replace(/\.md$/, '')}$`, 'm'), `${f}: name`);
+    const desc = /^description: (.+)$/m.exec(fm[1])?.[1] || '';
+    assert.ok(desc.length >= 80, `${f}: description`);
+    assert.doesNotMatch(desc, /: | #/, `${f}: YAML-breaking ": " or " #" in description`);
+    const tools = /^tools: (.+)$/m.exec(fm[1])?.[1] || '';
+    assert.ok(tools, `${f}: tools`);
+    if (/checker|playtester|researcher/.test(f)) assert.doesNotMatch(tools, /\b(Write|Edit)\b/, `${f}: review role must not have Write/Edit`);
+  }
+});
 
 test('every skill has frontmatter with a matching name and a description with triggers', () => {
   for (const s of skills) {

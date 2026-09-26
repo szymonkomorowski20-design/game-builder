@@ -99,7 +99,7 @@ function main() {
 
   const incidents = openIncidents(root);
   const incidentBlock = incidents.length
-    ? `\nOPEN INCIDENT(S) in \`.ai/incidents/\`: ${incidents.join(', ')}. Read the record first and continue that diagnosis.\n`
+    ? `\nOPEN INCIDENT(S) in \`.ai/incidents/\`: ${incidents.join(', ')}. Read the record first and continue that diagnosis (game-diagnose).\n`
     : '';
 
   emit(
@@ -108,9 +108,10 @@ function main() {
       `including after a context reset. It takes precedence over any web-app workflow (e.g. Sailes) that may also ` +
       `announce itself here: this is a game.\n\n` +
       `Pipeline: game-start → game-discovery → game-bootstrap → game-spec (local .ai/skills/spec-writing) → ` +
-      `game-pre-implement → game-implement (phase by phase, gb verify every step) → game-test → human playtest gate → release.\n` +
+      `game-pre-implement → game-implement (phase by phase, gb verify every step; game-checker + game-playtester at the gate) → game-test → human playtest gate (game-playtest) → game-release.\n` +
+      `Side skills: game-audio (sound/music), game-assets (art/models/fonts), recipes (\`gb recipe list\` in the plugin copy).\n` +
       `BROKEN ≠ MISSING: if the request is about something failing (crash, error in the log, physics glitch, FPS drop), ` +
-      `reproduce it with \`gb\` first; do not treat it as new scope.\n\n` +
+      `use game-diagnose — reproduce it with \`gb\` first; do not treat it as new scope.\n\n` +
       `ROUTING (from the repo's state on disk):\n${route}\n${incidentBlock}\n` +
       `ENGINE STATE: ${verifyLine(root)}\n\n` +
       `HARD RULES — ${SPINE}:\n${HARD_RULES}\n\n` +

@@ -50,9 +50,10 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
   shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0.01]
   perf [--seconds 10] [--scene X] [--headless]      frame/process/physics time, nodes, draw calls vs .ai/perf-budget.json
-  export [--preset "Web"]  export presets from export_presets.cfg (templates must be installed)
+  export [--preset "Web"] [--smoke]   export presets (templates must be installed); --smoke runs the exported desktop build headless and fails on errors in its log
  Setup (plugin copy of gb)
   scaffold …  ·  harness install  ·  tests install [gut]  ·  doctor
+  credits                  CREDITS.md from .ai/assets/REGISTER.md; fails on licences that cannot ship (NC, ND, unknown, proprietary)
   recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
@@ -618,7 +619,7 @@ function templatesDir(version) {
   return path.join(base, 'export_templates', version.replace(/\.official.*$/, '').replace(/^(\d+\.\d+\.\d+|\d+\.\d+)\.(\w+)$/, '$1.$2'));
 }
 
-function stepExport(ctx, presetName) {
+function stepExport(ctx, presetName, smoke = false) {
   const presets = parsePresets(safeRead(path.join(ctx.dir, 'export_presets.cfg')));
   if (!presets.length) return [{ step: 'export', status: 'fail', reasons: ['no export_presets.cfg (scaffold creates Windows Desktop + Web)'], ms: 0, errors: [], warnings: [] }];
   const chosen = presetName ? presets.filter((p) => p.name === presetName) : presets;
@@ -635,8 +636,32 @@ function stepExport(ctx, presetName) {
     }
     if (res.status === 'ok' && (!fs.existsSync(out) || fs.statSync(out).size === 0)) { res.status = 'fail'; res.reasons.push(`no output at ${out}`); }
     if (res.status === 'ok') res.bytes = fs.statSync(out).size;
+    if (res.status === 'ok' && smoke) res.smoke = smokeRun(ctx, out, p.platform);
+    if (res.smoke && res.smoke.status === 'fail') { res.status = 'fail'; res.reasons.push(...res.smoke.reasons); }
     return res;
   });
+}
+
+/**
+ * Runs an exported desktop build headless for a few seconds and reads its log file (--headless, --quit-after
+ * and --log-file work in release builds; measured on 4.7.2). Catches what the editor run cannot: resources
+ * dropped by export filters, missing autoloads, errors only in release. Web builds are not smoke-run.
+ */
+function smokeRun(ctx, exe, platform, frames = 180) {
+  if (!/Windows|Linux|macOS/i.test(platform || '') || !/\.(exe|x86_64|arm64|app)$|^[^.]+$/.test(path.basename(exe))) {
+    return { status: 'skip', reasons: [`smoke run not available for ${platform}`] };
+  }
+  const log = path.join(ctx.outDir, `smoke-${path.basename(exe)}.log`);
+  fs.mkdirSync(ctx.outDir, { recursive: true });
+  fs.rmSync(log, { force: true });
+  const r = spawnSync(exe, ['--headless', '--quit-after', String(frames), '--log-file', log], { cwd: path.dirname(exe), encoding: 'utf8', timeout: 120000 });
+  const text = safeRead(log) || `${r.stdout || ''}\n${r.stderr || ''}`;
+  const parsed = parseLog(text, ctx.ignores);
+  const reasons = [];
+  if (r.error) reasons.push(`could not start ${exe}: ${r.error.message}`);
+  if (!safeRead(log)) reasons.push('the build wrote no log file (crashed before start?)');
+  if (parsed.errors.length) reasons.push(`${parsed.errors.length} error(s) in the exported build's log: ${parsed.errors.slice(0, 3).map((e) => e.message || e).join(' | ')}`);
+  return { status: reasons.length ? 'fail' : 'ok', reasons, frames, log, exit: r.status };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -679,6 +704,7 @@ function parseArgs(argv) {
     else if (a === '--compare') opts.compare = true;
     else if (a === '--accept') opts.accept = true;
     else if (a === '--movie') opts.movie = true;
+    else if (a === '--smoke') opts.smoke = true;
     else if (a === '--threshold') opts.threshold = Number(argv[++i]);
     else if (a === '--preset') opts.preset = argv[++i];
     else if (a === '--headless') opts.headless = true;
@@ -717,7 +743,7 @@ function printStep(s) {
   else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
   else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
   else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
-  else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output})`;
+  else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output}${s.smoke ? `, smoke run ${s.smoke.status}${s.smoke.status === 'ok' ? ` (${s.smoke.frames} frames headless, log clean)` : ''}` : ''})`;
   process.stdout.write(`${tag} ${s.step}${extra} — ${s.ms} ms${s.reasons.length ? ' — ' + s.reasons.join('; ') : ''}\n`);
   for (const e of s.errors.slice(0, 10)) process.stdout.write(`     ${e.kind}: ${e.message}${e.at ? `  [${e.at}]` : ''}\n`);
   if (s.errors.length > 10) process.stdout.write(`     … ${s.errors.length - 10} more\n`);
@@ -737,6 +763,22 @@ function writeReport(dir, report) {
   } catch {
     return null;
   }
+}
+
+function cmdCredits(opts) {
+  const dir = findProjectDir(opts.path || process.cwd());
+  if (!dir) throw new UserError('No project.godot found (use --path).');
+  const C = require('./credits.js');
+  const reg = safeRead(path.join(dir, '.ai', 'assets', 'REGISTER.md'));
+  if (reg === null) throw new UserError('No .ai/assets/REGISTER.md — every asset needs a row there first.');
+  const rows = C.parseRegister(reg);
+  const problems = C.check(rows, dir);
+  const title = (/^config\/name="([^"]*)"/m.exec(safeRead(path.join(dir, 'project.godot')) || '') || [])[1] || path.basename(dir);
+  const out = path.join(dir, 'CREDITS.md');
+  fs.writeFileSync(out, C.render(rows, title));
+  process.stdout.write(`${problems.length ? 'FAIL' : 'PASS'} credits — ${rows.length} asset(s) → ${out}\n`);
+  for (const p of problems) process.stdout.write(`     ${p}\n`);
+  return problems.length ? 1 : 0;
 }
 
 function cmdRecipe(opts) {
@@ -773,6 +815,7 @@ function main(argv) {
   if (argv[0] === 'tools' && argv[1] === 'update') return cmdToolsUpdate(parseArgs(argv.slice(2)));
   if (argv[0] === 'doctor') return cmdDoctor(parseArgs(argv.slice(1)));
   if (argv[0] === 'recipe') return cmdRecipe(parseArgs(argv.slice(1)));
+  if (argv[0] === 'credits') return cmdCredits(parseArgs(argv.slice(1)));
   const opts = parseArgs(argv);
   const cmd = opts._.shift();
   if (!cmd || cmd === 'help' || cmd === '--help' || cmd === '-h') {
@@ -818,7 +861,7 @@ function main(argv) {
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
   else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01, movie: !!opts.movie })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
-  else if (cmd === 'export') steps = stepExport(ctx, opts.preset);
+  else if (cmd === 'export') steps = stepExport(ctx, opts.preset, !!opts.smoke);
   else if (cmd === 'verify') {
     steps = [stepImport(ctx)];
     // A parse error surfaces during import already; still run check so the report names every
@@ -893,7 +936,7 @@ function cmdScaffold(argv) {
 }
 
 /** Framework files a game repo carries in tools/gb/ — replaced by `gb tools update`; ignore-errors.txt is the repo's own. */
-const TOOL_FILES = ['gb.js', 'lint.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd'];
+const TOOL_FILES = ['gb.js', 'lint.js', 'credits.js', 'check_all.gd', 'setup_input.gd', 'project_setting.gd', 'imgdiff.gd'];
 
 function toolsOutdated(dir) {
   if (!fs.existsSync(path.join(PLUGIN_ROOT, 'templates'))) return null; // running from a repo copy: nothing to compare with
@@ -998,7 +1041,7 @@ function safeRead(f) {
   }
 }
 
-module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, versionFromName, wavPeakDb };
+module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, versionFromName, wavPeakDb, TOOL_FILES };
 
 if (require.main === module) {
   try {
