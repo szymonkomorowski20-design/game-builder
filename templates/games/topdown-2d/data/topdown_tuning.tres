@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="TopDownTuning" format=3]
+
+[ext_resource type="Script" path="res://scripts/player/topdown_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+move_speed = 150.0
+acceleration = 1200.0
+friction = 1500.0
+shoot_cooldown = 0.25
+bullet_speed = 420.0
+bullet_damage = 1
+bullet_lifetime = 1.2
+max_health = 5
+invulnerability = 0.8

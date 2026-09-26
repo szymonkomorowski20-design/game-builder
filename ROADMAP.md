@@ -52,7 +52,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 
 ## Etap 5 — Szablony startowe gier
 - [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy
-- [ ] Top-down 2D, puzzle na siatce, 3D TPS/FPS, karty — każdy z testami i licencjami
+- [x] Top-down 2D (0.9.0): arena, strzelanie, fale, wrogowie z obrażeniami kontaktowymi, 3 testy + 8 scenariuszy T1–T8, dowody wykrycia
+- [ ] Puzzle na siatce, karty, 3D TPS/FPS — każdy z testami i licencjami
 
 ## Etap 6 — Role i pozostałe skille (0.6.0 — w toku)
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement

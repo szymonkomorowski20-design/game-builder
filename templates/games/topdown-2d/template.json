@@ -1,0 +1,10 @@
+{
+  "name": "topdown-2d",
+  "description": "Top-down 2D arena starter: 8-direction movement with acceleration, shooting, chasing enemies with contact damage and invulnerability, waves, heart pickup, win/lose/restart; behaviour scenarios + unit tests.",
+  "dim": "2d",
+  "main_scene": "res://scenes/level/arena.tscn",
+  "viewport": [640, 360],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut"
+}

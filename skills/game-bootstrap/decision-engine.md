@@ -20,6 +20,12 @@ implemented spec describing them (`gb scaffold --template <name>`; list: `templa
 | Empty project | nothing to unlearn; unusual genres | movement/feel built and tested from scratch |
 Recommend a template only when its genre matches the brief's core loop.
 
+Available templates (each: implemented spec, Tuning resource, unit tests + behaviour scenarios green at scaffold time):
+| Template | Core loop | Tests |
+|---|---|---|
+| `platformer-2d` | run & jump (coyote time, buffer, variable jump), coins → goal | 8 scenarios P1–P8 + unit |
+| `topdown-2d` | 8-direction movement, shooting, chasing enemies with contact damage, waves, heart, win/lose | 8 scenarios T1–T8 + unit |
+
 ## Q2 — Dimension & camera (usually already in the brief → confirm)
 2D side / 2D top-down / 2D isometric / 3D third-person / 3D first-person / 3D top-down.
 

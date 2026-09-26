@@ -133,6 +133,7 @@ test('tools update refreshes framework files only and keeps ignore-errors.txt', 
 
 test('templates: platformer-2d is listed; an unknown template is rejected with the list', () => {
   assert.ok(sc.listTemplates().includes('platformer-2d'));
+  assert.ok(sc.listTemplates().includes('topdown-2d'));
   assert.throws(() => sc.parseScaffoldArgs(['--template', 'mmo']), /unknown template "mmo".*platformer-2d/);
   const o = sc.parseScaffoldArgs(['--dir', tmp(), '--template', 'platformer-2d', '--engine', '4.7']);
   assert.equal(o.dim, '2d');
@@ -186,6 +187,16 @@ test('recipes: add rewrites res:// paths into recipes/, copies tests, never over
 // ---- end-to-end with the real engine ----
 const haveGodot = spawnSync(process.execPath, [GB, 'godot', '--path', path.join(__dirname, 'fixtures', 'ok')], { encoding: 'utf8' }).status !== 2;
 const skip = haveGodot ? false : 'no Godot binary found — e2e skipped';
+
+test('e2e: topdown-2d template passes its own scenarios and unit tests out of the box', { skip, timeout: 900000 }, () => {
+  const dir = path.join(tmp(), 'td');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'TD', '--template', 'topdown-2d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(v.status, 0, v.stdout);
+  assert.match(v.stdout, /PASS scenarios \(9\/9 passing\)/);
+  assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
+});
 
 test('e2e: platformer-2d template passes its own 9 scenarios and unit tests out of the box', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'plat');

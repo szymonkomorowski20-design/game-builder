@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0 — 2026-09-26 · top-down template (stage 5)
+- `gb scaffold --template topdown-2d`: tested top-down arena starter — 8-direction movement with acceleration (normalized diagonals), shooting at a cooldown, enemies that chase and hurt on contact, invulnerability after a hit, two waves, heart pickup, win/lose/restart, HUD; all numbers in `TopDownTuning` (`data/topdown_tuning.tres`); implemented spec with Tuning table; 1 unit test file (3 tests) + 8 behaviour scenarios T1–T8, green at scaffold time. Detection proven: invulnerability 0 turns T5 red, a player without wall collision turns T2 red; screenshot looked at (HUD, walls, pillar, chasing enemies).
+- game-bootstrap template card lists both templates with their core loops and tests; e2e test scaffolds and verifies the new template.
+
 ## 0.8.0 — 2026-09-26 · multiplayer recipe, flake hunter
 - Recipe 39 multiplayer basics: server-authoritative RPCs (client asks, server validates with the network-provided sender id, broadcasts state), tested in ONE process — two `SceneMultiplayer` instances on separate branches over ENet on localhost: join, a cheating request clamped, disconnect. Web note: only HTTP/WebSocket/WebRTC in browsers.
 - `gb scenario --repeat N`: runs scenarios N times and names any `FLAKY` scenario (passed k/N). Proven with a deterministic alternating scenario.
