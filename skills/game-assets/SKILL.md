@@ -43,6 +43,8 @@ before a release, `gb credits`.
 After importing, `gb shot --movie --scene <scene using it>` and open the PNG: scale, filtering (blurry pixel
 art = wrong filter), transparency, z-order. Record the `Run result`.
 
+Template: [art-bible-template.md](art-bible-template.md) — copy to `.ai/art-bible.md` before the first real art goes in.
+
 ## Red Flags — STOP
 - An asset added without a REGISTER row, or with "free"/"unknown" as the licence.
 - A licence taken from a mirror, a catalogue or an aggregator instead of the author.

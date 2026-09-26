@@ -38,6 +38,8 @@ What players *do* outranks what they *say*. Ask open questions after, not leadin
 Record in the spec's phase **Playtest** section: date, build/commit, players, verdict table, and in
 `STATUS.md` the phase verdict. Recurring confusion → a lesson in `.ai/lessons.md`.
 
+Templates: [playtest-plan-template.md](playtest-plan-template.md) (before) · [playtest-report-template.md](playtest-report-template.md) (after) — copy both into `.ai/playtests/` named `{date}-{slug}-plan.md` and `{date}-{slug}-report.md`.
+
 ## Red Flags — STOP
 - Writing "feels good" / "is fun" as your own conclusion.
 - Changing code paths in response to a "tweak" verdict.

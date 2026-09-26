@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 98/98 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-26).
+Last full run: 113/113 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-26).
 
 ## How an agent uses a recipe
 1. Find it below (or `gb kb "<problem>"` for background).
@@ -56,6 +56,9 @@ Last full run: 98/98 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-26).
 | [33-hit-flash-shader](33-hit-flash-shader/README.md) | Hit flash (canvas_item shader) | `modulate = Color.WHITE` can't make a sprite *brighter* than its texture, so "flash white on hit" doesn't | test_r33_hit_flash.gd |
 | [34-adaptive-music](34-adaptive-music/README.md) | Adaptive music (AudioStreamInteractive) | music should change with the game (explore → combat → boss) without abrupt cuts, and gameplay code | test_r34_adaptive_music.gd |
 | [35-sfx-variants](35-sfx-variants/README.md) | SFX variants with built-in streams (Randomizer + Polyphonic) | the same footstep 40 times sounds mechanical; one `AudioStreamPlayer` per sound per enemy wastes | test_r35_sfx_variants.gd |
+| [36-balance-sim](36-balance-sim/README.md) | Balance contracts (Monte-Carlo simulation) | balance is judged by feel after every change; a tweak to one stat silently makes another enemy | test_r36_balance_sim.gd |
+| [37-level-validation](37-level-validation/README.md) | Level validation (completable, no soft-locks) | a level edit or a generator seed makes the exit unreachable, hides a coin behind a wall, or puts a | test_r37_level_validation.gd |
+| [38-colorblind-check](38-colorblind-check/README.md) | Colour-blind check (palette test + screen overlay) | red vs green teams, health bars, "good/bad" pickups — ~8 % of men can't tell some of these apart, | test_r38_colorblind.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —

@@ -26,7 +26,7 @@ If told "empty folder" but a `project.godot` exists, say so and switch to Case C
 
 ## Step 1 — Classify (decision mode)
 
-Walk `decision-engine.md` in rounds of 3–4 (`AskUserQuestion`), carrying the brief in — most answers are already in the brief; ask only what is missing. It yields the **setup manifest**: dimension, renderer, base resolution/pixel art, target platforms, test framework, LFS, optional modules (save, localization, multiplayer…) — each chosen by the human from a card, recorded in the brief's Decisions Ledger.
+Walk `decision-engine.md` in rounds of 3–4 (`AskUserQuestion`), carrying the brief in — most answers are already in the brief; ask only what is missing. It yields the **setup manifest**: dimension, renderer, base resolution/pixel art, target platforms, test framework, LFS, optional modules (save, localization, multiplayer…) — each chosen by the human from a card, recorded in the brief's Decisions Ledger. For each module show its status from `<plugin>/docs/modules.md` (tested recipe / skill / external / not yet) and its traps — e.g. multiplayer on a web target cannot use ENet, web saves depend on the browser keeping IndexedDB.
 
 **Engine card first.** Godot 4 is the recommendation *because this workflow can verify it* (`gb`) and the knowledge base covers it. Unity/Unreal are legitimate choices — say plainly that `gb` does not verify them yet, so "done" would rest on the human's own testing. Check which engines are actually installed (`GODOT_BIN`, the binaries `gb` finds) rather than assuming; a missing or mismatched Godot version is a fact-finding question, not something to paper over.
 

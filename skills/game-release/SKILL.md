@@ -27,6 +27,8 @@ differently. And publishing is always the human's act.
 - itch.io: the human creates the page and logs in to `butler` themselves; you may prepare the command, e.g. `butler push build/web <user>/<game>:html5 --userversion <version>` and `butler push build/windows <user>/<game>:windows --userversion <version>`. **Never** enter or store credentials, API keys or tokens; never run the push without an explicit "push now" for this build.
 - Stores (Steam etc.): out of scope unless the human sets them up; same rule.
 
+After the release: [postmortem-template.md](postmortem-template.md) → `.ai/postmortems/{version}.md`; lessons go where the template says.
+
 ## Red Flags — STOP
 - Exported without `--smoke`, or smoke FAIL ignored.
 - `gb credits` FAIL "just this once"; a CC-BY asset without in-game credit.

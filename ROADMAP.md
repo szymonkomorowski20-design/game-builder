@@ -58,9 +58,11 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement
 - [x] Skille: game-audio, game-assets, game-playtest, game-diagnose, game-release
 - [x] `gb export --smoke` (gotowy build uruchomiony bez okna, dowód wykrycia zasobu zgubionego przez filtr eksportu), `gb credits` (CREDITS.md z rejestru, blokada NC/ND/nieznanych licencji)
-- [ ] Skille: feel/juice, balans, level-design, ai-npc, narracja, zapis, wydajność, dostępność-lokalizacja, shadery-vfx, ui, docs, port
-- [ ] Katalog modułów opcjonalnych (multiplayer, Steamworks, osiągnięcia, zapis w chmurze, mody, proceduralne…)
-- [ ] Szablony: art bible, dokument audio, budżet wydajności, arkusz balansu, plan/raport playtestu, postmortem
+- [x] Skille (0.7.0): game-feel, game-balance, game-level-design, game-npc-ai, game-narrative, game-save, game-performance, game-ui-accessibility, game-vfx, game-upgrade
+- [x] Przepisy wspierające skille: 36 kontrakty balansu (symulacja), 37 walidacja poziomów (softlocki), 38 test palety pod daltonizm — z dowodami wykrycia
+- [x] Katalog modułów opcjonalnych — `docs/modules.md` (status, sposób, pułapki); wpięty w karty modułów game-bootstrap
+- [x] Szablony: art bible, dokument audio, arkusz balansu, plan/raport playtestu, postmortem (budżet wydajności już w scaffoldzie: `.ai/perf-budget.json`)
+- [ ] Przepis multiplayer (lokalny + online, strategia testów) — jedyny moduł „not yet” o wysokim priorytecie
 
 ## Etap 7 — Evale
 - [ ] ~20 scenariuszy (zakres, licencje, API Godota 3, `_physics_process`, dane zamiast magicznych liczb, tester przed kodem, qa uruchamia grę, migracja zapisów…) + fixtures, sędzia sprawdzony na celowo zepsutej grze

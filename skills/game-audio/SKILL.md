@@ -56,6 +56,8 @@ Type.web = Stream* (more latency) and test the web export. First sound only afte
 - Loudness balance, feel, sync with animation: **the human** at the playtest gate — ask specific questions
   ("is the jump sound too loud against the music?", "does the hit feel heavy?").
 
+Template: [audio-doc-template.md](audio-doc-template.md) — copy to `.ai/audio.md` when the game has more than a handful of sounds.
+
 ## Red Flags — STOP
 - A sound file without a REGISTER row, or with "unknown/royalty free" as licence.
 - A sound from another game/film/meme site "just for the prototype" — it ends up shipped.
