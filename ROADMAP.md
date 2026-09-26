@@ -62,7 +62,7 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Przepisy wspierające skille: 36 kontrakty balansu (symulacja), 37 walidacja poziomów (softlocki), 38 test palety pod daltonizm — z dowodami wykrycia
 - [x] Katalog modułów opcjonalnych — `docs/modules.md` (status, sposób, pułapki); wpięty w karty modułów game-bootstrap
 - [x] Szablony: art bible, dokument audio, arkusz balansu, plan/raport playtestu, postmortem (budżet wydajności już w scaffoldzie: `.ai/perf-budget.json`)
-- [ ] Przepis multiplayer (lokalny + online, strategia testów) — jedyny moduł „not yet” o wysokim priorytecie
+- [x] Przepis 39 multiplayer (serwer autorytatywny, test w jednym procesie) — dalej: spawner/synchronizer
 
 ## Etap 7 — Evale
 - [ ] ~20 scenariuszy (zakres, licencje, API Godota 3, `_physics_process`, dane zamiast magicznych liczb, tester przed kodem, qa uruchamia grę, migracja zapisów…) + fixtures, sędzia sprawdzony na celowo zepsutej grze

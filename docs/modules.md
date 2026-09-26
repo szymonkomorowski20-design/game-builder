@@ -20,7 +20,7 @@ third-party (check its licence at the source before adding), **not yet** = no su
 | Balance contracts | recipe 36 + skill `game-balance` | Monte-Carlo with bands in GUT | read the game's own data files |
 | Accessibility | recipe 38 + skill `game-ui-accessibility` | colour-pair test, overlay, toggles, AccessKit driver | colour never the only signal |
 | Controller support | built in (scaffold writes gamepad bindings) | input actions with joypad events; `Input.start_joy_vibration` for rumble | menus need initial focus |
-| Multiplayer (local / online) | **not yet** (planned recipe) | Godot high-level multiplayer: `MultiplayerSpawner`, `MultiplayerSynchronizer`, RPCs; ENet on desktop | **Web:** no low-level networking — only HTTP, WebSocket (client) and WebRTC (4.7 docs); determinism and the harness assume single-player — needs its own test strategy |
+| Multiplayer (local / online) | recipe 39 (basics); spawner/synchronizer not yet | Godot high-level multiplayer: `MultiplayerSpawner`, `MultiplayerSynchronizer`, RPCs; ENet on desktop | **Web:** no low-level networking — only HTTP, WebSocket (client) and WebRTC (4.7 docs); determinism and the harness assume single-player — needs its own test strategy |
 | Steamworks (achievements, cloud, leaderboards) | external | GodotSteam (GDExtension) — the human sets up the Steamworks account and app id | never commit app secrets; keep Steam calls behind an adapter so tests run without Steam |
 | Mods / user content | **not yet** | `ProjectSettings.load_resource_pack(path)` loads a `.pck` at runtime | a pack can replace any file and run code — only for trusted content, document it |
 | Analytics / telemetry | **not yet** | HTTP to your own endpoint | personal data → consent, privacy policy; off by default |

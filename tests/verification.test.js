@@ -170,6 +170,21 @@ test('tests install gut → gb test reports passing/failing counts from GUT', { 
   assert.match(r.stdout, /test_deliberately_failing/);
 });
 
+test('scenario --repeat names a scenario that passes only sometimes as FLAKY', { skip, timeout: 900000 }, () => {
+  const d = game();
+  // Deterministic "flake": a counter in user:// makes every other run fail.
+  const flaky = 'extends GbScenario\n\nfunc run() -> void:\n\tvar p := "user://gb_flaky_counter.txt"\n\tvar n := 0\n\tif FileAccess.file_exists(p):\n\t\tn = int(FileAccess.get_file_as_string(p))\n\tvar f := FileAccess.open(p, FileAccess.WRITE)\n\tf.store_string(str(n + 1))\n\tf.close()\n\texpect(n % 2 == 0, "alternates")\n';
+  const file = path.join(d, 'tests', 'scenarios', 'zz_flaky.gd');
+  fs.writeFileSync(file, flaky);
+  try {
+    const r = gb('scenario', 'res://tests/scenarios/zz_flaky.gd', '--repeat', '4', '--path', d);
+    assert.equal(r.status, 1, r.stdout);
+    assert.match(r.stdout, /FLAKY zz_flaky\.gd: passed 2\/4/);
+  } finally {
+    fs.rmSync(file, { force: true });
+  }
+});
+
 test('shot + compare against an accepted baseline (opens a window)', { skip: skip || (process.env.GB_TEST_WINDOW ? false : 'set GB_TEST_WINDOW=1'), timeout: 600000 }, () => {
   assert.equal(gb('shot', '--name', 't', '--accept', '--path', game()).status, 0);
   const r = gb('shot', '--name', 't', '--compare', '--path', game());

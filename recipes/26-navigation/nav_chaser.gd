@@ -14,6 +14,15 @@ func go_to(point: Vector2) -> void:
 	agent.target_position = point
 
 
+## True once the navigation map can answer a path query to `point`. Measured on 4.7.2: the map's first
+## iteration (id 1) exists at frame 0 but is EMPTY; the region's polygons arrive a few frames later (async
+## region updates since 4.5). Waiting a fixed number of frames is a race — wait for this instead.
+func map_ready(point: Vector2) -> bool:
+	var map := agent.get_navigation_map()
+	return NavigationServer2D.map_get_iteration_id(map) > 0 \
+		and not NavigationServer2D.map_get_path(map, global_position, point, true).is_empty()
+
+
 func _physics_process(_delta: float) -> void:
 	max_y = maxf(max_y, global_position.y)
 	if agent.is_navigation_finished():

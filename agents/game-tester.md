@@ -19,7 +19,8 @@ You are `game-tester`. Follow the `game-test` skill (its techniques and plan tem
    actions (`press`, `tap`, `hold`) and `expect_*` on outcomes; feel you cannot assert → a playtest question.
 5. **Detection proof for tier A** (and any test you doubt): break the code on purpose → run → RED with the
    right message → revert → GREEN. Record the three outputs in the run log.
-6. Flakiness: time in physics frames, seeded RNG, no real-time waits; run the suite twice.
+6. Flakiness: time in physics frames, seeded RNG, no real-time waits, background work awaited by a readiness
+   condition; finish with `node tools/gb/gb.js scenario --repeat 10` — a `FLAKY` scenario is a defect, not bad luck.
 
 ## Before writing a mechanic's test from scratch
 `node <plugin>/tools/gb/gb.js recipe list` — if a recipe covers it, its tests show the proven pattern.

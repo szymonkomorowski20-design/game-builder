@@ -39,6 +39,11 @@ Feel and fun are none of these — they are the human's playtest verdict.
 - Float positions: `expect_near` with a tolerance derived from the spec, never exact equality after physics.
 - Each scenario starts from a known scene (`load_scene`) and does not depend on another scenario's state.
 - Retrying until green is forbidden — it hides real intermittent bugs.
+- Anything the engine does on a background thread (navigation map sync, threaded resource loading, audio mixing,
+  networking) is ready **when a condition says so**, not after N frames: `wait_until(<the real readiness check>)`.
+  Measured: a navigation scenario that waited 2 frames raced the async map sync and failed ~1 run in 60.
+- Before closing a phase: `node tools/gb/gb.js scenario --repeat 10` — any scenario reported `FLAKY` is a defect to
+  diagnose (`game-diagnose`), never a re-run.
 
 ## Never
 - Assertions that cannot fail (asserting a value the test itself set).

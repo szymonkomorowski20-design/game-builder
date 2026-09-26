@@ -44,7 +44,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   lint                     broken res:// refs, Godot 3 APIs, assets missing from the licence register, harness
   run [--frames N] [--scene res://x.tscn]   run headless for N frames; fail on log errors
   test                     GUT (or gdUnit4) tests in res://tests (test_*.gd); JUnit in .ai/verify/junit.xml
-  scenario [res://tests/scenarios/x.gd] [--window] [--accept | --compare]   bot-player scenarios; with a window their shot() calls are saved and can be accepted/compared
+  scenario [res://tests/scenarios/x.gd] [--window] [--accept | --compare] [--repeat N]   bot-player scenarios; with a window their shot() calls are saved and can be accepted/compared; --repeat N names FLAKY scenarios
   replay [tests/replays/x.json]                      replay recordings headless; final state must match
  Play & measure (open a window)
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
@@ -396,6 +396,30 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
   return { step: 'scenarios', status: failed.length ? 'fail' : 'ok', reasons: failed.length ? [`${failed.length} of ${results.length} failed`] : [], ms: Date.now() - t0, results, count: results.length, errors, warnings: [] };
 }
 
+/** Runs the scenarios N times; a scenario that fails in some runs but not all is reported as FLAKY by name. */
+function stepScenariosRepeat(ctx, opts, times) {
+  const t0 = Date.now();
+  const runs = [];
+  for (let i = 0; i < times; i++) runs.push(stepScenarios(ctx, opts));
+  if (runs[0].status === 'skip') return runs[0];
+  const stats = new Map();
+  const errors = [];
+  runs.forEach((run, i) => {
+    for (const r of run.results || []) {
+      const s = stats.get(r.scenario) || { pass: 0, fail: 0 };
+      s[r.result === 'PASS' ? 'pass' : 'fail']++;
+      stats.set(r.scenario, s);
+    }
+    for (const e of run.errors || []) errors.push({ ...e, message: `run ${i + 1}: ${e.message}` });
+  });
+  const reasons = [];
+  for (const [name, s] of stats) {
+    if (s.fail && s.pass) reasons.push(`FLAKY ${path.basename(name)}: passed ${s.pass}/${times}`);
+    else if (s.fail) reasons.push(`${path.basename(name)}: failed ${s.fail}/${times}`);
+  }
+  return { step: 'scenarios', status: reasons.length ? 'fail' : 'ok', reasons, ms: Date.now() - t0, count: stats.size, repeat: times, results: runs.flatMap((r) => r.results || []), errors, warnings: [] };
+}
+
 function stepReplays(ctx, { only = null } = {}) {
   const dir = path.join(ctx.dir, 'tests', 'replays');
   const files = only ? [path.resolve(only)] : listFiles(dir, /\.json$/).map((f) => path.join(dir, f));
@@ -697,6 +721,7 @@ function parseArgs(argv) {
     if (a === '--json') opts.json = true;
     else if (a === '--path') opts.path = argv[++i];
     else if (a === '--frames') opts.frames = Number(argv[++i]);
+    else if (a === '--repeat') opts.repeat = Math.max(1, Number(argv[++i]) || 1);
     else if (a === '--scene') opts.scene = argv[++i];
     else if (a === '--window') opts.window = true;
     else if (a === '--name') opts.name = argv[++i];
@@ -740,6 +765,7 @@ function printStep(s) {
   else if (s.step === 'run') extra = ` (${s.frames} frames, ${s.scene || 'main scene'})`;
   else if (s.step === 'test' && s.totals) extra = ` (${s.framework}: ${s.totals.passing}/${s.totals.tests} passing)`;
   else if (s.framework) extra = ` (${s.framework})`;
+  else if (s.step === 'scenarios' && s.repeat) extra = ` (${s.count} scenario(s) × ${s.repeat} runs${s.status === 'ok' ? ', all passed every run' : ''})`;
   else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
   else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
   else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
@@ -857,7 +883,10 @@ function main(argv) {
   else if (cmd === 'lint') steps = [stepLint(ctx)];
   else if (cmd === 'run') steps = [stepRun(ctx, opts.frames || 120, opts.scene)];
   else if (cmd === 'test') steps = [stepTest(ctx)];
-  else if (cmd === 'scenario') steps = [stepScenarios(ctx, { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold || 0.01 })];
+  else if (cmd === 'scenario') {
+    const so = { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold || 0.01 };
+    steps = [opts.repeat > 1 ? stepScenariosRepeat(ctx, so, opts.repeat) : stepScenarios(ctx, so)];
+  }
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
   else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01, movie: !!opts.movie })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];

@@ -35,7 +35,7 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 |---|---|---|
 | Projectile passes through a hurtbox | Area on layer 0 / masks don't overlap | give hitboxes and hurtboxes dedicated layers (recipes 06–07: hitbox layer 3, hurtbox mask 3) |
 | Contact damage applies once while standing inside | `area_entered` fires on entry only | intended; re-hit needs leave+enter or a timer with i-frames |
-| `NavigationAgent2D` path empty on the first frame | the navigation map syncs on physics frames (async since 4.5) | set the target after ≥1 physics frame |
+| `NavigationAgent2D` path empty at start; a navigation scenario fails 1 run in ~60 | the map's first iteration (id 1) exists at frame 0 but is **empty**; region polygons arrive ~3 frames later, later under load (async since 4.5) — a fixed "wait 2 frames" is a race (measured 4.7.2) | wait until `NavigationServer2D.map_get_path(map, from, to, true)` is non-empty (recipe 26 `map_ready()`), never a fixed frame count |
 | Agent "arrived" but `is_navigation_finished()` is false | finish uses `target_desired_distance`, not your threshold | wait for `is_navigation_finished()` |
 | Enemy "sees" through walls or hits itself with the sight ray | ray not masked/excluded | `PhysicsRayQueryParameters2D.create(from, to, wall_mask, [get_rid()])` |
 | Top-down body slides/floors oddly | `motion_mode` GROUNDED for a top-down game | `motion_mode = MOTION_MODE_FLOATING` |

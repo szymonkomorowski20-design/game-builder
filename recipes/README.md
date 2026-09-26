@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 113/113 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-26).
+Last full run: 116/116 GUT tests, 11/11 bot scenarios (scenarios also 3× via --repeat), Godot 4.7.2 (2026-09-26).
 
 ## How an agent uses a recipe
 1. Find it below (or `gb kb "<problem>"` for background).
@@ -59,10 +59,11 @@ Last full run: 113/113 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-26).
 | [36-balance-sim](36-balance-sim/README.md) | Balance contracts (Monte-Carlo simulation) | balance is judged by feel after every change; a tweak to one stat silently makes another enemy | test_r36_balance_sim.gd |
 | [37-level-validation](37-level-validation/README.md) | Level validation (completable, no soft-locks) | a level edit or a generator seed makes the exit unreachable, hides a coin behind a wall, or puts a | test_r37_level_validation.gd |
 | [38-colorblind-check](38-colorblind-check/README.md) | Colour-blind check (palette test + screen overlay) | red vs green teams, health bars, "good/bad" pickups — ~8 % of men can't tell some of these apart, | test_r38_colorblind.gd |
+| [39-multiplayer-basics](39-multiplayer-basics/README.md) | Multiplayer basics (server-authoritative, tested in one process) | networked games trust clients ("I have 1000 points"), and multiplayer code is hard to test — two | test_r39_multiplayer.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —
 its migration test was proven to fail when the migration is broken.
 
 ## Not yet covered
-AnimationTree state machines, networked multiplayer, save-to-cloud, mod loading — planned in `ROADMAP.md`.
+AnimationTree state machines, multiplayer spawning/synchronizers, save-to-cloud, mod loading — planned in `ROADMAP.md`.
