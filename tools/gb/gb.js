@@ -44,11 +44,11 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   lint                     broken res:// refs, Godot 3 APIs, assets missing from the licence register, harness
   run [--frames N] [--scene res://x.tscn]   run headless for N frames; fail on log errors
   test                     GUT (or gdUnit4) tests in res://tests (test_*.gd); JUnit in .ai/verify/junit.xml
-  scenario [res://tests/scenarios/x.gd] [--window] [--accept | --compare] [--repeat N]   bot-player scenarios; with a window their shot() calls are saved and can be accepted/compared; --repeat N names FLAKY scenarios
+  scenario [res://tests/scenarios/x.gd] [--window] [--accept | --compare] [--repeat N] [--end-shot]   bot-player scenarios; with a window their shot() calls are saved and can be accepted/compared; --end-shot also saves each scenario's final frame as evidence; --repeat N names FLAKY scenarios
   replay [tests/replays/x.json]                      replay recordings headless; final state must match
  Play & measure (open a window)
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
-  shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0.01]
+  shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0]
   perf [--seconds 10] [--scene X] [--headless]      frame/process/physics time, nodes, draw calls vs .ai/perf-budget.json
   export [--preset "Web"] [--smoke]   export presets (templates must be installed); --smoke runs the exported desktop build headless and fails on errors in its log
  Setup (plugin copy of gb)
@@ -342,6 +342,22 @@ function gameRun(ctx, { window = false, scene = null, cap = HARNESS_ARGS_FRAME_C
   return runGodot(ctx.bin, args, ctx.dir, timeout);
 }
 
+/**
+ * True when Godot has not registered every `class_name` in the project yet — scripts added outside the
+ * editor (`gb recipe add`, a fresh clone) stay unknown until an import, and a run then fails with
+ * "Could not find type X" although nothing is wrong with the code.
+ */
+function classCacheStale(dir) {
+  const cache = path.join(dir, '.godot', 'global_script_class_cache.cfg');
+  if (!fs.existsSync(cache)) return true;
+  const known = fs.readFileSync(cache, 'utf8');
+  const { walk } = require('./lint.js');
+  return walk(dir, dir).filter((f) => f.endsWith('.gd')).some((f) => {
+    const m = /^class_name\s+(\w+)/m.exec(fs.readFileSync(f, 'utf8'));
+    return m && !known.includes(`&"${m[1]}"`);
+  });
+}
+
 function listFiles(dir, re) {
   try {
     return fs.readdirSync(dir).filter((f) => re.test(f)).sort();
@@ -350,28 +366,36 @@ function listFiles(dir, re) {
   }
 }
 
+/** Baselines are data for gb, not game resources: a .gdignore keeps Godot from importing (and exporting) them. */
+function ensureBaselineDir(baseDir) {
+  fs.mkdirSync(baseDir, { recursive: true });
+  const ignore = path.join(baseDir, '.gdignore');
+  if (!fs.existsSync(ignore)) fs.writeFileSync(ignore, '');
+}
+
 /** Scenario screenshots (GB_SHOT lines) → accepted into tests/baselines/, or compared against them. */
-function handleScenarioShots(ctx, log, { accept, compare, threshold = 0.01, tolerance = 0.1 }) {
+function handleScenarioShots(ctx, log, { accept, compare, threshold = 0, tolerance = 0.1 }) {
   const out = [];
   const baseDir = path.join(ctx.dir, 'tests', 'baselines');
   for (const m of log.matchAll(/GB_SHOT name=(\S+) path=(.+?) size=\d+x\d+ err=0/g)) {
     const [, name, file] = m;
     const baseline = path.join(baseDir, `${name}.png`);
+    if (name.endsWith('__end')) { out.push({ name, result: 'taken', file }); continue; } // --end-shot evidence, never a baseline
     if (accept) {
-      fs.mkdirSync(baseDir, { recursive: true });
+      ensureBaselineDir(baseDir);
       fs.copyFileSync(file, baseline);
       out.push({ name, result: 'accepted' });
     } else if (compare) {
       if (!fs.existsSync(baseline)) { out.push({ name, result: 'FAIL', reason: `no baseline tests/baselines/${name}.png — look at the shot, then --accept` }); continue; }
       const d = imgDiff(ctx, baseline, file, file.replace(/\.png$/, '.diff.png'), tolerance);
       const ok = d && d.sizeMatch && d.ratio <= threshold;
-      out.push({ name, result: ok ? 'PASS' : 'FAIL', ratio: d ? d.ratio : null, reason: ok ? null : (d ? `${(d.ratio * 100).toFixed(2)}% pixels differ` : 'diff failed') });
+      out.push({ name, result: ok ? 'PASS' : 'FAIL', ratio: d ? d.ratio : null, differing: d ? d.differing : null, reason: ok ? null : (d ? (d.sizeMatch ? `${d.differing} px (${(d.ratio * 100).toFixed(2)}%) differ from the baseline — look at ${name}.diff.png` : 'size differs from baseline') : 'diff failed') });
     } else out.push({ name, result: 'taken', file });
   }
   return out;
 }
 
-function stepScenarios(ctx, { only = null, window = false, accept = false, compare = false, threshold = 0.01 } = {}) {
+function stepScenarios(ctx, { only = null, window = false, accept = false, compare = false, threshold = 0, endShot = false } = {}) {
   const dir = path.join(ctx.dir, 'tests', 'scenarios');
   const files = only ? [only] : listFiles(dir, /\.gd$/).map((f) => `res://tests/scenarios/${f}`);
   if (!files.length) return { step: 'scenarios', status: 'skip', reasons: ['no scenarios in tests/scenarios/'], ms: 0, errors: [], warnings: [] };
@@ -380,11 +404,11 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
   const results = [];
   const errors = [];
   for (const f of files) {
-    const r = gameRun(ctx, { window, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`] });
+    const r = gameRun(ctx, { window: window || endShot, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`, ...(endShot ? ['--gb-end-shot'] : [])] });
     const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
     const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
     const logErrors = parseLog(r.log, ctx.ignores).errors;
-    const shots = window ? handleScenarioShots(ctx, r.log, { accept, compare, threshold }) : [];
+    const shots = window || endShot ? handleScenarioShots(ctx, r.log, { accept, compare, threshold }) : [];
     for (const s of shots.filter((x) => x.result === 'FAIL')) errors.push({ kind: 'SHOT', message: `${path.basename(f)}: ${s.name} — ${s.reason}`, at: null });
     const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut && !shots.some((x) => x.result === 'FAIL');
     results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots });
@@ -516,7 +540,7 @@ function movieCapture(ctx, { name, frames, scene }) {
   return { r, file, audio, frames: pngs.length };
 }
 
-function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0.01, tolerance = 0.1, movie = false } = {}) {
+function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0, tolerance = 0.1, movie = false } = {}) {
   const shotsDir = path.join(ctx.outDir, 'shots');
   const useMovie = movie || !hasHarness(ctx.dir);
   const t0 = Date.now();
@@ -544,7 +568,7 @@ function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = fal
   const baseDir = path.join(ctx.dir, 'tests', 'baselines');
   const baseline = path.join(baseDir, `${name}.png`);
   if (accept) {
-    fs.mkdirSync(baseDir, { recursive: true });
+    ensureBaselineDir(baseDir);
     fs.copyFileSync(res.file, baseline);
     res.baseline = 'accepted';
   } else if (compare) {
@@ -553,7 +577,7 @@ function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = fal
     res.diff = d;
     if (!d || !d.sizeMatch || d.ratio > threshold) {
       res.status = 'fail';
-      res.reasons.push(d ? (d.sizeMatch ? `${(d.ratio * 100).toFixed(2)}% pixels differ (> ${threshold * 100}%) — see ${name}.diff.png` : 'size differs from baseline') : 'diff failed');
+      res.reasons.push(d ? (d.sizeMatch ? `${d.differing} px (${(d.ratio * 100).toFixed(2)}%) differ (allowed ${threshold * 100}%) — look at ${name}.diff.png` : 'size differs from baseline') : 'diff failed');
     }
   }
   return res;
@@ -724,6 +748,7 @@ function parseArgs(argv) {
     else if (a === '--repeat') opts.repeat = Math.max(1, Number(argv[++i]) || 1);
     else if (a === '--scene') opts.scene = argv[++i];
     else if (a === '--window') opts.window = true;
+    else if (a === '--end-shot') opts.endShot = true;
     else if (a === '--name') opts.name = argv[++i];
     else if (a === '--seconds') opts.seconds = Number(argv[++i]);
     else if (a === '--compare') opts.compare = true;
@@ -767,13 +792,20 @@ function printStep(s) {
   else if (s.framework) extra = ` (${s.framework})`;
   else if (s.step === 'scenarios' && s.repeat) extra = ` (${s.count} scenario(s) × ${s.repeat} runs${s.status === 'ok' ? ', all passed every run' : ''})`;
   else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
-  else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
+  else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${s.diff.differing} px (${(s.diff.ratio * 100).toFixed(2)}%) differ from the baseline` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
   else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
   else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output}${s.smoke ? `, smoke run ${s.smoke.status}${s.smoke.status === 'ok' ? ` (${s.smoke.frames} frames headless, log clean)` : ''}` : ''})`;
   process.stdout.write(`${tag} ${s.step}${extra} — ${s.ms} ms${s.reasons.length ? ' — ' + s.reasons.join('; ') : ''}\n`);
   for (const e of s.errors.slice(0, 10)) process.stdout.write(`     ${e.kind}: ${e.message}${e.at ? `  [${e.at}]` : ''}\n`);
   if (s.errors.length > 10) process.stdout.write(`     … ${s.errors.length - 10} more\n`);
   if (s.step === 'lint') for (const w of s.warnings.slice(0, 10)) process.stdout.write(`     warn ${w.kind}: ${w.message}  [${w.at}]\n`);
+  if (s.step === 'scenarios') {
+    for (const r of s.results || []) for (const sh of r.shots || []) {
+      if (sh.result === 'PASS') process.stdout.write(`     shot ${sh.name}: ${sh.differing} px differ from the baseline\n`);
+      else if (sh.result === 'accepted') process.stdout.write(`     shot ${sh.name}: accepted as the new baseline\n`);
+      else if (sh.result === 'taken') process.stdout.write(`     shot ${sh.name}: ${sh.file}\n`);
+    }
+  }
 }
 
 function fmtNum(v, digits = 2) {
@@ -877,6 +909,7 @@ function main(argv) {
     return m ? 0 : 1;
   }
 
+  const pre = ['run', 'test', 'scenario', 'replay', 'shot', 'perf', 'export'].includes(cmd) && classCacheStale(ctx.dir) ? [stepImport(ctx)] : [];
   let steps;
   if (cmd === 'import') steps = [stepImport(ctx)];
   else if (cmd === 'check') steps = [stepCheck(ctx)];
@@ -884,11 +917,11 @@ function main(argv) {
   else if (cmd === 'run') steps = [stepRun(ctx, opts.frames || 120, opts.scene)];
   else if (cmd === 'test') steps = [stepTest(ctx)];
   else if (cmd === 'scenario') {
-    const so = { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold || 0.01 };
+    const so = { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold ?? 0, endShot: !!opts.endShot };
     steps = [opts.repeat > 1 ? stepScenariosRepeat(ctx, so, opts.repeat) : stepScenarios(ctx, so)];
   }
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
-  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01, movie: !!opts.movie })];
+  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold ?? 0, movie: !!opts.movie })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
   else if (cmd === 'export') steps = stepExport(ctx, opts.preset, !!opts.smoke);
   else if (cmd === 'verify') {
@@ -910,6 +943,7 @@ function main(argv) {
   } else {
     throw new UserError(`Unknown command: ${cmd}`);
   }
+  steps = [...pre, ...steps];
 
   const failed = steps.some((s) => s.status === 'fail');
   const report = { tool: 'game-builder gb', command: cmd, at: new Date().toISOString(), ...header, result: failed ? 'FAIL' : 'PASS', steps };

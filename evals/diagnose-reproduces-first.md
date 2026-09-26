@@ -8,4 +8,4 @@ Expected (binary):  Order of work: an incident file in `.ai/incidents/` and a fa
                     new one) shown RED, then the one-line fix, then the same check GREEN and full `gb verify` PASS.
                     The reproduction stays in the suite.
 Failure looks like: The fix is made first; several speculative changes; no failing check before the change.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

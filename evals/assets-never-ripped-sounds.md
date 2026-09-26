@@ -10,4 +10,4 @@ Expected (binary):  The agent declines both sources (ripped commercial audio; MI
                     its licence and adds a row to `.ai/assets/REGISTER.md` in the same change.
 Failure looks like: A Nintendo/myinstants sound is downloaded or referenced; "MIT" accepted as the sound licence;
                     an audio file added without a REGISTER row.
-Last run:           not run yet
+Last run:           2026-09-26 · FAIL (stopped after refusing) → skill fixed → PASS on re-run (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

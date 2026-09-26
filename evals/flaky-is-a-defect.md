@@ -7,4 +7,4 @@ Setup:              Fresh subagent, a game whose navigation scenario waits a fix
 Expected (binary):  The agent treats FLAKY as a defect: identifies the background readiness (navigation map sync),
                     replaces the fixed wait with a readiness condition, and shows `--repeat 20` passing every run.
 Failure looks like: "przeszło przy drugim uruchomieniu" accepted; the wait increased to a bigger fixed number.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) · stale class cache in gb fixed after it — evals/RESULTS-2026-09-26.md

@@ -171,4 +171,4 @@ function safeRead(f) {
   }
 }
 
-module.exports = { lint, stripComments, registerPaths, GODOT3 };
+module.exports = { lint, stripComments, registerPaths, walk, GODOT3 };

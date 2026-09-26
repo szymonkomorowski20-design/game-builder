@@ -21,14 +21,14 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 ## Loop — per phase, per step
 1. **Plan the step**: what changes, which check proves it. Name the RED check first:
    logic → a GUT test that fails now; behaviour → a scenario expectation that fails now.
-2. **Implement** the minimal change. Godot rules from AGENTS.md: movement in `_physics_process` × `delta`, tunables as `@export`/Resources matching the Tuning table, input via actions, signals up / calls down, static typing. The check-on-edit hook reports parse/lint errors immediately — fix them in the same turn.
+2. **Implement** the minimal change. Godot rules from AGENTS.md: movement in `_physics_process` × `delta`, tunables as `@export`/Resources matching the Tuning table (a new gameplay number goes into the spec's table first — value, unit, where, range — marked as your proposal for the playtest gate; then the code), input via actions, signals up / calls down, static typing. The check-on-edit hook reports parse/lint errors immediately — fix them in the same turn.
 3. **Verify**: `gb verify` (or `gb test` / `gb scenario <file>` while iterating, then full `verify` before commit). Paste the summary. Runtime errors count even when Godot exits 0 — read the report, not the exit code.
 4. **Run and look** when the step changes anything the player can see or hear: `gb shot --name <x> [--scene res://…tscn]` (harness) or `gb shot --movie --name <x> [--scene …]` (Godot Movie Maker — works in any project, also records the audio and reports its peak level), or a visual scenario with `gb scenario <file> --window`. Launch straight into the scene the step touched. Open the PNG and compare it with the Done-when. Never claim a visual result you did not look at — in the Pong dogfood every logic test was green while the ball covered the end-of-match text. Copy the shot you judged to `.ai/evidence/<spec-slug>/<NN>-<what-it-shows>.png` and end the step summary with exactly one line:
-   - `Run result: OBSERVED — <what is on screen / heard>` + evidence path;
+   - `Run result: OBSERVED — <what is on screen / heard> — .ai/evidence/<file>` (one line, the path on it);
    - `Run result: NOT VERIFIED — <why>` (no window, crash, empty shot) — this **blocks** closing a visual step;
    - `Run result: N/A — <why>` only when nothing is observable (a save-format migration). "It is logic" is not a reason: a damage formula shows a number somewhere.
    A still shows layout, clipping, presence, colour — not timing, feel or audio sync; say which half you covered and leave feel to the playtest gate. `audio peak -inf dBFS` on a step that should make sound is a failed step. Accepted shots become baselines (`--accept`, later `--compare`). *(Rule adapted from Claude Code Game Studios, MIT.)*
-5. **Commit** one focused commit per step (`feat(<spec>): …`); the game runs after every commit.
+5. **Commit point** — one focused commit per step (`feat(<spec>): …`); the game runs after every commit. The commit itself is made only when the human has told you to commit (the repo rule "NEVER commit/push without the human's instruction" wins); otherwise end the step with its files staged and say it is ready to commit. A missing git identity is a question for the human, not something to configure.
 6. **Track**: tick the step in the spec's Progress; new unknown → stop and re-gate the spec (`game-spec`), never guess.
 
 ## Phase gate (binary)
@@ -45,6 +45,7 @@ Change only Tuning-table values (exported vars/resources), update the table in t
 
 ## Replays and baselines after intended changes
 A replay or screenshot that stops matching after a change is **either a regression or an intended change**. Never re-record or re-accept to make it green on your own: show the human what changed (expected vs actual state / the diff image) and let them decide; then they re-record or you re-accept with their go-ahead.
+A **first** baseline for a new screen is different: accept it after you have opened the shot and described it in the Run result — the human sees it at the gate. A compare that passes still prints how many pixels differ: a non-zero count after a visual change means the baseline no longer shows the game — tell the human, as above.
 
 ## Keeping the repo's tools current
 `gb doctor` warns when `tools/gb/` differs from the installed plugin. Update with

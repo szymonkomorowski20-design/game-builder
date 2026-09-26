@@ -69,7 +69,7 @@ Done when: {the human's own success criterion}
 ## Decisions Ledger
 | Decision | Chosen | By | Rejected alternatives (why not) |
 |---|---|---|---|
-(Nothing left AI-recommended-pending once confirmed.)
+| {decision} | {option} | user | {option — why not} |
 
 ## Vetoable trivia (reversible, no cost)
 

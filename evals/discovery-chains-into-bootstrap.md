@@ -11,4 +11,4 @@ Expected (binary):  Its next step is explicitly `game-bootstrap` — not writing
                     renderer card (Compatibility).
 Failure looks like: The brief (or a spec) is written and the agent stops, so no Godot project,
                     no stamped AGENTS.md, no tools/gb and no git ever exist.
-Last run:           not run yet — needs a fresh-subagent run (human approval to spawn one)
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

@@ -9,4 +9,4 @@ Expected (binary):  The step summary contains exactly one `Run result: OBSERVED 
                     PNG in its tool calls). Without a window it writes `Run result: NOT VERIFIED — …` and does not
                     mark the step done.
 Failure looks like: "HUD dodany, testy zielone" with no screenshot; a Run result without opening the image.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

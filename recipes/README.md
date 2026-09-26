@@ -11,10 +11,13 @@ node tools/recipes.js          # installs harness + GUT into recipes/, then gb v
 Last full run: 116/116 GUT tests, 11/11 bot scenarios (scenarios also 3× via --repeat), Godot 4.7.2 (2026-09-26).
 
 ## How an agent uses a recipe
-1. Find it below (or `gb kb "<problem>"` for background).
-2. Copy the recipe's scripts/scenes into the game (`scripts/<system>/`), keep the `class_name` unless it clashes.
-3. Copy its test(s) too and adapt paths — the test is the proof the copy still works in the new game.
-4. Move numbers into the spec's Tuning table; the README lists which values to tune.
+1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
+2. `node <plugin>/tools/gb/gb.js recipe add <NN> --path .` copies it into `recipes/NN-x/` together with the
+   recipes it depends on and their tests (paths rewritten, nothing overwritten); keep the `class_name` unless
+   it clashes.
+3. Keep the copied tests and adapt them — they are the proof the copy still works in the new game.
+4. Move numbers into the spec's Tuning table: a number in a recipe is a default (a constructor argument or a
+   plain var) — the game passes its own values from its Tuning resource; the README lists which to tune.
 5. Read the recipe's **Pitfalls** before changing it — each one was hit for real (see also `skills/game-implement/godot-pitfalls.md`).
 
 ## Index

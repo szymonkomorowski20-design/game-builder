@@ -25,7 +25,7 @@ test('CHANGELOG has a heading for the current version in the format the hook par
 const skills = fs.readdirSync(path.join(ROOT, 'skills'));
 
 test('every eval has all fields and names files that exist', () => {
-  const evals = fs.readdirSync(path.join(ROOT, 'evals')).filter((f) => f.endsWith('.md') && f !== 'README.md');
+  const evals = fs.readdirSync(path.join(ROOT, 'evals')).filter((f) => f.endsWith('.md') && f !== 'README.md' && !f.startsWith('RESULTS-'));
   assert.ok(evals.length >= 20, `evals: ${evals.length}`);
   for (const f of evals) {
     const body = read(`evals/${f}`);

@@ -192,6 +192,11 @@ Gra w Godot ${o.engine} (${o.dim.toUpperCase()}), zbudowana metodą game-builder
 `;
 }
 
+/** 2D/3D cannot be read from project.godot; an adopted project without --dim says so instead of guessing. */
+function dimLabel(o) {
+  return o.adopt && !o.dimGiven ? '2D or 3D — not detected, fill in' : o.dim.toUpperCase();
+}
+
 function adr001(o) {
   return `# ADR-001: Engine and project setup
 
@@ -200,14 +205,14 @@ Status: accepted
 
 ## Decision
 - Engine: Godot ${o.engine}, GDScript with static typing
-- Dimension: ${o.dim.toUpperCase()}
+- Dimension: ${dimLabel(o)}
 - Renderer: ${RENDERERS[o.renderer]} (\`${o.renderer}\`)
 - Base resolution: ${o.width}×${o.height}${o.pixelArt ? ', pixel-art settings (viewport stretch, nearest filter, 2D pixel snap)' : ''}
 - Test framework: ${o.tests}
 - Git LFS for binary assets: ${o.lfs ? 'yes' : 'no'}
 
 ## Context
-Chosen by the human in game-bootstrap from decision cards; see the Decisions Ledger in \`.ai/brief.md\`.
+${o.adopt ? 'Read from the existing project.godot during adoption (game-bootstrap Case C; Godot defaults where a key is absent). Correct anything the project does differently.' : 'Chosen by the human in game-bootstrap from decision cards; see the Decisions Ledger in `.ai/brief.md`.'}
 
 ## Consequences
 ${o.renderer === 'gl_compatibility' ? '- Web export possible (Godot 4 web export requires the Compatibility renderer); fewer advanced 3D effects.\n' : ''}${o.renderer === 'forward_plus' ? '- Best desktop 3D quality; no web export without switching to Compatibility.\n' : ''}${o.lfs ? '- Binary assets go through Git LFS: every clone needs `git lfs install`; hosting quota applies.\n' : '- Binary assets are committed directly: keep the repository small, revisit LFS if assets grow past a few hundred MB.\n'}`;
@@ -218,7 +223,7 @@ function fill(tpl, o) {
     .replace(/\{\{NAME\}\}/g, o.name)
     .replace(/\{\{VERSION\}\}/g, pluginVersion())
     .replace(/\{\{ENGINE\}\}/g, o.engine)
-    .replace(/\{\{DIM\}\}/g, o.dim.toUpperCase())
+    .replace(/\{\{DIM\}\}/g, dimLabel(o))
     .replace(/\{\{RENDERER\}\}/g, `${RENDERERS[o.renderer]} (\`${o.renderer}\`)`)
     .replace(/\{\{WIDTH\}\}/g, String(o.width))
     .replace(/\{\{HEIGHT\}\}/g, String(o.height))
@@ -257,8 +262,13 @@ function plan(o) {
   add('tests/README.md', TESTS_README);
   copy('tests/scenarios/smoke.gd', path.join(TPL, 'project', 'tests', 'scenarios', 'smoke.gd'));
   add('tests/replays/.gitkeep', '');
-  add('tests/baselines/.gitkeep', '');
-  if (o.tests === 'gut') copy('tests/unit/test_example.gd', path.join(TPL, 'project', 'tests', 'unit', 'test_example.gd'));
+  add('tests/baselines/.gdignore', ''); // baselines are gb data, never imported or exported by Godot
+  if (o.tests === 'gut') {
+    const example = path.join(TPL, 'project', 'tests', 'unit', 'test_example.gd');
+    // Adoption never adds an Events autoload, so the example must not assert one the project does not have.
+    if (o.adopt && !o.hasEvents) add('tests/unit/test_example.gd', fs.readFileSync(example, 'utf8').replace(/\r\n/g, '\n').replace(/func test_events_autoload_exists\(\)[^\n]*\n[^\n]*\n\n\n/, ''));
+    else copy('tests/unit/test_example.gd', example);
+  }
   copyTree('addons/gb_harness', path.join(TPL, 'addons', 'gb_harness'));
   if (o.tests === 'gut') copyTree('addons/gut', path.join(PLUGIN, 'vendor', 'gut', 'addons', 'gut'));
   add('export_presets.cfg', exportPresets());
@@ -327,7 +337,7 @@ function parseScaffoldArgs(argv) {
     const v = () => argv[++i];
     if (a === '--dir') o.dir = path.resolve(v());
     else if (a === '--name') o.name = v();
-    else if (a === '--dim') o.dim = v().toLowerCase();
+    else if (a === '--dim') { o.dim = v().toLowerCase(); o.dimGiven = true; }
     else if (a === '--renderer') o.renderer = v();
     else if (a === '--pixel-art') o.pixelArt = true;
     else if (a === '--width') o.width = Number(v());
@@ -348,6 +358,8 @@ function parseScaffoldArgs(argv) {
     if (!o.width && o.templateInfo.viewport) [o.width, o.height] = o.templateInfo.viewport;
   }
   if (!['2d', '3d'].includes(o.dim)) throw new Error('scaffold: --dim must be 2d or 3d');
+  const existing = path.join(o.dir, 'project.godot');
+  if (o.adopt && fs.existsSync(existing)) Object.assign(o, existingSettings(fs.readFileSync(existing, 'utf8')));
   o.renderer = o.renderer || (o.dim === '3d' ? 'forward_plus' : 'gl_compatibility');
   if (!RENDERERS[o.renderer]) throw new Error(`scaffold: --renderer must be one of ${Object.keys(RENDERERS).join(', ')}`);
   if (!['gut', 'gdunit4', 'none'].includes(o.tests)) throw new Error('scaffold: --tests must be gut, gdunit4 or none');
@@ -355,6 +367,26 @@ function parseScaffoldArgs(argv) {
   o.height = o.height || (o.pixelArt ? 180 : 720);
   o.name = o.name || path.basename(o.dir);
   return o;
+}
+
+/**
+ * Adopt mode documents the project as it IS: renderer, base resolution, pixel-art filter and the Events
+ * autoload are read from its project.godot, with Godot's own defaults where a key is absent — never the
+ * new-project defaults (an adopted game without a [rendering] section runs Forward+ at 1152×648).
+ */
+function existingSettings(text) {
+  const get = (key) => {
+    const m = new RegExp(`^${key.replace(/[/.]/g, '\\$&')}=(.+)$`, 'm').exec(text);
+    return m ? m[1].trim().replace(/^"|"$/g, '') : null;
+  };
+  const renderer = get('renderer/rendering_method');
+  return {
+    renderer: renderer && RENDERERS[renderer] ? renderer : 'forward_plus',
+    width: Number(get('window/size/viewport_width')) || 1152,
+    height: Number(get('window/size/viewport_height')) || 648,
+    pixelArt: get('textures/canvas_textures/default_texture_filter') === '0',
+    hasEvents: /^Events=/m.test(text),
+  };
 }
 
 function listTemplates() {
@@ -365,4 +397,4 @@ function listTemplates() {
   }
 }
 
-module.exports = { listTemplates, scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, exportPresets, RENDERERS };
+module.exports = { listTemplates, scaffold, parseScaffoldArgs, projectGodot, mainScene, plan, exportPresets, existingSettings, RENDERERS };

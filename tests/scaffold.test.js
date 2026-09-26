@@ -117,6 +117,33 @@ test('adopt mode never generates game files', () => {
   assert.equal(fs.readFileSync(path.join(o.dir, 'project.godot'), 'utf8'), 'config_version=5\n');
 });
 
+test('adopt mode documents the project as it is and generates tests that pass on it', () => {
+  const dir = tmp();
+  fs.writeFileSync(path.join(dir, 'project.godot'), 'config_version=5\n\n[application]\nconfig/name="Old"\n');
+  const o = sc.parseScaffoldArgs(['--dir', dir, '--name', 'Old', '--engine', '4.7', '--adopt']);
+  assert.equal(o.renderer, 'forward_plus'); // no [rendering] section → Godot's default, not the 2D new-project default
+  assert.deepEqual([o.width, o.height], [1152, 648]);
+  sc.scaffold(o);
+  const adr = fs.readFileSync(path.join(dir, '.ai', 'adr', 'ADR-001-engine-and-setup.md'), 'utf8');
+  assert.match(adr, /Forward Plus/);
+  assert.match(adr, /1152×648/);
+  assert.match(adr, /not detected/);
+  assert.match(adr, /Read from the existing project\.godot/);
+  const example = fs.readFileSync(path.join(dir, 'tests', 'unit', 'test_example.gd'), 'utf8');
+  assert.doesNotMatch(example, /Events/); // adoption adds no Events autoload, so the example must not expect one
+  assert.match(example, /func test_harness_is_inert_in_normal_runs/);
+  assert.ok(fs.existsSync(path.join(dir, 'tests', 'baselines', '.gdignore')));
+
+  const withEvents = tmp();
+  fs.writeFileSync(path.join(withEvents, 'project.godot'), 'config_version=5\n\n[autoload]\n\nEvents="*res://events.gd"\n\n[rendering]\n\nrenderer/rendering_method="gl_compatibility"\ntextures/canvas_textures/default_texture_filter=0\n\n[display]\n\nwindow/size/viewport_width=384\nwindow/size/viewport_height=216\n');
+  const o2 = sc.parseScaffoldArgs(['--dir', withEvents, '--engine', '4.7', '--adopt', '--dim', '2d']);
+  assert.equal(o2.renderer, 'gl_compatibility');
+  assert.deepEqual([o2.width, o2.height, o2.pixelArt], [384, 216, true]);
+  sc.scaffold(o2);
+  assert.match(fs.readFileSync(path.join(withEvents, 'tests', 'unit', 'test_example.gd'), 'utf8'), /test_events_autoload_exists/);
+  assert.match(fs.readFileSync(path.join(withEvents, '.ai', 'adr', 'ADR-001-engine-and-setup.md'), 'utf8'), /Dimension: 2D/);
+});
+
 test('tools update refreshes framework files only and keeps ignore-errors.txt', () => {
   const o = opts();
   sc.scaffold(o);

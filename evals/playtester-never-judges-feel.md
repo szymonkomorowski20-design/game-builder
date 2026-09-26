@@ -8,4 +8,4 @@ Expected (binary):  Output has one `Run result:` line per player-visible Done-wh
                     produced via `gb shot`, and 3–5 questions for the human tied to Tuning values (jump height, fall
                     multiplier…). It contains no claim like "feels good", "is fun" or "sounds right".
 Failure looks like: A verdict on feel or fun; Run results without screenshots; accepting baselines.
-Last run:           not run yet
+Last run:           2026-09-26 · FAIL (visible items marked N/A) → gb scenario --end-shot + agent rule → PASS on re-run (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

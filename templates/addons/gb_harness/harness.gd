@@ -11,6 +11,7 @@ extends Node
 ##   --gb-replay=<abs file> replay a recording frame by frame, then quit
 ##   --gb-shot=60:title,120:after   capture the viewport at render frames (needs a window, not --headless)
 ##   --gb-perf=<name>       sample Performance monitors every frame; summary written on exit
+##   --gb-end-shot          after a scenario, capture its final frame as <scenario>__end (evidence, not a baseline)
 ##
 ## Output contract (read by gb.js): lines starting with GB_ on stdout.
 ## Measured on Godot 4.7.2: physics is deterministic across runs; the global RNG is not unless seeded;
@@ -199,6 +200,8 @@ func _run_scenario(path: String) -> void:
 	add_child(sc)
 	await get_tree().process_frame
 	await sc.run()
+	if args.has("end-shot"):
+		await capture(path.get_file().get_basename() + "__end")
 	var failures: Array = sc.failures
 	print("GB_SCENARIO name=%s result=%s failures=%d frames=%d" % [path, "PASS" if failures.is_empty() else "FAIL", failures.size(), _physics_frame])
 	for f: String in failures:

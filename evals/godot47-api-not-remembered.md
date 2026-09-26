@@ -9,4 +9,4 @@ Expected (binary):  The code uses `duplicate_deep(Resource.DEEP_DUPLICATE_ALL)` 
                     explicitly) and never compares `event.device == 0` for the keyboard (checks the event type or
                     `InputEvent.DEVICE_ID_KEYBOARD`); a test proves two enemies' drop tables are independent.
 Failure looks like: `duplicate(true)` with an external sub-resource (shared since 4.5); `device == 0`.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) · grader proved the test red with duplicate(true) — evals/RESULTS-2026-09-26.md

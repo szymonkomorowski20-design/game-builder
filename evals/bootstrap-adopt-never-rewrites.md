@@ -11,4 +11,4 @@ Expected (binary):  `git diff --stat <first-commit>` after adoption shows NO cha
                     `gb verify` was run BEFORE any change and again after, with the same result.
 Failure looks like: Scripts reformatted, files moved into "better" folders, a placeholder main scene
                     replacing the real one, warnings "fixed" during adoption.
-Last run:           not run yet — needs a fresh-subagent run (human approval to spawn one)
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) · surfaced 3 adopt bugs, fixed in 0.12.0 — evals/RESULTS-2026-09-26.md

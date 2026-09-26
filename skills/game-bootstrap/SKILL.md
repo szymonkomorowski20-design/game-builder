@@ -48,6 +48,8 @@ Commit to the spine for the session — **SPEC → HUMAN → VERIFIED → PLAYAB
 3. Write `.ai/brief.md` from the confirmed brief (it must contain the Decisions Ledger with nothing pending).
 4. Review `AGENTS.md` "Project" section against the manifest; add genre-specific notes only if they are judgment rules (keep it short — it is a map).
 5. `git init` (if needed), `git add -A`, first commit: `chore: bootstrap <title> (game-builder <version>)`.
+   If git has no author identity, ask the human which name and e-mail to use — never copy one from another
+   repository or invent one.
 
 The verification layer comes with the project: `addons/gb_harness` (autoload `GbHarness`, inert in normal play — scenarios, record/replay, screenshots, perf), GUT (vendored, pinned; with `--tests gut`), a smoke scenario, an example unit test, `export_presets.cfg` (Windows Desktop + Web), `.ai/perf-budget.json`, the CI workflow and the check-on-edit hook. With `--tests none`, `gb test` reports **SKIP** and you say so — a SKIP is never reported as a pass. Web export needs the Web export templates installed once in the Godot editor; `gb doctor` warns when they are missing.
 

@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.12.0 — 2026-09-26 · all 20 evals run, fixes from what they found (stage 7)
+- **Evals run** on fresh Sonnet subagents in fixture repos, graded against their binary expectations using the artifacts on disk (`evals/RESULTS-2026-09-26.md`, `Last run:` in every eval): **20 / 20 PASS** in the end; first runs 16 PASS, 3 FAIL, 1 invalid fixture. Limits stated there: stand-in runs (skills named in the prompt, not auto-triggered), one model, one run each.
+- **Fixed from the three failures:**
+  - game-audio: after refusing a forbidden source, pick the closest legal sound by its description, register it, wire it, prove it plays, and let the human judge it at the gate.
+  - game-test: "is the phase built?" is answered from the spec's Progress, STATUS.md and `git log`. `scripts/` and `scenes/` stay closed until the plan file exists.
+  - `gb scenario --end-shot` saves every scenario's final frame as `<scenario>__end.png`. It is evidence and never a baseline.
+  - game-playtester: N/A only for items with nothing to see or hear; a visible item without a picture is NOT VERIFIED.
+- **Fixed from defects that passing evals surfaced:**
+  - Screenshot compare now allows 0 differing pixels by default (was 1 %). Three unchanged runs measured 0, and green paddles in Pong (0.42 %) had passed. A passing compare prints its pixel count.
+  - `tests/baselines/` gets a `.gdignore`, so Godot no longer imports baselines or exports them into the game.
+  - `gb run/test/scenario/replay/shot/perf/export` import first when a `class_name` is missing from Godot's class cache. This happens after `gb recipe add` or on a fresh clone, where scenarios failed with "Could not find type X". Proven against 0.11.0 on a fresh scaffold + recipe 26.
+  - `gb scaffold --adopt`:
+    - records the project's real renderer, resolution, pixel filter and Events autoload in ADR-001 / AGENTS.md instead of new-project defaults;
+    - writes "2D or 3D — not detected" without `--dim`;
+    - no longer generates an example test that asserts an Events autoload adoption never adds, which made `gb verify` fail right after adoption.
+  - adopt-existing-repo.md: the one expected `gb doctor` MISS (export presets are the human's platform decision), a tracked `.godot/` reported instead of committed, ask for a git identity.
+  - game-bootstrap: ask for a git identity, never copy one from another repository. brief-template.md no longer contains the phrase `gb doctor` rejects.
+  - game-implement:
+    - step 5 is a commit point, made only on the human's word. It had contradicted the repo rule "never commit without the human".
+    - a new gameplay number goes into the spec's Tuning table before the code.
+    - the Run result line carries its evidence path.
+    - a first baseline may be accepted after looking at it; replacing one is the human's call.
+  - recipes/README.md describes `gb recipe add` and says recipe numbers are defaults fed from the game's Tuning.
+  - The release-hygiene test skips `RESULTS-*.md`.
+
 ## 0.11.0 — 2026-09-26 · card template, 20 evals
 - `gb scaffold --template cards-2d`: card combat starter (deckbuilder-style) — seeded deck (recipe 31), hand of 5, energy per turn, attack/block cards and the starting deck as data (`data/cards.tres`), enemy with cycling visible intents, block, win/lose/restart; pure `Combat` model; keyboard/gamepad (select, play, end turn) and mouse. 11 unit tests (incl. a balance contract: greedy play wins within 5 turns) + 4 scenarios C1–C4 played through input only, green at scaffold time. Detection proven (block not absorbing, energy not spent); the screenshot review found the selected card marked by colour alone → now also by ▶.
 - Evals: 12 new scenarios for the behaviours added in 0.5–0.10 (ripped sounds refused, 4.7 API changes, Tuning instead of literals, Run result line, checker finds what is missing, playtester never judges feel, diagnose reproduces first, release never publishes, save migration, flaky is a defect, recipe first, web audio limits) — 20 in total; a hygiene test checks every eval's fields and referenced files.

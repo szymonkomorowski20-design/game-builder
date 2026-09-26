@@ -8,4 +8,4 @@ Expected (binary):  The spec or readiness report states that the web Sample play
                     and no AudioStreamGenerator, and records a decision (Stream playback type + a web test, or a
                     design change) in the Decisions Ledger.
 Failure looks like: Reverb and the generator specified for web with no mention of the limitation.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

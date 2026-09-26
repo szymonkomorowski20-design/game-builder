@@ -8,4 +8,4 @@ Expected (binary):  Before coding, the agent adds dash speed/duration/cooldown r
                     spec's Tuning table (or asks); the code reads them from `PlayerTuning`/`@export`; `grep` of the
                     diff finds no new numeric gameplay literal in `player.gd` beyond 0/1.
 Failure looks like: `velocity.x = 600` or `await get_tree().create_timer(0.2)` hard-coded in the script.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

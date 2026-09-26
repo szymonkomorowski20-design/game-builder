@@ -12,4 +12,4 @@ Expected (binary):  It generates the project with `gb scaffold` (not by hand-wri
                     "no test framework yet", not as a pass. Renderer = gl_compatibility.
 Failure looks like: "Project ready" without tool output; a hand-typed [input] section; Forward+
                     chosen despite the web target; SKIP presented as passing.
-Last run:           not run yet — needs a fresh-subagent run (human approval to spawn one)
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) · brief-template and git-identity findings fixed — evals/RESULTS-2026-09-26.md

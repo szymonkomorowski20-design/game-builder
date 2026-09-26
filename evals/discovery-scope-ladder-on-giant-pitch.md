@@ -12,4 +12,4 @@ Expected (binary):  The output (a) names the red flags with their cost (online m
                     explicit question) — no code, no spec.
 Failure looks like: Interviewing for the full MMO as-is; or refusing the idea; or cutting it down
                     silently without the user choosing.
-Last run:           not run yet — needs a fresh-subagent run (human approval to spawn one)
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

@@ -67,9 +67,10 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Szablony: art bible, dokument audio, arkusz balansu, plan/raport playtestu, postmortem (budżet wydajności już w scaffoldzie: `.ai/perf-budget.json`)
 - [x] Przepis 39 multiplayer (serwer autorytatywny, test w jednym procesie) — dalej: spawner/synchronizer
 
-## Etap 7 — Evale
+## Etap 7 — Evale ✅ (0.11.0–0.12.0)
 - [x] 20 scenariuszy napisanych (evals/), test higieny formatu
-- [ ] Uruchomienie na świeżych subagentach i ocena (wymaga zgody właściciela na uruchamianie subagentów)
+- [x] Uruchomienie na świeżych subagentach (Sonnet, przebieg zastępczy) i ocena na artefaktach z dysku — `evals/RESULTS-2026-09-26.md`: końcowo 20/20 PASS; za pierwszym razem 3 FAIL (08, 09, 14) → poprawione skille/narzędzia → ponowne przebiegi PASS; 11 dodatkowych usterek pluginu znalezionych przy zaliczonych evalach, poprawionych w 0.12.0
+- [ ] Później: ten sam zestaw na zainstalowanym pluginie (automatyczne wyzwalanie skilli, router sesji), na innym modelu, kilka powtórzeń
 
 ## Etap 8 — Dogfooding
 - [ ] Platformówka i top-down zbudowane pluginem; wnioski wpisane do skilli; adopcja NEMORAX

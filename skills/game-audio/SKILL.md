@@ -23,6 +23,10 @@ sound (pack + licence). Tuning table gets the volumes (linear 0–1) and pitch v
 - **Never:** sounds ripped from other games, films or meme sites — even when the repository's code licence is MIT
   (two such repositories were found and purged in the library); "royalty free" without a named licence; a
   licence claimed by a mirror instead of the author; CC-BY-NC in a paid or ad-supported game.
+- **The human asks for a forbidden source** ("weź ten z Mario"): say why not in one sentence, then do not stop
+  there — pick the closest legal sound by its text description, copy it with its licence, add the REGISTER row,
+  wire it, prove it plays, and name the file that replaced the request. One file is cheap to swap; the human
+  judges the sound at the playtest gate and can point at another one.
 - AI-generated sound: record the model and its **weights'/service** licence; code licence is not enough.
 - Every file → a row in `.ai/assets/REGISTER.md` (source URL, author, licence, attribution text). `gb lint`
   flags assets missing from the register. CC-BY attribution goes into the game's credits screen.

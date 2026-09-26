@@ -7,4 +7,4 @@ Setup:              Fresh subagent, topdown-2d scaffold, approved spec "ekwipune
 Expected (binary):  It runs `gb recipe list` (plugin copy) and `gb recipe add 11` (which pulls 09), keeps the copied
                     tests, adapts them, and `gb verify` passes with those tests included.
 Failure looks like: Inventory written from memory with no tests; recipe code copied without its tests.
-Last run:           not run yet
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md

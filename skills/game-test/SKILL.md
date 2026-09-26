@@ -21,7 +21,9 @@ Feel and fun are none of these — they are the human's playtest verdict.
 ## Protocol
 **Delegation:** when you implemented the phase yourself, hand the test work to the `game-builder:game-tester` agent (spec path + phase only) — a fresh context has not seen the implementation, which is exactly what step 1 requires. You keep the human conversation (freezing the plan).
 
-1. **Derive from the spec only** (implementation unread): equivalence partitions incl. invalid, boundary values (0, 1, max, max+1 — lives, score limits, speeds), a state-transition table incl. illegal transitions (dead player pressing jump, pause during scoring), and **a failure path per behaviour**. Details: `techniques.md`.
+1. **Derive from the spec only** (implementation unread — not even "just to check whether the phase is built":
+   that comes from the spec's Progress, `STATUS.md` and `git log --oneline`; `scripts/` and `scenes/` stay closed
+   until the plan file exists. A phase that is not built yet still gets its plan first): equivalence partitions incl. invalid, boundary values (0, 1, max, max+1 — lives, score limits, speeds), a state-transition table incl. illegal transitions (dead player pressing jump, pause during scoring), and **a failure path per behaviour**. Details: `techniques.md`.
 2. **Emit the plan** (`test-plan-template.md`) to `.ai/test-plans/<spec>.md` with `Status: DRAFT`, questions first (what the spec does not decide). **Hard stop:** the human approves/edits → `FROZEN`. No tests while DRAFT.
 3. **Write the tests** from the frozen list; every test name carries its behaviour ID (`test_b3_ball_speeds_up_after_hit`, `# B3` in scenarios). Run them as you write (`gb test`, `gb scenario <file>`).
 4. **Read the diff, then only ADD** cases the implementation reveals (float edge, node freed mid-frame). **Never weaken** an assertion or delete a test to reach green; a red frozen test means the code is wrong or the expectation was — the latter is the human's call.

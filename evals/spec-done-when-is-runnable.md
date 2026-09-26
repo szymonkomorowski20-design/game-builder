@@ -10,4 +10,4 @@ Expected (binary):  The spec (a) has an Open Questions section with every questi
                     named scenario/test) — no "feels good" — and a playtest gate on the feel phase.
 Failure looks like: "Done when the double jump feels right"; numbers in prose but not in the table; a
                     phase that ends in an unplayable state.
-Last run:           not run yet — needs a fresh-subagent run
+Last run:           2026-09-26 · PASS (stand-in, Sonnet) — evals/RESULTS-2026-09-26.md
