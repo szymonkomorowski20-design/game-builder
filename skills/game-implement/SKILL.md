@@ -13,7 +13,7 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 **Use:** spec `approved` and READY (or obviously small). **Not:** no approved spec (→ `game-spec`); NOT-READY (fix the spec); something is broken (reproduce with `gb`, diagnose first).
 
 ## Pre-flight
-1. Read the spec, the readiness report, `.ai/STATE.md`, `.ai/lessons.md`, `AGENTS.md`.
+1. Read the spec, the readiness report, `.ai/STATE.md`, `.ai/lessons.md`, `AGENTS.md`, and — before writing engine API code — [godot-4.4-4.7-changes.md](godot-4.4-4.7-changes.md) (what changed since your training data). When a check fails in a way that makes no sense, look it up in [godot-pitfalls.md](godot-pitfalls.md) first. For a mechanic that has a tested recipe in the plugin (`recipes/README.md`: movement, camera, health, hitboxes, inventory, saves, dialogue, AI, navigation, audio…), start from the recipe, not from memory.
 2. `Status: in-progress`. Branch `feat/<spec-slug>` (never implement on the default branch).
 3. Baseline: `gb verify` — green before you start, or the failure is recorded first.
 4. Long work (> ~5 commits): run log `.ai/runs/{YYYY-MM-DD}-{slug}.md` — goal, phases, decisions, what's left, and after each phase the pasted evidence — so work resumes after a context reset.
@@ -23,7 +23,11 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
    logic → a GUT test that fails now; behaviour → a scenario expectation that fails now.
 2. **Implement** the minimal change. Godot rules from AGENTS.md: movement in `_physics_process` × `delta`, tunables as `@export`/Resources matching the Tuning table, input via actions, signals up / calls down, static typing. The check-on-edit hook reports parse/lint errors immediately — fix them in the same turn.
 3. **Verify**: `gb verify` (or `gb test` / `gb scenario <file>` while iterating, then full `verify` before commit). Paste the summary. Runtime errors count even when Godot exits 0 — read the report, not the exit code.
-4. **Look** when the step is visual: `gb shot --name <x> [--scene …]` or a visual scenario with `gb scenario <file> --window`, then open the PNG and describe what you see. Never claim a visual result you did not look at — in the Pong dogfood every logic test was green while the ball covered the end-of-match text. Accepted shots become baselines (`--accept`, later `--compare`).
+4. **Run and look** when the step changes anything the player can see or hear: `gb shot --name <x> [--scene res://…tscn]` (harness) or `gb shot --movie --name <x> [--scene …]` (Godot Movie Maker — works in any project, also records the audio and reports its peak level), or a visual scenario with `gb scenario <file> --window`. Launch straight into the scene the step touched. Open the PNG and compare it with the Done-when. Never claim a visual result you did not look at — in the Pong dogfood every logic test was green while the ball covered the end-of-match text. Copy the shot you judged to `.ai/evidence/<spec-slug>/<NN>-<what-it-shows>.png` and end the step summary with exactly one line:
+   - `Run result: OBSERVED — <what is on screen / heard>` + evidence path;
+   - `Run result: NOT VERIFIED — <why>` (no window, crash, empty shot) — this **blocks** closing a visual step;
+   - `Run result: N/A — <why>` only when nothing is observable (a save-format migration). "It is logic" is not a reason: a damage formula shows a number somewhere.
+   A still shows layout, clipping, presence, colour — not timing, feel or audio sync; say which half you covered and leave feel to the playtest gate. `audio peak -inf dBFS` on a step that should make sound is a failed step. Accepted shots become baselines (`--accept`, later `--compare`). *(Rule adapted from Claude Code Game Studios, MIT.)*
 5. **Commit** one focused commit per step (`feat(<spec>): …`); the game runs after every commit.
 6. **Track**: tick the step in the spec's Progress; new unknown → stop and re-gate the spec (`game-spec`), never guess.
 
@@ -56,4 +60,6 @@ A replay or screenshot that stops matching after a change is **either a regressi
 - You tuned by changing logic instead of Tuning values, or added numbers not in the table.
 - You re-recorded a replay or accepted a screenshot to turn a red check green without the human.
 - A phase closed without its playtest gate (when marked) or without pasted Done-when evidence.
+- A visual step closed with `Run result: NOT VERIFIED`, or with no `Run result` line at all.
+- You used a Godot API from memory that the 4.4–4.7 change list says was renamed or changed.
 - The session ends without updating STATE.md.

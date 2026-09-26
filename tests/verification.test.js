@@ -177,6 +177,18 @@ test('shot + compare against an accepted baseline (opens a window)', { skip: ski
   assert.match(r.stdout, /0\.00% differ/);
 });
 
+test('shot --movie works without the harness and reports whether the game made sound (opens a window)', { skip: skip || (process.env.GB_TEST_WINDOW ? false : 'set GB_TEST_WINDOW=1'), timeout: 600000 }, () => {
+  // A game with no harness and no test code: a sine tone plays from the first frame.
+  const tone = 'extends Node2D\n\nfunc _ready() -> void:\n\tvar s := AudioStreamWAV.new()\n\ts.format = AudioStreamWAV.FORMAT_16_BITS\n\ts.mix_rate = 44100\n\tvar data := PackedByteArray()\n\tdata.resize(44100 * 2)\n\tfor i in 44100:\n\t\tdata.encode_s16(i * 2, int(sin(i * TAU * 440.0 / 44100.0) * 16000.0))\n\ts.data = data\n\t$Player.stream = s\n\t$Player.play()\n';
+  const scene = '[gd_scene format=3]\n\n[ext_resource type="Script" path="res://main.gd" id="1"]\n\n[node name="Main" type="Node2D"]\nscript = ExtResource("1")\n\n[node name="Player" type="AudioStreamPlayer" parent="."]\n\n[node name="Box" type="Polygon2D" parent="."]\npolygon = PackedVector2Array(100, 100, 300, 100, 300, 300)\n';
+  const d = tmpProject({ 'project.godot': 'config_version=5\n[application]\nrun/main_scene="res://main.tscn"\nconfig/features=PackedStringArray("4.7")\n', 'main.tscn': scene, 'main.gd': tone });
+  const r = gb('shot', '--movie', '--name', 'tone', '--frames', '30', '--path', d);
+  assert.equal(r.status, 0, r.stdout + r.stderr);
+  assert.ok(fs.existsSync(path.join(d, '.ai', 'verify', 'shots', 'tone.png')));
+  const peak = Number(/audio peak (-?[\d.]+) dBFS/.exec(r.stdout)?.[1]);
+  assert.ok(peak > -12 && peak <= 0, `expected an audible tone, got: ${r.stdout}`);
+});
+
 test('export Windows Desktop produces an executable', { skip: skip || (process.env.GB_TEST_EXPORT ? false : 'set GB_TEST_EXPORT=1'), timeout: 900000 }, () => {
   const d = game();
   // The exact presets gb scaffold writes (a hand-trimmed preset without include/exclude_filter

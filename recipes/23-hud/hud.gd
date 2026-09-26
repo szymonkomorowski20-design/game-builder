@@ -26,4 +26,7 @@ func bind_wallet(w: Wallet) -> void:
 
 
 func _on_balance(balance: int) -> void:
-	coins_label.text = tr("HUD_COINS").format({"n": balance})
+	var fmt := tr("HUD_COINS")
+	if fmt == "HUD_COINS":   # no translation registered (recipe 22 not set up) — readable fallback
+		fmt = "Coins: {n}"
+	coins_label.text = fmt.format({"n": balance})

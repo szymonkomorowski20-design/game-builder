@@ -119,6 +119,45 @@ test('templates: platformer-2d is listed; an unknown template is rejected with t
   assert.ok(!fs.existsSync(path.join(o.dir, 'template.json')));
 });
 
+// ---- recipes (gb recipe) ----
+const R = require('../tools/gb/recipe.js');
+const RECIPES = path.join(__dirname, '..', 'recipes');
+
+test('recipes: dependencies come from class_name use; add resolves them first', () => {
+  const info = R.catalog(RECIPES);
+  assert.deepEqual(info['23-hud'].deps, ['05-health', '11-shop']);
+  assert.deepEqual(info['10-crafting'].deps, ['09-inventory']);
+  const order = R.resolve(info, ['23']);
+  assert.ok(order.indexOf('09-inventory') < order.indexOf('11-shop') && order.indexOf('11-shop') < order.indexOf('23-hud'));
+  assert.throws(() => R.resolve(info, ['99']), /unknown recipe/);
+});
+
+test('recipes: every recipe has a README and at least one test', () => {
+  for (const d of Object.keys(R.catalog(RECIPES))) {
+    assert.ok(fs.existsSync(path.join(RECIPES, d, 'README.md')), `${d} README`);
+    const nn = d.slice(0, 2);
+    const tests = [...fs.readdirSync(path.join(RECIPES, 'tests', 'unit')), ...fs.readdirSync(path.join(RECIPES, 'tests', 'scenarios'))].filter((f) => f.startsWith(`test_r${nn}_`) || f.startsWith(`r${nn}_`));
+    assert.ok(tests.length > 0, `${d} has no test`);
+  }
+});
+
+test('recipes: add rewrites res:// paths into recipes/, copies tests, never overwrites', () => {
+  const game = tmp();
+  fs.writeFileSync(path.join(game, 'project.godot'), 'config_version=5\n');
+  const r = R.add(RECIPES, game, ['06']);
+  assert.deepEqual(r.recipes, ['05-health', '06-hitbox-hurtbox']);
+  const arena = fs.readFileSync(path.join(game, 'recipes', '06-hitbox-hurtbox', 'arena.tscn'), 'utf8');
+  assert.match(arena, /res:\/\/recipes\/06-hitbox-hurtbox\/hitbox\.gd/);
+  assert.match(arena, /res:\/\/recipes\/05-health\/health\.gd/);
+  assert.doesNotMatch(arena, /"res:\/\/0\d-/);
+  assert.ok(fs.existsSync(path.join(game, 'tests', 'scenarios', 'r06_hitbox_hurtbox.gd')));
+  assert.ok(fs.existsSync(path.join(game, 'tests', 'unit', 'test_r05_health.gd')));
+  fs.writeFileSync(path.join(game, 'recipes', '05-health', 'health.gd'), '# mine');
+  const again = R.add(RECIPES, game, ['05']);
+  assert.equal(again.added.length, 0);
+  assert.equal(fs.readFileSync(path.join(game, 'recipes', '05-health', 'health.gd'), 'utf8'), '# mine');
+});
+
 // ---- end-to-end with the real engine ----
 const haveGodot = spawnSync(process.execPath, [GB, 'godot', '--path', path.join(__dirname, 'fixtures', 'ok')], { encoding: 'utf8' }).status !== 2;
 const skip = haveGodot ? false : 'no Godot binary found — e2e skipped';
@@ -132,6 +171,18 @@ test('e2e: platformer-2d template passes its own 9 scenarios and unit tests out 
   assert.equal(v.status, 0, v.stdout);
   assert.match(v.stdout, /PASS scenarios \(9\/9 passing\)/);
   assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
+});
+
+test('e2e: recipes copied into a fresh game (with dependencies) pass gb verify there', { skip, timeout: 900000 }, () => {
+  const dir = path.join(tmp(), 'rg');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'RG', '--dim', '2d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  const a = spawnSync(process.execPath, [GB, 'recipe', 'add', '23', '13', '35', '24', '--path', dir], { encoding: 'utf8' });
+  assert.equal(a.status, 0, a.stdout + a.stderr);
+  assert.match(a.stdout, /Recipes: 05-health, 09-inventory, 11-shop, 23-hud, 13-save-load, 35-sfx-variants, 24-enemy-ai/);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(v.status, 0, v.stdout);
+  assert.match(v.stdout, /PASS scenarios \(3\/3 passing\)/);
 });
 
 test('e2e: scaffold → brief → git commit → doctor DONE → verify PASS', { skip, timeout: 900000 }, () => {

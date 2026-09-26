@@ -38,10 +38,13 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Dowód: Pong zbudowany pluginem w 3 fazach (docs/dogfood/pong.md) — metoda złapała regres i usterkę wizualną
 - [ ] Werdykt gracza z bramek fazy 2 i 3 Ponga + nagranie meczu (czeka na człowieka)
 
-## Etap 4 — Wiedza, fala 05
-- [ ] Dokumentacja Godota w wersji przypiętej (gałąź 4.7, nie rozwojowa)
-- [ ] Biblioteka przepisów mechanik (~45): problem, scena, kod GDScript 4, test, pułapki, źródło
-- [ ] Pułapki Godota (`_process` vs `_physics_process`, współdzielone Resources, zmiany 3→4, warstwy kolizji…)
+## Etap 4 — Wiedza, fala 05 (0.5.0 — w toku)
+- [x] Dokumentacja Godota w wersji przypiętej (gałąź 4.7) — w BAZA-AI (fala 05) + referencja zmian 4.4–4.7 z oficjalnych przewodników migracji
+- [x] Biblioteka przepisów mechanik: 35 z 98 testami GUT i 11 scenariuszami; `gb recipe list/add` kopiuje je z testami do gry (dowód e2e)
+- [ ] Kolejne przepisy do ~45: AnimationTree, multiplayer, checkpointy, ruchome platformy, dash/knockback, minimapa, dostępność
+- [x] Pułapki Godota — `skills/game-implement/godot-pitfalls.md` (zmierzone, z poprawkami)
+- [x] Audio: skill `game-audio`, przepisy 34–35, `gb shot --movie` z pomiarem dźwięku; fala 05 biblioteki (paczki CC0/MIT/CC-BY, licencje)
+- [x] Z Claude Code Game Studios (MIT): dowód wizualny „Run result” w game-implement, zrzuty przez Movie Maker
 - [ ] Teoria projektowania (MDA, pętle, flow, krzywe trudności, game feel, level design, playtesty)
 - [ ] Dokumentacja GUT/gdUnit4, platform (itch/butler, web, Android), pipeline assetów (Blender→glTF, Aseprite, LDtk/Tiled)
 - [ ] Gry referencyjne open source w Godocie (MIT, z testami) zindeksowane

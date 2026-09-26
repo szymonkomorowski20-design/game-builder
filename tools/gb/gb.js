@@ -53,6 +53,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   export [--preset "Web"]  export presets from export_presets.cfg (templates must be installed)
  Setup (plugin copy of gb)
   scaffold …  ·  harness install  ·  tests install [gut]  ·  doctor
+  recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
@@ -439,16 +440,82 @@ function imgDiff(ctx, a, b, diffOut, tolerance) {
   return m ? { sizeMatch: m[1] === 'true', differing: Number(m[2]), total: Number(m[3]), ratio: Number(m[4]) } : null;
 }
 
-function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0.01, tolerance = 0.1 } = {}) {
-  if (!hasHarness(ctx.dir)) return { step: 'shot', status: 'fail', reasons: ['gb_harness not installed'], ms: 0, errors: [], warnings: [] };
+/** Peak level of a PCM/float WAV in dBFS (-Infinity = digital silence). Null when the file is not a WAV we can read. */
+function wavPeakDb(file) {
+  let b;
+  try { b = fs.readFileSync(file); } catch { return null; }
+  if (b.length < 44 || b.toString('ascii', 0, 4) !== 'RIFF' || b.toString('ascii', 8, 12) !== 'WAVE') return null;
+  let fmt = null, off = 12;
+  while (off + 8 <= b.length) {
+    const id = b.toString('ascii', off, off + 4), size = b.readUInt32LE(off + 4), body = off + 8;
+    if (id === 'fmt ') fmt = { format: b.readUInt16LE(body), bits: b.readUInt16LE(body + 14) };
+    if (id === 'data' && fmt) {
+      const end = Math.min(body + size, b.length);
+      let peak = 0;
+      if (fmt.format === 3 && fmt.bits === 32) for (let i = body; i + 4 <= end; i += 4) peak = Math.max(peak, Math.abs(b.readFloatLE(i)));
+      else if (fmt.bits === 16) for (let i = body; i + 2 <= end; i += 2) peak = Math.max(peak, Math.abs(b.readInt16LE(i)) / 32768);
+      else if (fmt.bits === 32) for (let i = body; i + 4 <= end; i += 4) peak = Math.max(peak, Math.abs(b.readInt32LE(i)) / 2147483648);
+      else return null;
+      return peak > 0 ? 20 * Math.log10(peak) : -Infinity;
+    }
+    off = body + size + (size % 2);
+  }
+  return null;
+}
+
+/**
+ * Screenshot through Godot's Movie Maker (--write-movie): no harness or game code needed. Writes N frames,
+ * keeps the last one as <name>.png and the recorded audio as <name>.wav. Needs a window (not headless).
+ */
+function movieCapture(ctx, { name, frames, scene }) {
   const shotsDir = path.join(ctx.outDir, 'shots');
+  const tmp = path.join(shotsDir, `_movie_${name}`);
+  fs.rmSync(tmp, { recursive: true, force: true });
+  fs.mkdirSync(tmp, { recursive: true });
+  const args = ['--path', ctx.dir, '--write-movie', path.join(tmp, `${name}.png`), '--quit-after', String(frames)];
+  if (scene) args.push(scene);
+  const r = runGodot(ctx.bin, args, ctx.dir, ctx.timeouts.run);
+  const re = new RegExp(`^${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\d{8}\\.png$`);
+  const pngs = fs.readdirSync(tmp).filter((f) => re.test(f)).sort();
+  let file = null, audio = null;
+  if (pngs.length) {
+    file = path.join(shotsDir, `${name}.png`);
+    fs.copyFileSync(path.join(tmp, pngs[pngs.length - 1]), file);
+  }
+  const wav = path.join(tmp, `${name}.wav`);
+  if (fs.existsSync(wav)) {
+    audio = path.join(shotsDir, `${name}.wav`);
+    fs.copyFileSync(wav, audio);
+  }
+  fs.rmSync(tmp, { recursive: true, force: true });
+  return { r, file, audio, frames: pngs.length };
+}
+
+function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0.01, tolerance = 0.1, movie = false } = {}) {
+  const shotsDir = path.join(ctx.outDir, 'shots');
+  const useMovie = movie || !hasHarness(ctx.dir);
   const t0 = Date.now();
-  const r = gameRun(ctx, { window: true, scene, cap: frames + 5, userArgs: [`--gb-shot=${frames}:${name}`, `--gb-out=${shotsDir}`] });
-  const m = /GB_SHOT name=\S+ path=(.+?) size=(\d+)x(\d+) err=(\d+)/.exec(r.log);
-  const res = stepResult('shot', r, { name, frames }, ctx.ignores);
-  res.ms = Date.now() - t0;
-  if (!m || m[4] !== '0') { res.status = 'fail'; res.reasons.push('no screenshot written (needs a desktop session with a window)'); return res; }
-  res.file = m[1];
+  let res;
+  if (useMovie) {
+    fs.mkdirSync(shotsDir, { recursive: true });
+    const m = movieCapture(ctx, { name, frames, scene });
+    res = stepResult('shot', m.r, { name, frames, method: 'movie' }, ctx.ignores);
+    res.ms = Date.now() - t0;
+    if (!m.file) { res.status = 'fail'; res.reasons.push('Movie Maker wrote no frames (needs a desktop session with a window)'); return res; }
+    res.file = m.file;
+    if (m.audio) {
+      res.audio = m.audio;
+      const db = wavPeakDb(m.audio);
+      res.audioPeakDb = db === null ? null : (Number.isFinite(db) ? Math.round(db * 10) / 10 : '-inf');
+    }
+  } else {
+    const r = gameRun(ctx, { window: true, scene, cap: frames + 5, userArgs: [`--gb-shot=${frames}:${name}`, `--gb-out=${shotsDir}`] });
+    const m = /GB_SHOT name=\S+ path=(.+?) size=(\d+)x(\d+) err=(\d+)/.exec(r.log);
+    res = stepResult('shot', r, { name, frames, method: 'harness' }, ctx.ignores);
+    res.ms = Date.now() - t0;
+    if (!m || m[4] !== '0') { res.status = 'fail'; res.reasons.push('no screenshot written (needs a desktop session with a window)'); return res; }
+    res.file = m[1];
+  }
   const baseDir = path.join(ctx.dir, 'tests', 'baselines');
   const baseline = path.join(baseDir, `${name}.png`);
   if (accept) {
@@ -611,6 +678,7 @@ function parseArgs(argv) {
     else if (a === '--seconds') opts.seconds = Number(argv[++i]);
     else if (a === '--compare') opts.compare = true;
     else if (a === '--accept') opts.accept = true;
+    else if (a === '--movie') opts.movie = true;
     else if (a === '--threshold') opts.threshold = Number(argv[++i]);
     else if (a === '--preset') opts.preset = argv[++i];
     else if (a === '--headless') opts.headless = true;
@@ -647,7 +715,7 @@ function printStep(s) {
   else if (s.step === 'test' && s.totals) extra = ` (${s.framework}: ${s.totals.passing}/${s.totals.tests} passing)`;
   else if (s.framework) extra = ` (${s.framework})`;
   else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
-  else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''})`;
+  else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${(s.diff.ratio * 100).toFixed(2)}% differ` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
   else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
   else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output})`;
   process.stdout.write(`${tag} ${s.step}${extra} — ${s.ms} ms${s.reasons.length ? ' — ' + s.reasons.join('; ') : ''}\n`);
@@ -671,6 +739,32 @@ function writeReport(dir, report) {
   }
 }
 
+function cmdRecipe(opts) {
+  const root = path.join(PLUGIN_ROOT, 'recipes');
+  if (!fs.existsSync(path.join(root, 'README.md'))) throw new UserError('recipes/ not found — run the plugin copy: node <plugin>/tools/gb/gb.js recipe …');
+  const R = require('./recipe.js');
+  const sub = opts._.shift();
+  if (sub === 'list') {
+    const info = R.catalog(root);
+    if (opts.json) { process.stdout.write(JSON.stringify(info, null, 2) + '\n'); return 0; }
+    for (const [d, v] of Object.entries(info)) process.stdout.write(`${d.padEnd(28)} ${v.title}${v.deps.length ? `  (needs ${v.deps.join(', ')})` : ''}\n`);
+    process.stdout.write(`\nDetails: ${path.join(root, 'README.md')}\n`);
+    return 0;
+  }
+  if (sub === 'add') {
+    if (!opts._.length) throw new UserError('Usage: gb recipe add <NN|name> [more…] --path <game>');
+    const dir = findProjectDir(opts.path || process.cwd());
+    if (!dir) throw new UserError('No project.godot found (use --path).');
+    const r = R.add(root, dir, opts._);
+    process.stdout.write(`Recipes: ${r.recipes.join(', ')}\n`);
+    for (const f of r.added) process.stdout.write(`  + ${f}\n`);
+    for (const f of r.skipped) process.stdout.write(`  = ${f} (exists — not overwritten)\n`);
+    process.stdout.write('Next: read each recipes/<NN>/README.md (Tuning, Pitfalls), then gb verify.\n');
+    return 0;
+  }
+  throw new UserError('Usage: gb recipe list | gb recipe add <NN|name…> --path <game>');
+}
+
 function main(argv) {
   // kb/assets pass their flags straight through to the knowledge-base search.
   if (argv[0] === 'kb') return kbSearch(argv.slice(1));
@@ -678,6 +772,7 @@ function main(argv) {
   if (argv[0] === 'scaffold') return cmdScaffold(argv.slice(1));
   if (argv[0] === 'tools' && argv[1] === 'update') return cmdToolsUpdate(parseArgs(argv.slice(2)));
   if (argv[0] === 'doctor') return cmdDoctor(parseArgs(argv.slice(1)));
+  if (argv[0] === 'recipe') return cmdRecipe(parseArgs(argv.slice(1)));
   const opts = parseArgs(argv);
   const cmd = opts._.shift();
   if (!cmd || cmd === 'help' || cmd === '--help' || cmd === '-h') {
@@ -721,7 +816,7 @@ function main(argv) {
   else if (cmd === 'test') steps = [stepTest(ctx)];
   else if (cmd === 'scenario') steps = [stepScenarios(ctx, { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold || 0.01 })];
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
-  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01 })];
+  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold || 0.01, movie: !!opts.movie })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
   else if (cmd === 'export') steps = stepExport(ctx, opts.preset);
   else if (cmd === 'verify') {
@@ -903,7 +998,7 @@ function safeRead(f) {
   }
 }
 
-module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, versionFromName };
+module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, versionFromName, wavPeakDb };
 
 if (require.main === module) {
   try {

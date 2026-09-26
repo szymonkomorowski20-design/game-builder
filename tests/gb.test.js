@@ -58,6 +58,28 @@ test('candidateBinaries: GODOT_BIN wins, console builds rank first, newer first'
   assert.deepEqual(scanned, ['Godot_v4.7.2-stable_win64_console.exe', 'Godot_v4.7.2-stable_win64.exe', 'Godot_v4.3-stable_win64.exe']);
 });
 
+function wav16(samples) {
+  const data = Buffer.alloc(samples.length * 2);
+  samples.forEach((s, i) => data.writeInt16LE(s, i * 2));
+  const h = Buffer.alloc(44);
+  h.write('RIFF', 0); h.writeUInt32LE(36 + data.length, 4); h.write('WAVE', 8);
+  h.write('fmt ', 12); h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22);
+  h.writeUInt32LE(44100, 24); h.writeUInt32LE(88200, 28); h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34);
+  h.write('data', 36); h.writeUInt32LE(data.length, 40);
+  return Buffer.concat([h, data]);
+}
+
+test('wavPeakDb: silence is -Infinity, half scale is about -6 dBFS, non-WAV is null', () => {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-wav-'));
+  fs.writeFileSync(path.join(d, 'silent.wav'), wav16(new Array(100).fill(0)));
+  fs.writeFileSync(path.join(d, 'half.wav'), wav16([0, 16384, -16384, 8000]));
+  fs.writeFileSync(path.join(d, 'x.wav'), 'not a wav');
+  assert.equal(gb.wavPeakDb(path.join(d, 'silent.wav')), -Infinity);
+  assert.ok(Math.abs(gb.wavPeakDb(path.join(d, 'half.wav')) + 6.02) < 0.05);
+  assert.equal(gb.wavPeakDb(path.join(d, 'x.wav')), null);
+  assert.equal(gb.wavPeakDb(path.join(d, 'missing.wav')), null);
+});
+
 test('detectTestFramework finds GUT and gdUnit4', () => {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-'));
   assert.equal(gb.detectTestFramework(d), null);
