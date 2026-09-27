@@ -34,7 +34,7 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 ## Phase gate (binary)
 1. Run every Done-when command from the spec; paste outputs into the spec's phase **Evidence**.
 2. `gb doctor` has no MISS.
-3. **Independent review** — spawn the `game-builder:game-checker` agent with ONLY: the diff range (`git diff <phase-start>...HEAD`), the spec path, the frozen test-plan path. Not your summary, not your reasoning. CHANGES-REQUIRED → fix and re-run the checker; NITS → fix or record in backlog.
+3. **Independent review** — spawn the `game-builder:game-checker` agent with ONLY: the diff range (`git diff <phase-start>...HEAD`, or `git diff --cached <phase-start>` while nothing is committed — stage the spec's Evidence and the run log first: the checker sees only the diff, and evidence written after staging is invisible to it), the spec path, the frozen test-plan path. Not your summary, not your reasoning. CHANGES-REQUIRED → fix and re-run the checker; NITS → fix or record in backlog.
 4. **Machine playtest** — spawn `game-builder:game-playtester` with the spec path and phase: it runs the game, captures shots/audio, looks at them and returns a `Run result` per Done-when item plus the questions for the human. Any NOT VERIFIED → fix before the human plays.
 5. **Playtest gate** (if marked): follow `.ai/checklists/playtest.md` — tell the human how to run it (F5 in the editor, or `gb export` build), what to try (3–5 things) and the current Tuning values. **Stop and wait** for their verdict: keep / tweak / cut per mechanic. Record it in the spec with date and commit.
 6. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
@@ -45,6 +45,7 @@ Change only Tuning-table values (exported vars/resources), update the table in t
 
 ## Replays and baselines after intended changes
 A replay or screenshot that stops matching after a change is **either a regression or an intended change**. Never re-record or re-accept to make it green on your own: show the human what changed (expected vs actual state / the diff image) and let them decide; then they re-record or you re-accept with their go-ahead.
+A baseline that contains changing text (a HUD with "1/5", a move counter) stops matching whenever that text changes — in Lodowy Loch adding floors 6–10 turned "Piętro 1/5" into "1/10" and broke all six board baselines. Keep counters out of baseline shots where you can, and when an intended text change breaks them, show the diff image and ask; do not re-accept.
 A **first** baseline for a new screen is different: accept it after you have opened the shot and described it in the Run result — the human sees it at the gate. A compare that passes still prints how many pixels differ: a non-zero count after a visual change means the baseline no longer shows the game — tell the human, as above.
 
 ## Keeping the repo's tools current

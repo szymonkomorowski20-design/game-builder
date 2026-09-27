@@ -4,7 +4,7 @@ Built with game-builder 0.2.0 → 0.3.0 following the skills only: `gb scaffold`
 local spec-writing (game-spec method) → game-pre-implement report → test plan frozen before code →
 game-implement, three phases, RED first, `gb verify` every step, detection proofs → human playtest gates.
 
-Repo: `Desktop/gb-pong` (local git; commits 50da709 → 0767d5b).
+Repo: `Desktop/gry testowe/gb-pong` (local git; commits 50da709 → 993abcd).
 
 ## Result
 | Phase | Evidence | Playtest gate |

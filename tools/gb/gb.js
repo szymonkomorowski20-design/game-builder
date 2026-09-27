@@ -48,7 +48,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   replay [tests/replays/x.json]                      replay recordings headless; final state must match
  Play & measure (open a window)
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
-  shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0]
+  shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0] [--tolerance 0.02]
   perf [--seconds 10] [--scene X] [--headless]      frame/process/physics time, nodes, draw calls vs .ai/perf-budget.json
   export [--preset "Web"] [--smoke]   export presets (templates must be installed); --smoke runs the exported desktop build headless and fails on errors in its log
  Setup (plugin copy of gb)
@@ -296,7 +296,8 @@ function stepTest(ctx) {
     }
     return n;
   };
-  if (countTests(path.join(ctx.dir, 'tests')) === 0) return { step: 'test', status: 'skip', reasons: ['no test_*.gd files under tests/'], ms: 0, framework: fw, errors: [], warnings: [] };
+  const onDisk = countTests(path.join(ctx.dir, 'tests'));
+  if (onDisk === 0) return { step: 'test', status: 'skip', reasons: ['no test_*.gd files under tests/'], ms: 0, framework: fw, errors: [], warnings: [] };
   const junit = path.join(ctx.outDir, 'junit.xml');
   fs.mkdirSync(ctx.outDir, { recursive: true });
   const args = fw === 'gut'
@@ -314,6 +315,11 @@ function stepTest(ctx) {
   if (fw === 'gut' && !totals) { status = 'fail'; reasons.push('no GUT summary in the log (run did not finish, or a test script failed to parse)'); }
   if (totals && totals.failing > 0) reasons.push(`${totals.failing} failing of ${totals.tests}`);
   if (totals && totals.tests === 0) reasons.push('no tests found in res://tests (files must be test_*.gd extending GutTest)');
+  // GUT skips a test script that fails to load (parse error, unknown class) and still reports the rest as
+  // passing — without this check `gb test` was green while a whole test file never ran.
+  const unloaded = [...new Set([...r.log.matchAll(/Failed to load script "(res:\/\/tests\/[^"]*test_[^"]*\.gd)"/g)].map((m) => m[1]))];
+  if (unloaded.length) { status = 'fail'; reasons.push(`${unloaded.length} test script(s) did not load and were skipped: ${unloaded.join(', ')}`); }
+  else if (fw === 'gut' && totals && totals.scripts !== null && totals.scripts < onDisk) { status = 'fail'; reasons.push(`GUT ran ${totals.scripts} of ${onDisk} test_*.gd files — the others did not load`); }
   const failingTests = [...r.log.matchAll(/^- (test_\S+)\s*\n\s*\[Failed\]:\s*(.*)$/gm)].map((m) => ({ kind: 'TEST FAILED', message: `${m[1]}: ${m[2].trim()}`, at: null }));
   return { step: 'test', status, reasons, ms: r.ms, framework: fw, totals, junit: fs.existsSync(junit) ? junit : null, errors: failingTests.concat(status === 'fail' && !failingTests.length ? parsed.errors : []).slice(0, 50), warnings: [], logTail: r.log.split(/\r?\n/).filter(Boolean).slice(-15) };
 }
@@ -374,7 +380,7 @@ function ensureBaselineDir(baseDir) {
 }
 
 /** Scenario screenshots (GB_SHOT lines) → accepted into tests/baselines/, or compared against them. */
-function handleScenarioShots(ctx, log, { accept, compare, threshold = 0, tolerance = 0.1 }) {
+function handleScenarioShots(ctx, log, { accept, compare, threshold = 0, tolerance = 0.02 }) {
   const out = [];
   const baseDir = path.join(ctx.dir, 'tests', 'baselines');
   for (const m of log.matchAll(/GB_SHOT name=(\S+) path=(.+?) size=\d+x\d+ err=0/g)) {
@@ -395,7 +401,7 @@ function handleScenarioShots(ctx, log, { accept, compare, threshold = 0, toleran
   return out;
 }
 
-function stepScenarios(ctx, { only = null, window = false, accept = false, compare = false, threshold = 0, endShot = false } = {}) {
+function stepScenarios(ctx, { only = null, window = false, accept = false, compare = false, threshold = 0, tolerance = 0.02, endShot = false } = {}) {
   const dir = path.join(ctx.dir, 'tests', 'scenarios');
   const files = only ? [only] : listFiles(dir, /\.gd$/).map((f) => `res://tests/scenarios/${f}`);
   if (!files.length) return { step: 'scenarios', status: 'skip', reasons: ['no scenarios in tests/scenarios/'], ms: 0, errors: [], warnings: [] };
@@ -408,7 +414,7 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
     const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
     const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
     const logErrors = parseLog(r.log, ctx.ignores).errors;
-    const shots = window || endShot ? handleScenarioShots(ctx, r.log, { accept, compare, threshold }) : [];
+    const shots = window || endShot ? handleScenarioShots(ctx, r.log, { accept, compare, threshold, tolerance }) : [];
     for (const s of shots.filter((x) => x.result === 'FAIL')) errors.push({ kind: 'SHOT', message: `${path.basename(f)}: ${s.name} — ${s.reason}`, at: null });
     const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut && !shots.some((x) => x.result === 'FAIL');
     results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots });
@@ -540,7 +546,7 @@ function movieCapture(ctx, { name, frames, scene }) {
   return { r, file, audio, frames: pngs.length };
 }
 
-function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0, tolerance = 0.1, movie = false } = {}) {
+function stepShot(ctx, { name = 'main', frames = 60, scene = null, compare = false, accept = false, threshold = 0, tolerance = 0.02, movie = false } = {}) {
   const shotsDir = path.join(ctx.outDir, 'shots');
   const useMovie = movie || !hasHarness(ctx.dir);
   const t0 = Date.now();
@@ -756,6 +762,7 @@ function parseArgs(argv) {
     else if (a === '--movie') opts.movie = true;
     else if (a === '--smoke') opts.smoke = true;
     else if (a === '--threshold') opts.threshold = Number(argv[++i]);
+    else if (a === '--tolerance') opts.tolerance = Number(argv[++i]);
     else if (a === '--preset') opts.preset = argv[++i];
     else if (a === '--headless') opts.headless = true;
     else if (a === '--quick') opts.quick = true;
@@ -917,11 +924,11 @@ function main(argv) {
   else if (cmd === 'run') steps = [stepRun(ctx, opts.frames || 120, opts.scene)];
   else if (cmd === 'test') steps = [stepTest(ctx)];
   else if (cmd === 'scenario') {
-    const so = { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold ?? 0, endShot: !!opts.endShot };
+    const so = { only: opts._[0] || null, window: !!opts.window || !!opts.accept || !!opts.compare, accept: !!opts.accept, compare: !!opts.compare, threshold: opts.threshold ?? 0, tolerance: opts.tolerance ?? 0.02, endShot: !!opts.endShot };
     steps = [opts.repeat > 1 ? stepScenariosRepeat(ctx, so, opts.repeat) : stepScenarios(ctx, so)];
   }
   else if (cmd === 'replay') steps = [stepReplays(ctx, { only: opts._[0] || null })];
-  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold ?? 0, movie: !!opts.movie })];
+  else if (cmd === 'shot') steps = [stepShot(ctx, { name: opts.name || 'main', frames: opts.frames || 60, scene: opts.scene, compare: !!opts.compare, accept: !!opts.accept, threshold: opts.threshold ?? 0, tolerance: opts.tolerance ?? 0.02, movie: !!opts.movie })];
   else if (cmd === 'perf') steps = [stepPerf(ctx, { name: opts.name || 'perf', seconds: opts.seconds || 10, scene: opts.scene, window: !opts.headless })];
   else if (cmd === 'export') steps = stepExport(ctx, opts.preset, !!opts.smoke);
   else if (cmd === 'verify') {

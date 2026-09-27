@@ -170,6 +170,20 @@ test('tests install gut → gb test reports passing/failing counts from GUT', { 
   assert.match(r.stdout, /test_deliberately_failing/);
 });
 
+test('a test script that does not parse fails gb test instead of being skipped by GUT', { skip, timeout: 900000 }, () => {
+  if (!fs.existsSync(path.join(game(), 'addons', 'gut'))) gb('tests', 'install', '--path', game());
+  const bad = path.join(game(), 'tests', 'unit', 'test_unparsable.gd');
+  fs.mkdirSync(path.dirname(bad), { recursive: true });
+  fs.writeFileSync(bad, 'extends GutTest\n\n\nfunc test_uses_a_class_that_does_not_exist() -> void:\n\tvar p := NoSuchClass.new()\n\tassert_not_null(p)\n');
+  try {
+    const r = gb('test', '--path', game());
+    assert.equal(r.status, 1, r.stdout);
+    assert.match(r.stdout, /did not load and were skipped: res:\/\/tests\/unit\/test_unparsable\.gd/);
+  } finally {
+    fs.rmSync(bad);
+  }
+});
+
 test('scenario --repeat names a scenario that passes only sometimes as FLAKY', { skip, timeout: 900000 }, () => {
   const d = game();
   // Deterministic "flake": a counter in user:// makes every other run fail.
@@ -189,7 +203,7 @@ test('shot + compare against an accepted baseline (opens a window)', { skip: ski
   assert.equal(gb('shot', '--name', 't', '--accept', '--path', game()).status, 0);
   const r = gb('shot', '--name', 't', '--compare', '--path', game());
   assert.equal(r.status, 0, r.stdout);
-  assert.match(r.stdout, /0\.00% differ/);
+  assert.match(r.stdout, /0 px \(0\.00%\) differ from the baseline/);
 });
 
 test('shot --movie works without the harness and reports whether the game made sound (opens a window)', { skip: skip || (process.env.GB_TEST_WINDOW ? false : 'set GB_TEST_WINDOW=1'), timeout: 600000 }, () => {

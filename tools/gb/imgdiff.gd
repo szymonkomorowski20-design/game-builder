@@ -1,6 +1,6 @@
 extends SceneTree
 ## game-builder: compare two PNG screenshots (runs headless — image maths needs no window).
-## User args (after `--`): --a=<abs png> --b=<abs png> --diff=<abs png to write> [--tolerance=0.1]
+## User args (after `--`): --a=<abs png> --b=<abs png> --diff=<abs png to write> [--tolerance=0.02]
 ## A pixel "differs" when any RGBA channel differs by more than `tolerance` (0..1).
 ## Output: GB_IMGDIFF size_match=<bool> differing=<n> total=<n> ratio=<float>
 
@@ -11,7 +11,7 @@ func _init() -> void:
 		var kv := arg.trim_prefix("--").split("=", true, 1)
 		if kv.size() == 2:
 			a[kv[0]] = kv[1]
-	var tol := float(a.get("tolerance", "0.1"))
+	var tol := float(a.get("tolerance", "0.02"))
 	var ia := Image.load_from_file(String(a.get("a", "")))
 	var ib := Image.load_from_file(String(a.get("b", "")))
 	if ia == null or ib == null:

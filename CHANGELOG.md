@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.12.1 — 2026-09-27 · fixes found while building Lodowy Loch (stage 8)
+- `gb test` failed open: GUT skips a test script that does not load (parse error, unknown class) and reports the rest as passing, so a test file written before its code showed "PASS 2/2". A test script that fails to load — or fewer scripts run than `test_*.gd` files on disk — now fails the step, naming the file. Proven: the new verification test fails on 0.12.0 and passes now.
+- Screenshot compare, per-pixel tolerance 0.1 → 0.02, with a new `--tolerance` flag. Identical runs are bit-exact: 0 px differed even at tolerance 0. At 0.1, an ice-tint change that altered 23 % of the screen compared as "0 px differ". Proven in Lodowy Loch: the same change now fails with 5–15 % of pixels per floor, and reverting it gives 0 px.
+- The opt-in windowed test "shot + compare" still expected the pre-0.12.0 message and failed; 0.12.0 was released without running it. It now matches "0 px (0.00%) differ from the baseline". Before a release that touches shots, run `GB_TEST_WINDOW=1 npm test` too.
+- game-implement: baselines containing changing text (HUD counters) break on every text change. Keep counters out of baseline shots; when an intended text change breaks them, show the diff and ask. Found in Lodowy Loch: 5 → 10 floors turned "1/5" into "1/10" in six baselines.
+- game-implement phase gate: with commits made only on the human's word, the checker reviews the staged diff (`git diff --cached <phase-start>`). Stage the spec's Evidence and the run log before spawning it. In Lodowy Loch phase 1 the evidence was written after staging, and the checker correctly returned CHANGES-REQUIRED for the missing proof.
+
 ## 0.12.0 — 2026-09-26 · all 20 evals run, fixes from what they found (stage 7)
 - **Evals run** on fresh Sonnet subagents in fixture repos, graded against their binary expectations using the artifacts on disk (`evals/RESULTS-2026-09-26.md`, `Last run:` in every eval): **20 / 20 PASS** in the end; first runs 16 PASS, 3 FAIL, 1 invalid fixture. Limits stated there: stand-in runs (skills named in the prompt, not auto-triggered), one model, one run each.
 - **Fixed from the three failures:**
