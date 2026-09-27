@@ -69,6 +69,18 @@ function wav16(samples) {
   return Buffer.concat([h, data]);
 }
 
+test('exportBytes: a web export counts index.html + .wasm + .pck + .js, not the 5 kB page alone', () => {
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-exp-'));
+  fs.writeFileSync(path.join(d, 'index.html'), Buffer.alloc(5000));
+  fs.writeFileSync(path.join(d, 'index.wasm'), Buffer.alloc(40000));
+  fs.writeFileSync(path.join(d, 'index.pck'), Buffer.alloc(600));
+  fs.writeFileSync(path.join(d, 'index.audio.worklet.js'), Buffer.alloc(70));
+  fs.writeFileSync(path.join(d, 'other.txt'), Buffer.alloc(99999));   // not part of this export
+  assert.equal(gb.exportBytes(path.join(d, 'index.html')), 45670);
+  fs.writeFileSync(path.join(d, 'Game.exe'), Buffer.alloc(1000));
+  assert.equal(gb.exportBytes(path.join(d, 'Game.exe')), 1000);
+});
+
 test('kbVersionNote: warns when kb results quote the master Godot docs next to the pinned 4.7 copy', () => {
   const master = 'Plik lokalny: zrodla/godotengine--godot-docs/tutorials/export/exporting_for_android.rst — linie 1–10';
   const pinned = 'Plik lokalny: fala-05/zrodla/godotengine--godot-docs-4.7/tutorials/export/exporting_for_android.rst';

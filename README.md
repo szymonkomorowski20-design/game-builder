@@ -8,18 +8,25 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 > Żadnego kodu bez zatwierdzonego speca · kluczowe decyzje podejmujesz Ty · „gotowe” = zielony `gb verify` ·
 > każda faza da się uruchomić i zagrać · bramek między fazami nie przeskakujemy.
 
-## Co jest w wersji 0.3.0 (etapy 1–3)
+**Instrukcja obsługi po polsku:** [gry-wiedza/game-builder/INSTRUKCJA.md](https://github.com/szymonkomorowski20-design/gry-wiedza/blob/main/game-builder/INSTRUKCJA.md).
+Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
+wydanie.
+
+## Co jest w środku (0.17.0)
 
 | Element | Do czego służy |
 |---|---|
-| `game-start` | Pokazuje mapę całego procesu i kieruje: nowa gra / nowa mechanika / przejęcie istniejącego projektu |
-| `game-discovery` | Wywiad o koncepcji: fantazja gracza, pętla rozgrywki, platforma, sterowanie, grafika; **drabina zakresu** tnie „MMO z otwartym światem” do pierwszej grywalnej wersji |
-| `game-bootstrap` | Karty decyzji (silnik, renderer, rozdzielczość, testy, LFS) → `gb scaffold` generuje projekt → `gb doctor` + `gb verify` dowodzą, że działa |
-| `game-spec` · `game-pre-implement` · `game-implement` · `game-test` | Spec z tabelą strojenia i bramkami gry → raport gotowości → budowa faza po fazie (test najpierw, `gb verify` po każdym kroku, zrzuty oglądane) → testy wyprowadzone ze speca i zatwierdzone przez Ciebie |
-| `gb` (narzędzie) | Import, sprawdzenie wszystkich skryptów, uruchomienie gry bez okna i czytanie logu, testy, raport; wyszukiwanie w bazie gry-wiedza |
-| Hooki sesji | Na starcie każdej sesji w repo gry: gdzie jesteśmy w procesie, wynik ostatniej weryfikacji, twarde zasady |
+| Proces: `game-start` → `game-discovery` → `game-bootstrap` → `game-spec` → `game-pre-implement` → `game-implement` → `game-test` → `game-playtest` → `game-release` | od pomysłu (wywiad z drabiną zakresu) przez karty decyzji i spec z tabelą strojenia do budowy faza po fazie i wydania; na każdej bramce grasz Ty |
+| Skille tematyczne | audio, assety, balans, level design, game feel, AI postaci, narracja, zapis gry, wydajność, UI i dostępność, efekty, aktualizacja silnika, diagnoza błędów |
+| Role (agenci) | `game-checker` (niezależna recenzja zmian), `game-tester` (testy ze speca przed kodem), `game-playtester` (uruchamia grę, ogląda zrzuty, słucha dźwięku), `game-researcher` (fakty ze źródłami) |
+| 6 szablonów gier | `platformer-2d`, `topdown-2d`, `grid-puzzle-2d`, `cards-2d`, `platformer-3d`, `fps-3d`, każdy z testami i botem-graczem |
+| 46 przepisów | przetestowane mechaniki (ruch, walka, ekwipunek, zapis, dialogi, AI, nawigacja, audio, multiplayer, kamera 3D, animacje, minimapa…), `gb recipe add` |
+| Narzędzie `gb` | weryfikacja gry bez okna, bot-gracz, nagrania Twojej gry jako testy, zrzuty z wzorcami, wydajność, eksport z próbnym uruchomieniem, licencje/napisy, wyszukiwanie w gry-wiedza |
+| Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy/lekki), twarde zasady |
+| `docs/` | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne, tryb pracy |
 
-Pełny plan etapów 2–8: [ROADMAP.md](ROADMAP.md).
+Dowód działania: gra *Lodowy Loch* zbudowana pluginem w 5 fazach i przejdziona przez człowieka
+([raport](docs/dogfood/lodowy-loch.md)). Plan i stan: [ROADMAP.md](ROADMAP.md), zmiany: [CHANGELOG.md](CHANGELOG.md).
 
 ## Instalacja
 

@@ -682,6 +682,20 @@ function templatesDir(version) {
   return path.join(base, 'export_templates', version.replace(/\.official.*$/, '').replace(/^(\d+\.\d+\.\d+|\d+\.\d+)\.(\w+)$/, '$1.$2'));
 }
 
+/** Size of one export: the main file plus its siblings sharing the stem (web: index.wasm/.pck/.js…; desktop: a separate .pck). */
+function exportBytes(out) {
+  const dir = path.dirname(out);
+  const main = path.basename(out);
+  const stem = path.basename(out, path.extname(out));
+  let total = 0;
+  for (const f of fs.readdirSync(dir)) {
+    if (f !== main && !f.startsWith(`${stem}.`)) continue;
+    const st = fs.statSync(path.join(dir, f));
+    if (st.isFile()) total += st.size;
+  }
+  return total;
+}
+
 function stepExport(ctx, presetName, smoke = false) {
   const presets = parsePresets(safeRead(path.join(ctx.dir, 'export_presets.cfg')));
   if (!presets.length) return [{ step: 'export', status: 'fail', reasons: ['no export_presets.cfg (scaffold creates Windows Desktop + Web)'], ms: 0, errors: [], warnings: [] }];
@@ -698,7 +712,7 @@ function stepExport(ctx, presetName, smoke = false) {
       res.missingTemplates = true;
     }
     if (res.status === 'ok' && (!fs.existsSync(out) || fs.statSync(out).size === 0)) { res.status = 'fail'; res.reasons.push(`no output at ${out}`); }
-    if (res.status === 'ok') res.bytes = fs.statSync(out).size;
+    if (res.status === 'ok') res.bytes = exportBytes(out);
     if (res.status === 'ok' && smoke) res.smoke = smokeRun(ctx, out, p.platform);
     if (res.smoke && res.smoke.status === 'fail') { res.status = 'fail'; res.reasons.push(...res.smoke.reasons); }
     return res;
@@ -1133,7 +1147,7 @@ function safeRead(f) {
   }
 }
 
-module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, kbVersionNote, versionFromName, wavPeakDb, TOOL_FILES };
+module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, kbVersionNote, exportBytes, versionFromName, wavPeakDb, TOOL_FILES };
 
 if (require.main === module) {
   try {

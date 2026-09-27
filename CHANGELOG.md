@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.17.1 — 2026-09-27 · export size, README
+- `gb export` reports the size of the whole export. For the web that is index.html plus .wasm, .pck and .js: Lodowy Loch showed 0.0 MB, now 40.5 MB. There is a test for it (`exportBytes`).
+- README describes 0.17.0 and links the Polish manual in gry-wiedza (`game-builder/INSTRUKCJA.md`).
+- Web export templates 4.7.2 installed on the dev machine (official release, SHA512 checked). The Lodowy Loch web build exports and runs in a browser: title, floor 1, a slide with the keyboard.
+
 ## 0.17.0 — 2026-09-27 · design theory, platforms, asset pipeline, starter packs, reference games, light process
 - **`docs/design-theory.md`:** nine ideas, each with a source and its place at our gates:
   - MDA;
