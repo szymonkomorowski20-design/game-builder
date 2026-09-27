@@ -1,8 +1,8 @@
 # Process weight — standard, light or autonomous
 
-A game repo runs one of two process weights, set in its `AGENTS.md` (`- Process: standard` or `- Process:
-light`). The session router reads it at every session start and after every context reset, and prints the matching
-pipeline. **The human chooses it** at bootstrap (a decision card in `game-bootstrap/decision-engine.md`) and may
+A game repo runs one of three process weights, set in its `AGENTS.md` (`- Process: standard`, `- Process: light`
+or `- Process: autonomous`). The session router reads it at every session start and after every context reset, and
+prints the matching pipeline. **The human chooses it** at bootstrap (a decision card in `game-bootstrap/decision-engine.md`) and may
 change it later. Record the change in the Decisions Ledger. Standard is the default and matches the behaviour of
 every earlier release.
 
@@ -13,8 +13,9 @@ roles. Even so, every phase spawns a checker and a playtester, and every non-tri
 For a jam game, a toy or a learning project that is overhead. **Our own cost comparison hasn't been measured yet**:
 an eval run of the same briefs in both modes is on the roadmap.
 
-## Never relaxed (all modes)
-The spine: **SPEC → HUMAN → VERIFIED → PLAYABLE → GATED**.
+## Never relaxed (standard and light)
+The spine: **SPEC → HUMAN → VERIFIED → PLAYABLE → GATED**. Autonomous keeps every rule here except the two it moves
+to the end of the game (who decides and approves, and when the human plays), as its table below says.
 - A spec on disk, approved by the human, before gameplay code (light allows the short form below).
 - The human owns every key decision: the decision cards stay.
 - `gb verify` green, with the output shown. `Run result` lines carry evidence paths, and shots are looked at, not

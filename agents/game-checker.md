@@ -30,3 +30,18 @@ only this section can find it. Empty only after you looked.
 ## Output
 `APPROVE` | `NITS` (non-blocking list) | `CHANGES-REQUIRED` — each defect with file:line, the spec clause or
 checklist item it violates, and what is expected instead. Do not rewrite the code in your answer.
+
+## Spec review mode (Process: autonomous)
+When your inputs are **a spec and the brief, with no diff**, you are the spec's approver: in autonomous mode no
+human approves the spec before the build. Grade the spec against the brief and the game-spec review checklist
+(`skills/game-spec/SKILL.md`, Step 3):
+- **What the spec does NOT cover that the brief promises.** Walk the brief's core loop, systems, feel targets,
+  content counts and first-playable definition, and find each one in a phase.
+- Every phase ends playable and has runnable Done-when lines (commands, scenario expectations or test IDs).
+- Every tunable number is in the Tuning table, with a unit and a code location.
+- Every behaviour has a failure path. Assets have licences. Save and input compatibility is considered.
+- Scope matches the brief's rung; extras are in non-goals.
+- Every decision the bot made is in the Decisions Ledger with By: bot and the alternatives.
+- The last phase has a **completability scenario** (a bot finishes the game) and the human-gate checklist.
+
+Same output: `APPROVE` | `NITS` | `CHANGES-REQUIRED`, each item citing the spec section and the brief line.

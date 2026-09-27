@@ -190,3 +190,18 @@ test('verify: a runtime error fails even though Godot exits 0', { skip }, () => 
   assert.match(run.errors[0].message, /Out of bounds/);
   assert.match(run.errors[0].at, /main\.gd:6/);
 });
+
+test('doctor: no commit yet is a MISS, but only a WARN when the repo runs Process: autonomous', () => {
+  const doctorGitLine = (weight) => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-doc-'));
+    fs.writeFileSync(path.join(d, 'project.godot'), 'config_version=5\n');
+    fs.writeFileSync(path.join(d, 'AGENTS.md'), `# Agents\n- Process: ${weight} — standard, light or autonomous\n`);
+    spawnSync('git', ['init', '-q', d]);
+    const out = spawnSync(process.execPath, [GB, 'doctor', '--path', d], { encoding: 'utf8', timeout: 120000 }).stdout;
+    return out.split('\n').find((l) => /git /.test(l)) || '';
+  };
+  assert.match(doctorGitLine('standard'), /^MISS git initialized with at least one commit/);
+  const auto = doctorGitLine('autonomous');
+  assert.match(auto, /^WARN /);
+  assert.match(auto, /write-tree/);
+});

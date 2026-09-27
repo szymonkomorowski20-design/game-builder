@@ -1153,7 +1153,11 @@ function cmdDoctor(opts) {
   }
 
   const git = spawnSync('git', ['-C', dir, 'rev-list', '--count', 'HEAD'], { encoding: 'utf8' });
+  const isRepo = spawnSync('git', ['-C', dir, 'rev-parse', '--git-dir'], { encoding: 'utf8' }).status === 0;
+  const autonomous = /^\s*-\s*Process:\s*autonomous\b/m.test(agents || '');
   if (git.status === 0 && Number(git.stdout.trim()) > 0) ok(`git initialized, ${git.stdout.trim()} commit(s)`);
+  // Autonomous mode: commits wait for the human's word at the end; phases keep `git write-tree` snapshots.
+  else if (isRepo && autonomous) warn('git initialized, no commit yet (Process: autonomous: commits wait for the human; keep a git write-tree snapshot per phase in STATUS.md)');
   else miss('git initialized with at least one commit');
 
   const want = projectEngineVersion(pg);

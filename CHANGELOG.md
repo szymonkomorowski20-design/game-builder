@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.21.1 — 2026-09-27 · fixes found by the proof game
+- `gb doctor` in a `Process: autonomous` repo reports "no commit yet" as a WARN pointing to the `git write-tree` snapshots,
+  not a MISS: there commits wait for the human, so the MISS blocked every phase gate. Tested.
+- `game-checker` has a **spec review mode** (a spec and the brief, no diff), because autonomous mode has it approve the
+  spec before any code.
+- `docs/rigor.md` says three weights, and names which rules autonomous moves to the end.
+
 ## 0.21.0 — 2026-09-27 · autonomous process mode
 - **`- Process: autonomous`**, for when the human chooses it ("zrób sam", "prawie bez bramek"); the owner chose it for
   proof games:
