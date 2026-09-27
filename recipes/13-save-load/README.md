@@ -3,7 +3,7 @@
 **Problem:** saves outlive code. A renamed field or a crash during writing destroys players' progress — the worst bug a game can ship.
 
 **Solution:** JSON saves in `user://` with a `version` field; `load_save` runs migrations up to `CURRENT_VERSION`;
-writes go to `.tmp` and are renamed into place (atomic); corrupt / missing / too-new files return an explicit `Result`
+writes go to `.tmp` and are renamed into place; a `.tmp` left by a crash is recovered on load (renamed into place when the save is gone, dropped when it is unfinished or a good save exists); corrupt / missing / too-new files return an explicit `Result`
 so the game can tell the player instead of silently resetting. Each system contributes its own `to_dict()`
 (inventory 09, achievements 12) — the save file is their composition.
 

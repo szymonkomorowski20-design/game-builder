@@ -39,7 +39,21 @@ static func save(path: String, data: Dictionary) -> Error:
 
 
 ## Returns {"result": Result, "data": Dictionary}
+## An interrupted save can leave <path>.tmp behind:
+## - the save is gone (the crash hit between removing the old file and renaming the new one) → the .tmp is the newest
+##   complete write: it is renamed into place and loaded — unless it is itself unfinished (corrupt), then it is dropped;
+## - the save is still there → the .tmp is an unfinished write and is dropped; the last good save stays.
 static func load_save(path: String) -> Dictionary:
+	var tmp := path + ".tmp"
+	if FileAccess.file_exists(tmp):
+		if FileAccess.file_exists(path) or _read(tmp).result == Result.CORRUPT:
+			DirAccess.remove_absolute(tmp)
+		else:
+			DirAccess.rename_absolute(tmp, path)
+	return _read(path)
+
+
+static func _read(path: String) -> Dictionary:
 	if not FileAccess.file_exists(path):
 		return {"result": Result.MISSING, "data": {}}
 	# JSON instance, not JSON.parse_string: a corrupt save is an expected case, not an engine error to print.

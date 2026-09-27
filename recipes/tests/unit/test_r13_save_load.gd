@@ -59,3 +59,29 @@ func test_r13_overwrite_replaces_previous_save() -> void:
 	SaveSystem.save(p, {"player": {"coins": 1}})
 	SaveSystem.save(p, {"player": {"coins": 2}})
 	assert_eq(int(SaveSystem.load_save(p).data.player.coins), 2)
+
+
+func test_r13_crash_between_remove_and_rename_recovers_the_tmp() -> void:
+	# The old save is already removed, the new one sits complete in <path>.tmp.
+	var p := dir.path_join("slot.json")
+	_write("slot.json.tmp", '{"version": 2, "player": {"coins": 9}}')
+	var r := SaveSystem.load_save(p)
+	assert_eq(r.result, SaveSystem.Result.OK, "the complete .tmp is the save")
+	assert_eq(int(r.data.player.coins), 9)
+	assert_true(FileAccess.file_exists(p), "renamed into place")
+	assert_false(FileAccess.file_exists(p + ".tmp"))
+
+
+func test_r13_unfinished_tmp_next_to_a_good_save_is_dropped() -> void:
+	var p := dir.path_join("slot.json")
+	SaveSystem.save(p, {"player": {"coins": 1}})
+	_write("slot.json.tmp", '{"version": 2, "play')
+	assert_eq(int(SaveSystem.load_save(p).data.player.coins), 1, "the last good save stays")
+	assert_false(FileAccess.file_exists(p + ".tmp"), "the unfinished write is dropped")
+
+
+func test_r13_unfinished_tmp_alone_is_no_save() -> void:
+	var p := dir.path_join("slot.json")
+	_write("slot.json.tmp", '{"version": 2, "play')
+	assert_eq(SaveSystem.load_save(p).result, SaveSystem.Result.MISSING)
+	assert_false(FileAccess.file_exists(p + ".tmp"))

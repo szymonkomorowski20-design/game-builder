@@ -3,6 +3,7 @@ extends SceneTree
 ## format THIS Godot version expects). Idempotent.
 ## User args: --autoload=Name=res://path.gd      register an autoload (singleton) if absent
 ##            --enable-plugin=res://addons/x/plugin.cfg   add to editor_plugins/enabled if absent
+##            --set=section/key=value                     set a string setting (e.g. application/run/main_scene=res://x.tscn)
 ## Output: GB_SETTING changed=<n> err=<code>
 
 
@@ -14,6 +15,11 @@ func _init() -> void:
 			var key := "autoload/" + kv[0]
 			if not ProjectSettings.has_setting(key):
 				ProjectSettings.set_setting(key, "*" + kv[1])
+				changed += 1
+		elif arg.begins_with("--set="):
+			var kv := arg.trim_prefix("--set=").split("=", true, 1)
+			if kv.size() == 2 and ProjectSettings.get_setting(kv[0], null) != kv[1]:
+				ProjectSettings.set_setting(kv[0], kv[1])
 				changed += 1
 		elif arg.begins_with("--enable-plugin="):
 			var cfg := arg.trim_prefix("--enable-plugin=")

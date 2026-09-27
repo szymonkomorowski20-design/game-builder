@@ -247,9 +247,18 @@ function stepResult(name, r, extra = {}, ignores = []) {
   return { step: name, status, reasons, ms: r.ms, errors: parsed.errors.slice(0, 50), warnings: parsed.warnings.slice(0, 50), ...extra, logTail: r.log.split(/\r?\n/).filter(Boolean).slice(-15) };
 }
 
+// A script that preloads a file added outside the editor (a new .ogg/.png) is compiled during the same scan that
+// first imports that file, and fails with "has no resource loaders" — measured in Lodowy Loch (4.7.2): the second
+// import passes. Only that error triggers one retry, and the report says so.
+const IMPORT_ORDER_ERROR = /has no resource loaders \(unrecognized file extension\)/;
+
 function stepImport(ctx) {
-  const r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--import'], ctx.dir, ctx.timeouts.import);
-  return stepResult('import', r, {}, ctx.ignores);
+  let r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--import'], ctx.dir, ctx.timeouts.import);
+  const retried = IMPORT_ORDER_ERROR.test(r.log);
+  if (retried) r = runGodot(ctx.bin, ['--headless', '--path', ctx.dir, '--import'], ctx.dir, ctx.timeouts.import);
+  const res = stepResult('import', r, {}, ctx.ignores);
+  if (retried) res.reasons.push('imported twice: a script preloads files that were new to this import (first pass cannot compile it)');
+  return res;
 }
 
 function stepCheck(ctx) {

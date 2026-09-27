@@ -102,6 +102,9 @@ build/
 .claude/worktrees/
 .claude/status/
 .claude/settings.local.json
+
+# Windows: "2>nul" run inside Git Bash creates a real file named nul, which git cannot index
+nul
 `;
 
 function gitattributes(lfs) {

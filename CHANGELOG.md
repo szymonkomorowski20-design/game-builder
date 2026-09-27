@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.12.2 — 2026-09-27 · more fixes from Lodowy Loch (stage 8, phases 4–5)
+- Recipe 13 (versioned saves), interrupted writes. `save` writes `.tmp`, removes the old file, then renames. A
+  crash between the last two steps left only `.tmp`, and the next load reported MISSING, so the player lost
+  progress. The Lodowy Loch phase-5 checker caught it. `load_save` now renames a complete orphaned `.tmp` into place
+  and drops a `.tmp` that is unfinished or sits next to a good save. Three new tests; detection proven (without the
+  recovery, those three are red).
+- `gb import` / `gb verify` import twice when the first pass fails with "Preload file … has no resource loaders". A
+  script that preloads a file new to that import (an .ogg added outside the editor) cannot compile on the first pass,
+  and the second one passes (measured on 4.7.2). The report says "imported twice". Proven on a fresh scaffold with a
+  preloaded new .ogg: 0.12.1 fails the import, now it passes.
+- `tools/gb/project_setting.gd --set=section/key=value` sets any string setting through the engine, for example
+  `application/run/main_scene`. Needed when a game gains a title screen.
+- Scaffolded `.gitignore` ignores `nul`. In Lodowy Loch an agent ran `… 2>nul` inside Git Bash, which created a real file named `nul`, and `git add -A` then failed ("unable to index file 'nul'").
+
 ## 0.12.1 — 2026-09-27 · fixes found while building Lodowy Loch (stage 8)
 - `gb test` failed open: GUT skips a test script that does not load (parse error, unknown class) and reports the rest as passing, so a test file written before its code showed "PASS 2/2". A test script that fails to load — or fewer scripts run than `test_*.gd` files on disk — now fails the step, naming the file. Proven: the new verification test fails on 0.12.0 and passes now.
 - Screenshot compare, per-pixel tolerance 0.1 → 0.02, with a new `--tolerance` flag. Identical runs are bit-exact: 0 px differed even at tolerance 0. At 0.1, an ice-tint change that altered 23 % of the screen compared as "0 px differ". Proven in Lodowy Loch: the same change now fails with 5–15 % of pixels per floor, and reverting it gives 0 px.

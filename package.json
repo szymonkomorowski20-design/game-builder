@@ -1,6 +1,6 @@
 {
   "name": "game-builder",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "private": true,
   "description": "Agentic-first game development pipeline for Godot 4 (Claude Code plugin).",
   "scripts": {
