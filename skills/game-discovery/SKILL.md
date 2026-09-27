@@ -56,7 +56,7 @@ Write back a compact summary grouped by checklist area. Then — separately and 
 
 ```
 ## Decisions Ledger
-| Decision | Chosen | By | Rejected alternatives (why not) |
+| Decision | Choice | Decided by | Alternatives turned down, and why |
 |---|---|---|---|
 | Dimension / camera | 2D side view | user | top-down (their references are platformers) |
 | First playable scope | 1 arena, 1 enemy type, 3 min run | user | full campaign (unfinishable as a first step) |

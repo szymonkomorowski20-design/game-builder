@@ -69,6 +69,35 @@ function wav16(samples) {
   return Buffer.concat([h, data]);
 }
 
+test('gb doc: prints a knowledge document from the gry-wiedza clone, lists them, names the GitHub URL when missing', () => {
+  const clone = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-wiedza-'));
+  fs.mkdirSync(path.join(clone, 'wiedza'));
+  fs.writeFileSync(path.join(clone, 'wiedza', 'platforms.md'), '# Platforms — Web, itch.io, Android\nweb facts\n');
+  fs.writeFileSync(path.join(clone, 'wiedza', 'README.md'), '# index\n');
+  const env = { ...process.env, GAME_BUILDER_WIEDZA: clone };
+  const one = spawnSync(process.execPath, [GB, 'doc', 'platforms'], { encoding: 'utf8', env });
+  assert.equal(one.status, 0, one.stderr);
+  assert.match(one.stdout, /web facts/);
+  const list = spawnSync(process.execPath, [GB, 'doc'], { encoding: 'utf8', env });
+  assert.equal(list.status, 0);
+  assert.match(list.stdout, /platforms\s+Platforms — Web, itch\.io, Android/);
+  assert.doesNotMatch(list.stdout, /README/);
+  const missing = spawnSync(process.execPath, [GB, 'doc', 'nope'], { encoding: 'utf8', env });
+  assert.equal(missing.status, 3);
+  assert.match(missing.stderr, /github\.com\/szymonkomorowski20-design\/gry-wiedza\/blob\/main\/wiedza\/nope\.md/);
+});
+
+test('findWiedza: GAME_BUILDER_WIEDZA first, then the clone that holds BAZA-AI, then ~/Desktop/gry-wiedza', () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-home-'));
+  const clone = path.join(home, 'Desktop', 'gry-wiedza');
+  fs.mkdirSync(path.join(clone, 'wiedza'), { recursive: true });
+  assert.equal(gb.findWiedza({ env: {}, home }), clone);
+  const other = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-other-'));
+  fs.mkdirSync(path.join(other, 'wiedza'));
+  assert.equal(gb.findWiedza({ env: { GAME_BUILDER_WIEDZA: other }, home }), other);
+  assert.equal(gb.findWiedza({ env: {}, home: fs.mkdtempSync(path.join(os.tmpdir(), 'gb-empty-')) }), null);
+});
+
 test('exportBytes: a web export counts index.html + .wasm + .pck + .js, not the 5 kB page alone', () => {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-exp-'));
   fs.writeFileSync(path.join(d, 'index.html'), Buffer.alloc(5000));

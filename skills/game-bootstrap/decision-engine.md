@@ -40,7 +40,7 @@ Available templates (each: implemented spec, Tuning resource, unit tests + behav
 | Forward+ (`forward_plus`) | desktop 3D with modern lighting/effects | no web export; heavier GPU requirements |
 | Mobile (`mobile`) | Android/iOS 3D, or light 3D on desktop | some Forward+ effects missing |
 Default recommendation: 2D → Compatibility; 3D desktop-only → Forward+; anything with web → Compatibility.
-Show the platform's consequences from `<plugin>/docs/platforms.md` on the card: for web, no ENet (WebSocket/WebRTC only), audio without bus effects in Sample mode, saves in IndexedDB, mouse capture only after a click. For Android, the human installs the JDK and SDK; the Play Store needs an AAB (Gradle) and a release keystore.
+Show the platform's consequences from `gb doc platforms` (gry-wiedza) on the card: for web, no ENet (WebSocket/WebRTC only), audio without bus effects in Sample mode, saves in IndexedDB, mouse capture only after a click. For Android, the human installs the JDK and SDK; the Play Store needs an AAB (Gradle) and a release keystore.
 
 ## Q4 — Resolution & pixel art (decision for 2D)
 - Pixel art: low base resolution (320×180, 384×216, 480×270 — all scale cleanly to 1080p), viewport stretch, nearest filtering, pixel snap. `--pixel-art` sets these; the window opens at ×4.

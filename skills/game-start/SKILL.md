@@ -85,7 +85,7 @@ Detect from the filesystem and confirm if ambiguous — **trust the filesystem**
 
 ## Quick Reference
 
-| Phase | Skill | Route A (new) | Route B (feature) | Route C (adopt) | Gate |
+| Phase | Skill | A: new game | B: new mechanic | C: adopt a project | Gate to pass |
 |---|---|---|---|---|---|
 | 0 | — | map + route + engine + fog | map + route | map + route | route chosen |
 | 1 | `game-discovery` | new-game | feature | light | Brief confirmed |

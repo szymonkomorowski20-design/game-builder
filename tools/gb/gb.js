@@ -26,6 +26,7 @@
  *   test                  run GUT or gdUnit4 if installed (skip if neither is present)
  *   verify                import → check → run → test; writes .ai/verify/last.json
  *   kb <query...>         search the gry-wiedza knowledge base (BAZA-AI)
+ *   doc [name]            knowledge documents from the gry-wiedza clone (wiedza/): design theory, platforms…
  *   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
  * Common options: --path <project dir> (default: nearest dir with project.godot) · --json
  */
@@ -57,9 +58,10 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
+  doc [name]               knowledge documents in gry-wiedza/wiedza (no name: list) — design-theory, platforms, asset-pipeline, starter-packs, reference-games
   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
 Options: --path <project dir> (default: nearest dir with project.godot) · --json
-Env: GODOT_BIN (Godot executable; on Windows prefer *_console.exe) · GAME_BUILDER_KB (BAZA-AI folder)
+Env: GODOT_BIN (Godot executable; on Windows prefer *_console.exe) · GAME_BUILDER_KB (BAZA-AI folder) · GAME_BUILDER_WIEDZA (gry-wiedza clone for gb doc)
 `;
 
 const HERE = __dirname;
@@ -750,6 +752,47 @@ function findKnowledgeBase({ env = process.env, home = os.homedir() } = {}) {
   return c.find((d) => fs.existsSync(path.join(d, 'dla-ai', 'szukaj.mjs'))) || null;
 }
 
+const WIEDZA_URL = 'https://github.com/szymonkomorowski20-design/gry-wiedza/blob/main/wiedza';
+
+/**
+ * The gry-wiedza clone holding the knowledge documents (`wiedza/`): GAME_BUILDER_WIEDZA, else the clone that
+ * contains BAZA-AI, else ~/Desktop/gry-wiedza or ~/gry-wiedza. Null when none has a `wiedza/` folder.
+ */
+function findWiedza({ env = process.env, home = os.homedir() } = {}) {
+  const kb = findKnowledgeBase({ env, home });
+  const candidates = [env.GAME_BUILDER_WIEDZA, kb && path.dirname(kb), path.join(home, 'Desktop', 'gry-wiedza'), path.join(home, 'gry-wiedza')];
+  return candidates.filter(Boolean).find((d) => fs.existsSync(path.join(d, 'wiedza'))) || null;
+}
+
+/** gb doc [name] — the knowledge documents moved to gry-wiedza (design theory, platforms, asset pipeline…). */
+function docCommand(args) {
+  const name = (args[0] || '').replace(/\.md$/i, '');
+  const root = findWiedza();
+  if (!root) {
+    process.stderr.write(`gry-wiedza clone with a wiedza/ folder not found (set GAME_BUILDER_WIEDZA or clone the repo to ~/Desktop/gry-wiedza).\n` +
+      `Online: ${name ? `${WIEDZA_URL}/${name}.md` : WIEDZA_URL}\n`);
+    return 3;
+  }
+  const dir = path.join(root, 'wiedza');
+  if (!name) {
+    const docs = fs.readdirSync(dir).filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md').sort();
+    process.stdout.write(`Knowledge documents in ${dir} (gb doc <name>):\n`);
+    for (const f of docs) {
+      const title = ((safeRead(path.join(dir, f)) || '').match(/^#\s+(.+)$/m) || [, ''])[1];
+      process.stdout.write(`  ${f.replace(/\.md$/, '').padEnd(18)}${title}\n`);
+    }
+    return 0;
+  }
+  const text = safeRead(path.join(dir, `${name}.md`));
+  if (text === null) {
+    process.stderr.write(`No wiedza/${name}.md in ${root} (run \`gb doc\` for the list; pull the clone if it is new).\nOnline: ${WIEDZA_URL}/${name}.md\n`);
+    return 3;
+  }
+  process.stdout.write(text);
+  process.stdout.write(`\n<!-- source: ${path.join(dir, `${name}.md`)} (gry-wiedza, CC BY 4.0 unless the document says otherwise) -->\n`);
+  return 0;
+}
+
 /**
  * BAZA-AI holds two copies of the Godot docs: `zrodla/godotengine--godot-docs` (master, 4.8-dev at the time of
  * writing) and `fala-05/zrodla/godotengine--godot-docs-4.7` (the pinned version). Search results mix both, and
@@ -911,6 +954,7 @@ function cmdRecipe(opts) {
 function main(argv) {
   // kb/assets pass their flags straight through to the knowledge-base search.
   if (argv[0] === 'kb') return kbSearch(argv.slice(1));
+  if (argv[0] === 'doc') return docCommand(argv.slice(1));
   if (argv[0] === 'assets') return kbSearch(['--assety', ...argv.slice(1)]);
   if (argv[0] === 'scaffold') return cmdScaffold(argv.slice(1));
   if (argv[0] === 'tools' && argv[1] === 'update') return cmdToolsUpdate(parseArgs(argv.slice(2)));
@@ -1147,7 +1191,7 @@ function safeRead(f) {
   }
 }
 
-module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, kbVersionNote, exportBytes, versionFromName, wavPeakDb, TOOL_FILES };
+module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, findWiedza, kbVersionNote, exportBytes, versionFromName, wavPeakDb, TOOL_FILES };
 
 if (require.main === module) {
   try {

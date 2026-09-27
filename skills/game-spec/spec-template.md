@@ -57,7 +57,7 @@ Ladder rung: toy | first playable | vertical slice | content | polish
 - … (→ .ai/backlog.md)
 
 ## Decisions Ledger
-| Decision | Chosen | By | Rejected (why) |
+| Decision | Choice | Decided by | Turned down (why) |
 |---|---|---|---|
 
 ## Progress

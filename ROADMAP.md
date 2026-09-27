@@ -47,12 +47,14 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Pułapki Godota — `skills/game-implement/godot-pitfalls.md` (zmierzone, z poprawkami)
 - [x] Audio: skill `game-audio`, przepisy 34–35, `gb shot --movie` z pomiarem dźwięku; fala 05 biblioteki (paczki CC0/MIT/CC-BY, licencje)
 - [x] Z Claude Code Game Studios (MIT): dowód wizualny „Run result” w game-implement, zrzuty przez Movie Maker
-- [x] Teoria projektowania (0.17.0): `docs/design-theory.md` — MDA, pętle, decyzje, nauka, flow i krzywa trudności, game feel, level design, odbiorca, playtesty; każda idea ze źródłem i miejscem w bramkach (brief: docelowe doświadczenie, przegląd specu, raport playtestu, postmortem)
-- [x] Platformy (0.17.0): `docs/platforms.md` — web, itch.io + butler, Android wg dokumentacji gałęzi 4.7 (kopia master w BAZA-AI różni się dla Androida)
-- [x] Pipeline assetów (0.17.0): `docs/asset-pipeline.md` — obrazy/pixel art, audio, Blender→glTF, przyrostki nazw, edycje odporne na reimport, TileMapLayer, Aseprite Wizard / YATI / LDtk
+- [x] Teoria projektowania (0.17.0): `gry-wiedza/wiedza/design-theory.md` (`gb doc design-theory`) — MDA, pętle, decyzje, nauka, flow i krzywa trudności, game feel, level design, odbiorca, playtesty; każda idea ze źródłem i miejscem w bramkach (brief: docelowe doświadczenie, przegląd specu, raport playtestu, postmortem)
+- [x] Platformy (0.17.0): `gry-wiedza/wiedza/platforms.md` (`gb doc platforms`) — web, itch.io + butler, Android wg dokumentacji gałęzi 4.7 (kopia master w BAZA-AI różni się dla Androida)
+- [x] Pipeline assetów (0.17.0): `gry-wiedza/wiedza/asset-pipeline.md` (`gb doc asset-pipeline`) — obrazy/pixel art, audio, Blender→glTF, przyrostki nazw, edycje odporne na reimport, TileMapLayer, Aseprite Wizard / YATI / LDtk
 - [ ] gdUnit4: ścieżka `gb test` dla gdUnit4 nigdy nie uruchomiona (dodatek niezainstalowany) — sprawdzić, gdy ktoś go wybierze; GUT pokryty (game-test + gb)
-- [x] Gry referencyjne (0.17.0): `docs/reference-games.md` — 17 gier Godot 4 z licencjami kodu i assetów sprawdzonymi w repo; żadna nie ma testów automatycznych (ustalenie)
-- [x] Paczki startowe (0.17.0): `docs/starter-packs.md` — paczki z biblioteki per szablon, strony autorów do rejestru; luki: kafelki platformówki 2D z boku, czcionki bez polskich znaków (zmierzone)
+- [x] Gry referencyjne (0.17.0): `gry-wiedza/wiedza/reference-games.md` (`gb doc reference-games`) — 17 gier Godot 4 z licencjami kodu i assetów sprawdzonymi w repo; żadna nie ma testów automatycznych (ustalenie)
+- [x] Paczki startowe (0.17.0): `gry-wiedza/wiedza/starter-packs.md` (`gb doc starter-packs`) — paczki z biblioteki per szablon, strony autorów do rejestru; luki: kafelki platformówki 2D z boku, czcionki bez polskich znaków (zmierzone)
+
+- [x] Rozdział repozytoriów (0.18.0): wiedza w gry-wiedza (`wiedza/`, czytana przez `gb doc`), narzędzie i instrukcja w game-builder; licencje: `LICENSE` (zastrzeżona), `THIRD_PARTY_NOTICES.md`; hooki sesji przepisane od zera (wcześniej adaptacja Sailes)
 
 ## Etap 5 — Szablony startowe gier
 - [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy

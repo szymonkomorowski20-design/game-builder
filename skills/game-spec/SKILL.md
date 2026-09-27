@@ -53,7 +53,7 @@ Walk `spec-template.md` section by section. Rules per section:
 - [ ] Assets have licences; nothing from a "prototype only" source is planned for release.
 - [ ] Save/input/scene-path compatibility considered.
 - [ ] Scope matches the ladder rung; later ideas are in non-goals/backlog.
-- [ ] Design check (`<plugin>/docs/design-theory.md`): every mechanic serves the brief's target experience; positive loops are capped; every choice has a trade-off; each level/wave adds something new; the difficulty table rises with rests.
+- [ ] Design check (`gb doc design-theory` (gry-wiedza)): every mechanic serves the brief's target experience; positive loops are capped; every choice has a trade-off; each level/wave adds something new; the difficulty table rises with rests.
 
 ## Step 4 — Approval
 Show the human the spec (or its phase list + Tuning table + Open Questions resolved). On approval: `Status: approved`, commit (`spec: <title>`), hand to `game-pre-implement` (non-trivial) or `game-implement` (small).

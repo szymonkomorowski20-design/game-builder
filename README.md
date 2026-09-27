@@ -8,7 +8,7 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 > Żadnego kodu bez zatwierdzonego speca · kluczowe decyzje podejmujesz Ty · „gotowe” = zielony `gb verify` ·
 > każda faza da się uruchomić i zagrać · bramek między fazami nie przeskakujemy.
 
-**Instrukcja obsługi po polsku:** [gry-wiedza/game-builder/INSTRUKCJA.md](https://github.com/szymonkomorowski20-design/gry-wiedza/blob/main/game-builder/INSTRUKCJA.md).
+**Instrukcja obsługi po polsku:** [docs/INSTRUKCJA.md](docs/INSTRUKCJA.md).
 Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
 wydanie.
 
@@ -23,7 +23,8 @@ wydanie.
 | 46 przepisów | przetestowane mechaniki (ruch, walka, ekwipunek, zapis, dialogi, AI, nawigacja, audio, multiplayer, kamera 3D, animacje, minimapa…), `gb recipe add` |
 | Narzędzie `gb` | weryfikacja gry bez okna, bot-gracz, nagrania Twojej gry jako testy, zrzuty z wzorcami, wydajność, eksport z próbnym uruchomieniem, licencje/napisy, wyszukiwanie w gry-wiedza |
 | Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy/lekki), twarde zasady |
-| `docs/` | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne, tryb pracy |
+| `docs/` | instrukcja obsługi, tryb pracy (standardowy/lekki), moduły opcjonalne, raporty z budowy gier |
+| Wiedza (w repo [gry-wiedza](https://github.com/szymonkomorowski20-design/gry-wiedza), `gb doc <nazwa>`) | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne |
 
 Dowód działania: gra *Lodowy Loch* zbudowana pluginem w 5 fazach i przejdziona przez człowieka
 ([raport](docs/dogfood/lodowy-loch.md)). Plan i stan: [ROADMAP.md](ROADMAP.md), zmiany: [CHANGELOG.md](CHANGELOG.md).
@@ -44,7 +45,9 @@ albo w Claude Code:
 
 **B. Lokalnie (rozwój pluginu):** `/plugin marketplace add C:\ścieżka\do\game-builder`, potem `/plugin install game-builder@game-builder`.
 
-Zmienne środowiskowe (opcjonalne): `GODOT_BIN` — ścieżka do Godota, jeśli `gb` go nie znajdzie (szuka w PATH, na Pulpicie, w Pobranych, w typowych folderach) · `GAME_BUILDER_KB` — folder `BAZA-AI`, jeśli nie jest w `~/Desktop/gry-wiedza/BAZA-AI`.
+Zmienne środowiskowe (opcjonalne): `GODOT_BIN` — ścieżka do Godota, jeśli `gb` go nie znajdzie (szuka w PATH, na Pulpicie, w Pobranych, w typowych folderach) · `GAME_BUILDER_KB` — folder `BAZA-AI`, jeśli nie jest w `~/Desktop/gry-wiedza/BAZA-AI` · `GAME_BUILDER_WIEDZA` — kopia repo gry-wiedza (dla `gb doc`), jeśli nie jest w `~/Desktop/gry-wiedza`.
+
+**Licencja:** kod pluginu jest zastrzeżony ([LICENSE](LICENSE)); składniki innych autorów mają własne licencje ([THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)).
 
 ## Jak zacząć grę
 

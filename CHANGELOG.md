@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.18.0 — 2026-09-27 · knowledge moved to gry-wiedza, licences, hooks rewritten
+- **Split:** the tool stays here and the knowledge moved to the gry-wiedza repo.
+  - `design-theory`, `platforms`, `asset-pipeline`, `starter-packs` and `reference-games` now live in
+    `gry-wiedza/wiedza/`, with Godot-docs attribution (CC BY 3.0).
+  - New `gb doc [name]` reads them from the local gry-wiedza clone (`GAME_BUILDER_WIEDZA`, the clone holding
+    BAZA-AI, or `~/Desktop/gry-wiedza`). With no clone it names the GitHub URL. Tested.
+  - Skills point to `gb doc <name>`.
+  - The Polish manual moved the other way, from gry-wiedza to `docs/INSTRUKCJA.md`, because it describes the tool.
+- **Licences:** `LICENSE` (proprietary, all rights reserved, by the owner's decision) and `THIRD_PARTY_NOTICES.md`:
+  - GUT 9.7.1: MIT, vendored with its licence and copied into games with it;
+  - Claude Code Game Studios: MIT, adapted rules, full notice included;
+  - Godot docs: CC BY 3.0, summarised facts, attribution;
+  - Sailes app-builder: inspiration only.
+- **Hooks rewritten from scratch.** The session hooks had been adapted from Sailes app-builder (Sailes Tech, no
+  licence), and about 20 lines were verbatim. They are now new code with the same behaviour:
+  - `hooks/lib/game-repo.js` replaces `repo-state.js`;
+  - `session-router.js` replaces `workflow-router.js`;
+  - `version-check.js` replaces `framework-version-check.js`;
+  - the game templates' `guard-protected-paths.sh` now parses JSON with Node;
+  - `session-start.sh` was rewritten and now tolerates CRLF.
+
+  Decision-table headers were reworded. After the rewrite, the only line shared with sailes-app-builder 1.28.2
+  is a standard PowerShell invocation. Hook tests 12/12 and guard tests 8/8 pass;
+  the staleness warning was checked by hand.
+
 ## 0.17.1 — 2026-09-27 · export size, README
 - `gb export` reports the size of the whole export. For the web that is index.html plus .wasm, .pck and .js: Lodowy Loch showed 0.0 MB, now 40.5 MB. There is a test for it (`exportBytes`).
 - README describes 0.17.0 and links the Polish manual in gry-wiedza (`game-builder/INSTRUKCJA.md`).

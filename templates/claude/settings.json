@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/session-start.sh\""
+            "command": "sh \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.claude/hooks/session-start.sh\""
           }
         ]
       }
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/check-on-edit.sh\"",
+            "command": "sh \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.claude/hooks/check-on-edit.sh\"",
             "timeout": 60
           }
         ]
@@ -52,7 +52,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"$(git rev-parse --show-toplevel)/.claude/hooks/guard-protected-paths.sh\""
+            "command": "sh \"$(git rev-parse --show-toplevel 2>/dev/null || pwd)/.claude/hooks/guard-protected-paths.sh\""
           }
         ]
       }

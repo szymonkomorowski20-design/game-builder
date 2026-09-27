@@ -1,21 +1,22 @@
 #!/usr/bin/env sh
-# SessionStart (game repo): print session memory so "read STATE.md at session start" is enforced,
-# not remembered. Warns when the snapshot is older than the work in the history.
+# SessionStart (game repo): show the session memory, so reading .ai/STATE.md at the start of a session
+# happens every time instead of when someone remembers. Warns when the memory is older than the work.
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-STATE="$ROOT/.ai/STATE.md"
+MEMORY="$ROOT/.ai/STATE.md"
 
-cat "$STATE" 2>/dev/null
+if [ -f "$MEMORY" ]; then
+  cat "$MEMORY"
 
-# Staleness: commits since the recorded Last-commit that are NOT the snapshot's own write.
-if [ -f "$STATE" ]; then
-  claimed="$(sed -n 's/^[Ll]ast-commit:[[:space:]]*\([0-9a-fA-F]\{4,\}\).*/\1/p' "$STATE" | head -1)"
-  if [ -n "$claimed" ] && git -C "$ROOT" rev-parse --verify --quiet "$claimed^{commit}" >/dev/null 2>&1; then
-    total="$(git -C "$ROOT" rev-list --count "$claimed..HEAD" 2>/dev/null || echo 0)"
-    snaps="$(git -C "$ROOT" rev-list --count "$claimed..HEAD" -- .ai/STATE.md 2>/dev/null || echo 0)"
-    work=$((total - snaps))
-    if [ "$work" -gt 0 ]; then
-      echo "--- WARNING: .ai/STATE.md was written at $claimed; $work commit(s) of work came after it."
-      echo "    Verify before trusting it, and update it together with the history."
+  # STATE.md records the commit it describes ("Last-commit: <hash>"). Every later commit that did not
+  # itself update STATE.md is work the memory doesn't know about yet.
+  noted="$(grep -i -m 1 '^last-commit:' "$MEMORY" | tr -d '\r' | awk '{print $2}')"
+  if [ -n "$noted" ] && git -C "$ROOT" cat-file -e "$noted^{commit}" 2>/dev/null; then
+    since="$(git -C "$ROOT" log --format=%H "$noted..HEAD" 2>/dev/null | wc -l)"
+    updates="$(git -C "$ROOT" log --format=%H "$noted..HEAD" -- .ai/STATE.md 2>/dev/null | wc -l)"
+    unseen=$((since - updates))
+    if [ "$unseen" -gt 0 ]; then
+      echo "--- WARNING: .ai/STATE.md describes $noted, and $unseen commit(s) of work came after it."
+      echo "    Check it against the history before relying on it, and update it along with your work."
     fi
   fi
 fi

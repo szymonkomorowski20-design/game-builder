@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/framework-version-check.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/version-check.js\"",
             "timeout": 10
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/workflow-router.js\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/session-router.js\"",
             "timeout": 10
           }
         ]

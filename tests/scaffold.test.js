@@ -62,7 +62,7 @@ test('stamps AGENTS.md with the plugin version and fills every placeholder', () 
 });
 
 test('the spine in AGENTS.md template is byte-identical to the session router', () => {
-  const router = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'workflow-router.js'), 'utf8');
+  const router = fs.readFileSync(path.join(__dirname, '..', 'hooks', 'session-router.js'), 'utf8');
   const tpl = fs.readFileSync(path.join(__dirname, '..', 'templates', 'repo', 'AGENTS.md.tmpl'), 'utf8');
   const spine = /const SPINE = '([^']+)'/.exec(router)[1];
   assert.ok(tpl.includes(spine));

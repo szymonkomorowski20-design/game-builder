@@ -1,37 +1,45 @@
 #!/usr/bin/env sh
-# PreToolUse guard (game repo). Reads the tool-call JSON on stdin; blocks (exit 2 + reason on stderr)
-# when a call touches the protected surface. No jq — the two fields that matter are extracted with sed.
+# PreToolUse guard for a game repo. Claude Code sends the tool call as JSON on stdin; exiting with 2 and a
+# message on stderr stops the call and shows the message to the agent.
 #
-# Only the FIELD is inspected, never the whole payload: a Write whose CONTENT merely mentions
-# ".godot/" or "push --force" (AGENTS.md does both) must pass. Matching the raw payload blocks
-# documentation edits — a guard that cries wolf gets disabled.
-payload="$(cat)"
+# We look only at the `command` (Bash) and `file_path` (Edit/Write) fields — never at the whole payload —
+# so writing a document that merely MENTIONS ".godot/" or a force-push (AGENTS.md does) is allowed.
+# A guard that blocks harmless edits gets switched off, and then it protects nothing.
+input="$(cat)"
 
-block() { echo "BLOCKED by guard-protected-paths: $1" >&2; exit 2; }
-
-field() {
-  printf '%s' "$payload" | sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\(\([^\"\\\\]\|\\\\.\)*\)\".*/\1/p" | head -1
+deny() {
+  printf 'guard-protected-paths stopped this call: %s\n' "$1" >&2
+  exit 2
 }
 
-cmd="$(field command)"
-# JSON-escaped Windows separators (\\) → /
-fp="$(field file_path | sed 's#\\\\#/#g')"
+# tool_input.<name> as plain text, parsed as real JSON (Node is already required by gb; jq may be missing).
+tool_input() {
+  printf '%s' "$input" | node -e '
+    let raw = "";
+    process.stdin.on("data", (d) => (raw += d)).on("end", () => {
+      try {
+        const value = (JSON.parse(raw).tool_input || {})[process.argv[1]];
+        if (typeof value === "string") process.stdout.write(value);
+      } catch {}
+    });' "$1"
+}
 
-# --- Commands (Bash tool) ---
-case "$cmd" in
-  *'push --force'*|*'push -f'*)   block "force-push is denied (hard safety rules)";;
-  *'reset --hard'*)               block "reset --hard is denied — use git restore / git revert";;
-  *'butler push'*|*'steamcmd'*)   block "publishing a build needs the human's explicit approval of that release";;
+command_line="$(tool_input command)"
+# Windows paths → forward slashes, so one pattern matches both.
+target="$(tool_input file_path | tr '\\' '/')"
+
+# Shell commands with consequences only the human may choose.
+case "$command_line" in
+  *'push --force'* | *'push -f'*) deny "force-pushing rewrites shared history (hard safety rules)" ;;
+  *'reset --hard'*) deny "reset --hard throws work away — use git restore or git revert" ;;
+  *'butler push'* | *'steamcmd'*) deny "publishing a build needs the human's explicit go for that release" ;;
 esac
 
-# --- Paths (Edit/Write tools) ---
-case "$fp" in
-  */.godot/*|.godot/*)
-    block ".godot/ is Godot's cache — change the source asset or project setting instead";;
-  *.import)
-    block "*.import files are written by Godot's import dock — change import settings in the editor (or ask the human)";;
-  */.ai/specs/implemented/*|.ai/specs/implemented/*)
-    block "implemented specs are history — write a new spec instead";;
+# Files that are generated or closed.
+case "$target" in
+  */.godot/* | .godot/*) deny ".godot/ is Godot's cache — change the source asset or the project setting instead" ;;
+  *.import) deny "*.import files are written by Godot's import dock — change import settings in the editor (or ask the human)" ;;
+  */.ai/specs/implemented/* | .ai/specs/implemented/*) deny "implemented specs are history — write a new spec instead" ;;
 esac
 
 exit 0

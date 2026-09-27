@@ -11,8 +11,8 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
-const ROUTER = path.join(ROOT, 'hooks', 'workflow-router.js');
-const VERSION_CHECK = path.join(ROOT, 'hooks', 'framework-version-check.js');
+const ROUTER = path.join(ROOT, 'hooks', 'session-router.js');
+const VERSION_CHECK = path.join(ROOT, 'hooks', 'version-check.js');
 
 function repo(files) {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-hook-'));

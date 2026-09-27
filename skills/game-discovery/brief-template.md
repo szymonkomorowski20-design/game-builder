@@ -18,7 +18,7 @@ spec's context section (feature).
 {One sentence.}
 
 ## Target experience
-{1–2 of: sensation · fantasy · narrative · challenge · fellowship · discovery · expression · submission — in the player's words. Who it is for. See `<plugin>/docs/design-theory.md` §1, §8.}
+{1–2 of: sensation · fantasy · narrative · challenge · fellowship · discovery · expression · submission — in the player's words. Who it is for. See `gb doc design-theory` (gry-wiedza) §1, §8.}
 
 ## Core loop
 - Every ~10 s: {verb}
@@ -70,7 +70,7 @@ Done when: {the human's own success criterion}
 - {explicitly NOT in this game / not now — also copied to .ai/backlog.md}
 
 ## Decisions Ledger
-| Decision | Chosen | By | Rejected alternatives (why not) |
+| Decision | Choice | Decided by | Alternatives turned down, and why |
 |---|---|---|---|
 | {decision} | {option} | user | {option — why not} |
 
