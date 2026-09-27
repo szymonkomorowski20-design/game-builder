@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/targets/target.gd" id="1_target"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_target"]
+size = Vector3(1, 1, 0.3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_target"]
+size = Vector3(1, 1, 0.3)
+
+[sub_resource type="StandardMaterial3D" id="Mat_target"]
+albedo_color = Color(0.9, 0.3, 0.25, 1)
+
+[node name="Target" type="StaticBody3D" groups=["targets"]]
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("1_target")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_target")
+
+[node name="Look" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_target")
+surface_material_override/0 = SubResource("Mat_target")

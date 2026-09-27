@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="FpsTuning" format=3]
+
+[ext_resource type="Script" path="res://scripts/player/fps_tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+walk_speed = 6.0
+acceleration = 50.0
+friction = 60.0
+air_control = 0.5
+jump_height = 1.2
+time_to_apex = 0.35
+mouse_sensitivity = 0.0025
+stick_look_speed = 3.0
+min_pitch_deg = -85.0
+max_pitch_deg = 85.0
+fire_interval = 0.15
+damage = 1
+weapon_range = 60.0

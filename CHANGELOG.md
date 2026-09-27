@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.15.0 — 2026-09-27 · first-person shooter template, template input actions
+- `gb scaffold --template fps-3d`, green at scaffold time.
+  - Mouse look from `screen_relative` with a pitch clamp, and right-stick look.
+  - Movement relative to the view; jump.
+  - A hitscan weapon (`RayCast3D` masked to world + targets, so walls stop shots) with `fire_interval`, `damage`
+    and `weapon_range` in `FpsTuning`.
+  - 5 targets with health: one moving, one behind cover. Clear the arena to win.
+  - A crosshair HUD; Esc frees the mouse.
+  - 6 unit tests and scenarios F1–F6 plus smoke, stable over 10 repeats.
+- Detection proven:
+  - no fire interval → F4 red (60 shots/s instead of ~7);
+  - a ray that ignores walls → F5 red (the hidden target takes damage);
+  - mouse look from `relative` → F1 red.
+- Templates can declare their own input actions in `template.json` `"actions"`: keys by name, mouse buttons,
+  joypad buttons and axes. Scaffold passes them to `setup_input.gd --extra-actions=…`, so Godot still writes the
+  input map. fps-3d uses this for `shoot` (LMB / F / right trigger) and `look_*` (right stick). The e2e test checks
+  that `shoot` is on mouse button 1.
+- The screenshots showed an oversized box gun, which was shrunk.
+
 ## 0.14.0 — 2026-09-27 · recipes 40–43
 - **40 orbit camera 3D:**
   - `OrbitCamera`: yaw rig, pitch child, spring arm. Mouse (while captured) or the optional

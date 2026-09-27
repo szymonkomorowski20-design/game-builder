@@ -18,7 +18,7 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Testy: 43 (gb jednostkowe + integracyjne na prawdziwym Godocie, hooki, strażnik, scaffold, e2e bootstrap, higiena wydania)
 - [x] `claude plugin validate` przechodzi (manifest, marketplace, frontmatter skilli)
 - [x] Evale: 5 scenariuszy napisanych
-- [ ] Evale uruchomione na świeżych subagentach (wymaga zgody na uruchamianie subagentów)
+- [x] Evale uruchomione na świeżych subagentach — zrobione w etapie 7 (evals/RESULTS-2026-09-26.md)
 
 ## Etap 2 — Warstwa weryfikacji ✅ (0.2.0)
 - [x] GUT 9.7.1 dołączony do pluginu i instalowany przez `gb` (scaffold / `tests install`), `gb test` z podsumowaniem i JUnit; gdUnit4 tylko wykrywany (instalacja ręczna)
@@ -58,7 +58,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Karty (0.11.0): walka karciana, energia, zamiary przeciwnika, dane kart, 11 testów (z kontraktem balansu) + 4 scenariusze
 - [x] 3D: szablon `platformer-3d` (0.13.0) — ruch i skok w 3D, kamera na sprężynie przed ścianami, monety → meta; 7 scenariuszy D1–D7 + testy jednostkowe, Forward+ i Jolt
 - [x] 3D: kamera orbitująca myszą/gałką — przepis 40 (0.14.0)
-- [ ] 3D: szablon strzelanki TPS/FPS
+- [x] 3D: szablon strzelanki `fps-3d` (0.15.0) — widok z pierwszej osoby, strzał natychmiastowy, cele; szablony mogą dodawać własne akcje (strzał pod myszą)
+- [ ] 3D: strzelanka z trzeciej osoby — do złożenia z platformer-3d + przepis 40 + broń z fps-3d, gdy gra tego potrzebuje
 
 ## Etap 6 — Role i pozostałe skille ✅ (0.6.0–0.8.0)
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement

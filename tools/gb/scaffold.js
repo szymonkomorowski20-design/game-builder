@@ -326,9 +326,18 @@ function scaffold(o, { runGodot = null, dryRun = false } = {}) {
     else fs.writeFileSync(dst, f.content);
   }
   if (!dryRun && runGodot) {
-    const r = runGodot(['--headless', '--path', o.dir, '--script', path.join(o.dir, 'tools', 'gb', 'setup_input.gd')]);
+    const args = ['--headless', '--path', o.dir, '--script', path.join(o.dir, 'tools', 'gb', 'setup_input.gd')];
+    // A template can declare its own actions (e.g. shoot on the left mouse button); Godot still writes them.
+    let extra = null;
+    if (o.templateInfo && o.templateInfo.actions) {
+      extra = path.join(require('os').tmpdir(), `gb-actions-${process.pid}-${Date.now()}.json`);
+      fs.writeFileSync(extra, JSON.stringify(o.templateInfo.actions));
+      args.push('--', `--extra-actions=${extra}`);
+    }
+    const r = runGodot(args);
+    if (extra) fs.rmSync(extra, { force: true });
     const m = /GB_INPUT_DONE added=(\d+) err=(\d+)/.exec(r);
-    report.push(m ? `INPUT   ${m[1]} default action(s) added via Godot (existing actions untouched)` : 'FAIL    input actions: setup_input.gd did not report — run it manually');
+    report.push(m ? `INPUT   ${m[1]} action(s) added via Godot (existing actions untouched)` : 'FAIL    input actions: setup_input.gd did not report — run it manually');
   }
   return report;
 }

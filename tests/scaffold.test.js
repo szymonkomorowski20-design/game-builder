@@ -270,6 +270,20 @@ test('e2e: platformer-3d template passes its own 8 scenarios and unit tests out 
   assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
 });
 
+test('e2e: fps-3d template adds its own input actions (shoot on the mouse) and passes its scenarios out of the box', { skip, timeout: 900000 }, () => {
+  const dir = path.join(tmp(), 'fps');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'FPS', '--template', 'fps-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /INPUT {3}12 action\(s\) added via Godot/);
+  const pg = fs.readFileSync(path.join(dir, 'project.godot'), 'utf8');
+  assert.match(pg, /^shoot=\{[\s\S]*?InputEventMouseButton[\s\S]*?"button_index":1/m, 'shoot is on the left mouse button');
+  assert.match(pg, /^look_right=\{/m);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(v.status, 0, v.stdout);
+  assert.match(v.stdout, /PASS scenarios \(7\/7 passing\)/);
+  assert.match(v.stdout, /PASS test \(gut: 6\/6 passing\)/);
+});
+
 test('e2e: recipes copied into a fresh game (with dependencies) pass gb verify there', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'rg');
   const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'RG', '--dim', '2d'], { encoding: 'utf8', timeout: 600000 });
@@ -287,7 +301,7 @@ test('e2e: scaffold → brief → git commit → doctor DONE → verify PASS', {
   const run = (args, cwd = dir) => spawnSync(process.execPath, [GB, ...args], { cwd, encoding: 'utf8', timeout: 600000 });
   const s = run(['scaffold', '--dir', dir, '--name', 'E2E', '--dim', '2d', '--pixel-art'], os.tmpdir());
   assert.equal(s.status, 0, s.stdout + s.stderr);
-  assert.match(s.stdout, /INPUT {3}7 default action/);
+  assert.match(s.stdout, /INPUT {3}7 action\(s\) added via Godot/);
 
   let d = run(['doctor']);
   assert.equal(d.status, 1, 'doctor must not pass before the brief and the first commit');

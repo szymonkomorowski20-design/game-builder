@@ -1,0 +1,17 @@
+{
+  "name": "fps-3d",
+  "description": "First-person shooter starter: mouse look (screen_relative, pitch clamp) and right-stick look, movement relative to where you look, jump; hitscan weapon with fire interval, damage and range from a tuning resource; targets with health (one moving, one behind a wall); win when all are down; crosshair HUD; 7 behaviour scenarios + unit tests.",
+  "dim": "3d",
+  "main_scene": "res://scenes/arena/arena.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut",
+  "actions": {
+    "shoot": { "keys": ["F"], "mouse": [1], "joy_axis": [5, 1.0] },
+    "look_left": { "joy_axis": [2, -1.0] },
+    "look_right": { "joy_axis": [2, 1.0] },
+    "look_up": { "joy_axis": [3, -1.0] },
+    "look_down": { "joy_axis": [3, 1.0] }
+  }
+}
