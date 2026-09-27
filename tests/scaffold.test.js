@@ -95,7 +95,10 @@ test('process weight: standard by default; --rigor light goes to AGENTS.md and A
   sc.scaffold(l);
   assert.match(fs.readFileSync(path.join(l.dir, 'AGENTS.md'), 'utf8'), /^- Process: light\b/m);
   assert.match(fs.readFileSync(path.join(l.dir, '.ai', 'adr', 'ADR-001-engine-and-setup.md'), 'utf8'), /Process weight: light/);
-  assert.throws(() => sc.parseScaffoldArgs(['--rigor', 'turbo']), /--rigor must be standard or light/);
+  const a = opts(['--rigor', 'autonomous']);
+  sc.scaffold(a);
+  assert.match(fs.readFileSync(path.join(a.dir, 'AGENTS.md'), 'utf8'), /^- Process: autonomous\b/m);
+  assert.throws(() => sc.parseScaffoldArgs(['--rigor', 'turbo']), /--rigor must be standard, light or autonomous/);
 });
 
 test('credits: CREDITS.md from the register; NC/unknown/proprietary licences and missing files fail', () => {

@@ -70,6 +70,7 @@ Recommend LFS when the brief expects >~300 MB of assets or large 3D/audio source
 |---|---|---|
 | **Standard** (default) | a checker and a playtester agent at every phase gate; readiness report per spec; the full paper trail | slower and costlier per phase |
 | Light | a short spec, one checker per spec, your own Run result instead of the playtester agent, a human gate at least at the end of each spec | problems found later, so a late fix costs more; not for saves, multiplayer or release |
+| Autonomous | you play only the finished game; the bot decides with the recommended options (recorded for your review), the checker approves the spec, and machine gates run between phases, including "a bot can finish it" | decisions you might have made differently, and feel judged only at the end. Only when the human asks for it |
 Recommend light for a jam, a toy, a learning project or a one-mechanic experiment (the brief's "why" and deadline answer this). Recommend standard for anything meant for players. The spine never changes. Details: `<plugin>/docs/rigor.md`.
 
 ## Q8 — Optional modules (activate only when the brief needs them)

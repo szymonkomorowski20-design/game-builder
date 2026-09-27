@@ -42,6 +42,8 @@ Walk `spec-template.md` section by section. Rules per section:
 - **Non-goals** + backlog entries.
 - **Decisions Ledger** for decisions made in this spec.
 
+**Process: autonomous** (AGENTS.md): write the full spec. Resolve Open Questions yourself with recorded decisions (By: bot). Approval comes from a fresh `game-builder:game-checker` given only the spec and the brief; CHANGES-REQUIRED means fix it and review again. Then set `Status: approved (checker)`. The human reviews it at the end (`<plugin>/docs/rigor.md`).
+
 **Process: light** (AGENTS.md): a **short spec** is enough. It has goal, non-goals, the Tuning table, a Done-when list (commands + expected results), the tests per Done-when and at most 2 phases, each still ending playable. Open Questions are still resolved with the human, and the review checklist below still applies (`<plugin>/docs/rigor.md`).
 
 ## Step 3 — Review checklist (run before asking for approval)

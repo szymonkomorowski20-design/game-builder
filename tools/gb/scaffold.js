@@ -387,7 +387,7 @@ function parseScaffoldArgs(argv) {
   o.renderer = o.renderer || (o.dim === '3d' ? 'forward_plus' : 'gl_compatibility');
   if (!RENDERERS[o.renderer]) throw new Error(`scaffold: --renderer must be one of ${Object.keys(RENDERERS).join(', ')}`);
   if (!['gut', 'gdunit4', 'none'].includes(o.tests)) throw new Error('scaffold: --tests must be gut, gdunit4 or none');
-  if (!['standard', 'light'].includes(o.rigor)) throw new Error('scaffold: --rigor must be standard or light');
+  if (!['standard', 'light', 'autonomous'].includes(o.rigor)) throw new Error('scaffold: --rigor must be standard, light or autonomous');
   o.width = o.width || (o.pixelArt ? 320 : 1280);
   o.height = o.height || (o.pixelArt ? 180 : 720);
   o.name = o.name || path.basename(o.dir);

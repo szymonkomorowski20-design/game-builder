@@ -64,7 +64,7 @@ function processWeight(root) {
   const hit = agents === null ? null : agents.match(/^- Process:\s*([A-Za-z-]+)/m);
   if (!hit) return { weight: 'standard', unknown: null };
   const word = hit[1].toLowerCase();
-  return word === 'standard' || word === 'light' ? { weight: word, unknown: null } : { weight: 'standard', unknown: hit[1] };
+  return ['standard', 'light', 'autonomous'].includes(word) ? { weight: word, unknown: null } : { weight: 'standard', unknown: hit[1] };
 }
 
 /** Markdown work items in a folder, oldest name first; READMEs and templates are not work items. */

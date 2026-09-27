@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.21.0 — 2026-09-27 · autonomous process mode
+- **`- Process: autonomous`**, for when the human chooses it ("zrób sam", "prawie bez bramek"); the owner chose it for
+  proof games:
+  - the bot makes the key decisions with each card's recommended option and the genre doc, recording each in the
+    Decisions Ledger (By: bot, reason, alternatives);
+  - a fresh game-checker approves the spec against the brief;
+  - every phase has machine gates: `gb verify`, the checker, the playtester looking at shots, and a
+    **completability scenario** (a bot finishes the loop);
+  - the human plays the finished game with a checklist in STATUS.md.
+
+  Unchanged: safety, licences, paid generators only on the human's yes per batch, and commits only on the human's
+  word (per-phase `git write-tree` snapshots).
+- Where it lives:
+  - `gb scaffold --rigor autonomous`;
+  - the session router prints the autonomous pipeline and a PROCESS line;
+  - a bootstrap card option;
+  - notes in discovery, spec and implement;
+  - `docs/rigor.md`.
+
+  Tested (router and scaffold).
+
 ## 0.20.0 — 2026-09-27 · template action-roguelite-3d (Hades-like), gb check sees autoloads, templates built on recipes
 - **`gb scaffold --template action-roguelite-3d`** — an original Hades-like starter:
   - a hub with a training dummy, an upgrade shrine and the run door;

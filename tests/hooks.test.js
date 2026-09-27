@@ -66,6 +66,12 @@ test('router: process weight comes from AGENTS.md; light changes the pipeline, n
   assert.doesNotMatch(light, /game-playtester/, 'light: the implementer writes the Run result itself');
   assert.match(light, /game-checker once per spec/);
   assert.match(light, /SPEC → HUMAN → VERIFIED → PLAYABLE → GATED/, 'the spine never relaxes');
+  const auto = run(ROUTER, repo({ 'AGENTS.md': STAMPED + '- Process: autonomous\n', 'project.godot': '' }));
+  assert.match(auto, /PROCESS: autonomous/);
+  assert.match(auto, /Decisions Ledger/, 'the bot records every decision it makes');
+  assert.match(auto, /human plays the finished game/i);
+  assert.match(auto, /paid/i, "paid generators still need the human's yes");
+  assert.match(auto, /SPEC → HUMAN → VERIFIED → PLAYABLE → GATED/);
   const odd = run(ROUTER, repo({ 'AGENTS.md': STAMPED + '- Process: turbo\n', 'project.godot': '' }));
   assert.match(odd, /PROCESS: standard/);
   assert.match(odd, /unknown process "turbo"/);

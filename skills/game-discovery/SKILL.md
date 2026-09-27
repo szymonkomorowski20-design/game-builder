@@ -11,7 +11,7 @@ description: Use at the START of a conversation when the user wants to make a ne
 
 **Core principle:** a one-sentence pitch ("roguelike z kotami") is never the whole game. Your value is the questions they did not think to answer — above all *what the player actually does, second to second* — not starting to code fast.
 
-**Decision ownership (load-bearing):** every key decision — genre, perspective (2D/3D, camera), core loop, controls, platform, scope, art source/style, monetisation, engine — is **the human's**. You surface the fork, lay out real options with honest pros and cons, recommend with a reason grounded in *their* answers, and let them choose. You recommend; they decide. Method: `decision-card.md`.
+**Decision ownership (load-bearing):** every key decision — genre, perspective (2D/3D, camera), core loop, controls, platform, scope, art source/style, monetisation, engine — is **the human's**. You surface the fork, lay out real options with honest pros and cons, recommend with a reason grounded in *their* answers, and let them choose. You recommend; they decide. Method: `decision-card.md`. **The one exception is when the human chose `Process: autonomous`** ("zrób sam", "prawie bez bramek"). Then they give the pitch and you answer the rest with each card's recommended option, informed by `gb doc genre-*`. Record every decision in the Ledger with **By: bot**, the reason and the alternatives, so they can overturn it at the end (`<plugin>/docs/rigor.md`).
 
 - Decide alone ONLY trivial, reversible, cost-free details (a placeholder name, the order of two questions). Unsure whether it is trivial? It is not — ask.
 - Never bury a decision as an "assumption" in a summary. A genre picked silently and listed at the bottom is the #1 failure mode.

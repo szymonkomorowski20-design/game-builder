@@ -40,6 +40,8 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 6. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
 7. Update root `STATUS.md` (phase, playable yes/no, verdict).
 
+**Process: autonomous** (AGENTS.md): steps 1–4 run at **every** phase, and they are the gate. Add a **completability scenario**: a bot finishes the phase's playable loop (template A8, recipe 37). A red one blocks the phase just like a red `gb verify`. Step 5 (the human) moves to the end of the game. Write its checklist into STATUS.md: how to run it, 3–5 things to try, the Tuning values, and the Decisions Ledger. Commits wait for the human's word, so keep a `git write-tree` snapshot per phase and list the ids in STATUS.md.
+
 **Process: light** (AGENTS.md): steps 1, 2 and 7 stay. Step 3 (checker) runs **once per spec**, on the whole spec diff, before the last human gate. Step 4 is your own `Run result` per Done-when (shots opened and looked at, paths on the lines) instead of the playtester agent. Step 5 happens at least at the end of the spec, and at any phase the human asks for. Step 6 is optional. The run log is optional too, but STATE.md is still written at session end. Nothing else relaxes (`<plugin>/docs/rigor.md`).
 
 ## The tuning loop (after a "tweak" verdict)

@@ -105,7 +105,7 @@ dla konkretnej partii.
       waluta między runami), bossowie z fazami i zapowiadanymi atakami, efekty statusów
 - [x] Szablon `action-roguelite-3d` (0.20.0) (kamera izometryczna, ruch, zryw, kombinacje, 2 typy wrogów, pokoje z falami,
       wybór daru, boss, śmierć i nowy run, waluta) z bot-scenariuszami
-- [ ] Tryb pracy „autonomiczny” (bramki maszynowe między fazami, człowiek na końcu) — do decyzji przy grze-dowodzie
+- [x] Tryb pracy „autonomiczny” (0.21.0): bot decyduje polecanymi opcjami (zapisane do przeglądu), spec zatwierdza checker, bramki maszynowe + scenariusz „bot przechodzi grę”, człowiek gra w gotową grę; bez zmian: bezpieczeństwo, licencje, płatne assety za zgodą, commit na słowo
 - [ ] Gra-dowód zbudowana pluginem od zera + raport
 ### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy
 ### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność

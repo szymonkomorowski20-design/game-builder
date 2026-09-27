@@ -58,6 +58,22 @@ function engineState(root) {
 function processText(root) {
   const choice = game.processWeight(root);
   const note = choice.unknown ? ` AGENTS.md names an unknown process "${choice.unknown}" — using standard; ask the human which they meant.` : '';
+  if (choice.weight === 'autonomous') {
+    return {
+      pipeline:
+        'game-start → game-discovery (you answer the questions yourself with each decision card\'s recommended option ' +
+        'and the genre doc, `gb doc genre-*`) → game-bootstrap → game-spec (approved by an independent game-checker ' +
+        'review against the brief, not by the human) → game-pre-implement → game-implement (every phase ends playable; ' +
+        'machine gates: gb verify, game-checker, game-playtester with shots you looked at, and a bot scenario proving ' +
+        'the game can be completed) → the human plays the finished game → game-release.',
+      process:
+        'PROCESS: autonomous — the human chose to play only the finished game. You make the key decisions yourself; ' +
+        'write every one into the brief\'s Decisions Ledger (By: bot, with the reason and the alternatives) so the ' +
+        'human can review and overturn them at the end. Unchanged: safety rules, licences, paid generators only ' +
+        'after the human\'s yes for that batch, and commits only on the human\'s word (keep per-phase snapshots with ' +
+        `\`git write-tree\` instead). The final human gate is real: list what to judge in STATUS.md. Details: ${RIGOR_DOC}.${note}`,
+    };
+  }
   if (choice.weight === 'light') {
     return {
       pipeline:
