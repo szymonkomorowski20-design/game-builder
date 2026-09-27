@@ -16,6 +16,9 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | `test_…` "at line -1: Nonexistent 'float' constructor" | `get_shader_parameter()` returns `null` until the uniform is set | set every uniform once in `_ready`, guard reads with `null` |
 | `gb lint` reports a broken `res://` in a comment or a test for a missing file | lint scans all text | build the path dynamically (`"res://x/" + "missing.tscn"`) for intentional misses; don't write example paths in comments |
 | Viewport capture is black/empty headless | headless has no renderer | `gb shot` / `--write-movie` need a window (`--window`) |
+| A test that sorts `StringName`s passes, then fails after unrelated code is added | `StringName` sorts by its interned address, not alphabetically, so the order depends on what was loaded first (recipe 52's test failed in the proof game) | compare as `String`s: `names.map(func(x): return String(x))` then `sort()`, or compare sets |
+| A lambda "finds" a value but the variable is still `null` after `wait_until(func(): …)` | GDScript lambdas capture locals **by value**; assigning to an outer local inside the lambda changes only its copy | write through a container: `var found: Array[Node] = []` … `found.append(n)` inside the lambda |
+| `print()` from a scenario is nowhere in the `gb scenario` report | gb shows only its own markers from the Godot log | use `note("…")` in the scenario — gb prints each line under the scenario and keeps them in `--json` |
 
 ## Scenes, nodes, time
 

@@ -132,6 +132,23 @@ test('scenario: failing expectations and unknown actions are reported, exit 1', 
   }
 });
 
+test('scenario: note() lines are shown under the scenario and kept in --json (print output is not)', { skip, timeout: 600000 }, () => {
+  const f = path.join(game(), 'tests', 'scenarios', 'zz_notes.gd');
+  fs.writeFileSync(f, 'extends GbScenario\n\n\nfunc run() -> void:\n\tnote("hero hp=%d" % 42)\n\tprint("plain print")\n\tnote("second")\n');
+  try {
+    const r = gb('scenario', 'res://tests/scenarios/zz_notes.gd', '--path', game());
+    assert.equal(r.status, 0, r.stdout);
+    assert.match(r.stdout, /note zz_notes\.gd: hero hp=42/);
+    assert.match(r.stdout, /note zz_notes\.gd: second/);
+    assert.doesNotMatch(r.stdout, /plain print/);
+    const j = JSON.parse(gb('scenario', 'res://tests/scenarios/zz_notes.gd', '--json', '--path', game()).stdout);
+    const step = j.steps.find((s) => s.step === 'scenarios');
+    assert.deepEqual(step.results[0].notes, ['hero hp=42', 'second']);
+  } finally {
+    fs.rmSync(f);
+  }
+});
+
 test('scenario: a scenario script with a parse error fails fast with a clear reason (no wait for the frame cap)', { skip, timeout: 600000 }, () => {
   const bad = path.join(game(), 'tests', 'scenarios', 'zz_parse.gd');
   fs.writeFileSync(bad, 'extends GbScenario\n\n\nfunc run() -> void:\n\texpect_eq(1, 1)\n');

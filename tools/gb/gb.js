@@ -424,11 +424,12 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
     const r = gameRun(ctx, { window: window || endShot, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`, ...(endShot ? ['--gb-end-shot'] : [])] });
     const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
     const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
+    const notes = [...r.log.matchAll(/^GB_NOTE (.*)$/gm)].map((x) => x[1].trim());
     const logErrors = parseLog(r.log, ctx.ignores).errors;
     const shots = window || endShot ? handleScenarioShots(ctx, r.log, { accept, compare, threshold, tolerance }) : [];
     for (const s of shots.filter((x) => x.result === 'FAIL')) errors.push({ kind: 'SHOT', message: `${path.basename(f)}: ${s.name} — ${s.reason}`, at: null });
     const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut && !shots.some((x) => x.result === 'FAIL');
-    results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots });
+    results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots, notes });
     if (!m) errors.push({ kind: 'SCENARIO', message: `${f}: did not finish (no GB_SCENARIO line — crash, timeout or frame cap)`, at: null });
     for (const e of expectFails) errors.push({ kind: 'EXPECT', message: `${path.basename(f)}: ${e}`, at: null });
     for (const e of logErrors) errors.push({ ...e, message: `${path.basename(f)}: ${e.message}` });
@@ -886,6 +887,11 @@ function printStep(s) {
   if (s.errors.length > 10) process.stdout.write(`     … ${s.errors.length - 10} more\n`);
   if (s.step === 'lint') for (const w of s.warnings.slice(0, 10)) process.stdout.write(`     warn ${w.kind}: ${w.message}  [${w.at}]\n`);
   if (s.step === 'scenarios') {
+    for (const r of s.results || []) {
+      const notes = r.notes || [];
+      for (const n of notes.slice(0, 40)) process.stdout.write(`     note ${path.basename(r.scenario)}: ${n}\n`);
+      if (notes.length > 40) process.stdout.write(`     … ${notes.length - 40} more notes (--json has all)\n`);
+    }
     for (const r of s.results || []) for (const sh of r.shots || []) {
       if (sh.result === 'PASS') process.stdout.write(`     shot ${sh.name}: ${sh.differing} px differ from the baseline\n`);
       else if (sh.result === 'accepted') process.stdout.write(`     shot ${sh.name}: accepted as the new baseline\n`);

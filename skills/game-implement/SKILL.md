@@ -40,7 +40,17 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 6. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
 7. Update root `STATUS.md` (phase, playable yes/no, verdict).
 
-**Process: autonomous** (AGENTS.md): steps 1–4 run at **every** phase, and they are the gate. Add a **completability scenario**: a bot finishes the phase's playable loop (template A8, recipe 37). A red one blocks the phase just like a red `gb verify`. Step 5 (the human) moves to the end of the game. Write its checklist into STATUS.md: how to run it, 3–5 things to try, the Tuning values, and the Decisions Ledger. Commits wait for the human's word, so keep a `git write-tree` snapshot per phase and list the ids in STATUS.md.
+**Process: autonomous** (AGENTS.md): steps 1–4 run at **every** phase, and they are the gate. Add a **completability scenario**: a bot finishes the phase's playable loop (template A8, recipe 37). A red one blocks the phase just like a red `gb verify`. Step 5 (the human) moves to the end of the game. Write its checklist into STATUS.md: how to run it, 3–5 things to try, the Tuning values, and the Decisions Ledger. Commits wait for the human's word, so keep a `git write-tree` snapshot per phase and list the ids in STATUS.md. How:
+- Take the first snapshot right after bootstrap (`git add -A`, then `git write-tree`). It is the baseline the phase-1
+  checker diffs against, and without it there is nothing to diff.
+- The checker gets `git diff <previous tree> <new tree>`.
+- While the checker or the playtester runs, **don't edit the repo**: they run `gb verify` and shots on the working
+  tree. Work in another repo or park the next phase's files. You can keep working instead if you give them a clean
+  copy of the snapshot. Make it with `GIT_INDEX_FILE=<tmp>.idx git read-tree <tree>`, then
+  `GIT_INDEX_FILE=<tmp>.idx git --work-tree=<dir> checkout-index -a` (no commit, the repo's index untouched), and
+  have them verify with `gb verify --path <dir>`.
+
+(Proof game, 0.21.x: a parked-file mistake nearly let the checker verify half-written phase-3 code.)
 
 **Process: light** (AGENTS.md): steps 1, 2 and 7 stay. Step 3 (checker) runs **once per spec**, on the whole spec diff, before the last human gate. Step 4 is your own `Run result` per Done-when (shots opened and looked at, paths on the lines) instead of the playtester agent. Step 5 happens at least at the end of the spec, and at any phase the human asks for. Step 6 is optional. The run log is optional too, but STATE.md is still written at session end. Nothing else relaxes (`<plugin>/docs/rigor.md`).
 

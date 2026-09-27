@@ -5,6 +5,7 @@ extends RefCounted
 ## what they see. Drive with tick(delta, distance_to_target).
 
 signal strike_started
+signal state_changed(state: State)
 
 enum State { CHASE, WINDUP, STRIKE, RECOVER, STAGGER }
 
@@ -17,6 +18,7 @@ var recover := 0.7
 var stagger_time := 0.25
 
 var state := State.CHASE
+var gate := Callable()   ## optional: returns whether it may start an attack now (attack tokens)
 var _t := 0.0
 
 
@@ -31,7 +33,7 @@ func tick(delta: float, distance: float) -> void:
 	_t += delta
 	match state:
 		State.CHASE:
-			if distance <= attack_range:
+			if distance <= attack_range and (not gate.is_valid() or gate.call()):
 				_go(State.WINDUP)
 		State.WINDUP:
 			if _t + EPS >= telegraph:
@@ -69,3 +71,4 @@ func is_telegraphing() -> bool:
 func _go(s: State) -> void:
 	state = s
 	_t = 0.0
+	state_changed.emit(s)

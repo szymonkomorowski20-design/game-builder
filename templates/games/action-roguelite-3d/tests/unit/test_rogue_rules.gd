@@ -103,3 +103,28 @@ func test_balance_no_hit_takes_too_much() -> void:
 		assert_lte(e.damage, base_hp * 0.2, "%s hits for ≤ 20%% of base health" % path.get_file())
 	for m in RogueBoss.moves():
 		assert_lte(m.damage, base_hp * 0.3, "boss %s hits for ≤ 30%% of base health" % m.id)
+
+
+func test_attack_tokens_limit_simultaneous_attackers() -> void:
+	var t := AttackTokens.new()
+	t.limit = 2
+	var a := RefCounted.new()
+	var b := RefCounted.new()
+	var c := RefCounted.new()
+	assert_true(t.take(a))
+	assert_true(t.take(b))
+	assert_false(t.take(c), "a third attacker waits")
+	assert_true(t.take(a), "a holder asking again keeps its token")
+	t.give_back(a)
+	assert_true(t.take(c), "a returned token goes to the next one")
+
+
+func test_enemy_brain_waits_for_a_token_in_range() -> void:
+	var b := EnemyBrain.new()
+	var allowed := [false]
+	b.gate = func() -> bool: return allowed[0]
+	b.tick(DT, 0.5)
+	assert_eq(b.state, EnemyBrain.State.CHASE, "in range but no token: keeps chasing")
+	allowed[0] = true
+	b.tick(DT, 0.5)
+	assert_eq(b.state, EnemyBrain.State.WINDUP, "with a token it winds up")

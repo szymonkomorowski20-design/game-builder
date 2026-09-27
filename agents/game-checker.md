@@ -45,3 +45,6 @@ human approves the spec before the build. Grade the spec against the brief and t
 - The last phase has a **completability scenario** (a bot finishes the game) and the human-gate checklist.
 
 Same output: `APPROVE` | `NITS` | `CHANGES-REQUIRED`, each item citing the spec section and the brief line.
+From the **third round** on, CHANGES-REQUIRED is only for a defect that makes the build miss a brief promise or makes
+a Done-when impossible to run; everything else is a NIT that the implementer fixes during the phase. (In the proof
+game each round found smaller things, and the fourth round was the first NITS.)

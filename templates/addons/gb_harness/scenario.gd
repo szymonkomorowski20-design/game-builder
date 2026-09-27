@@ -115,6 +115,14 @@ func shot(shot_name: String) -> void:
 	await harness().capture(shot_name)
 
 
+# ---- notes (diagnosis) ----
+
+## A line gb shows under the scenario in its report (print() output is not shown). For diagnosing a failing
+## scenario: what hit the hero, which state an enemy was in. Remove or keep; notes never fail a scenario.
+func note(message: String) -> void:
+	print("GB_NOTE %s" % message)
+
+
 # ---- expectations (collect failures; the scenario keeps running) ----
 
 func expect(condition: bool, message: String) -> void:

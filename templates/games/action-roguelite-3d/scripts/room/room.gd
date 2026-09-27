@@ -15,8 +15,10 @@ const BOSS := preload("res://scenes/boss/boss.tscn")
 const DOOR := preload("res://scenes/room/door.tscn")
 
 @export var spawn_warning := 0.5
+@export var attack_tokens := 2   ## melee enemies allowed to wind up or strike at the same time (fairness)
 
 var director := EncounterDirector.new()
+var tokens := AttackTokens.new()
 var player: RoguePlayer
 var boss: RogueBoss
 var is_cleared := false
@@ -97,6 +99,8 @@ func _announce(scene: PackedScene, pos: Vector3) -> void:
 func _spawn_now(scene: PackedScene, pos: Vector3) -> RogueEnemy:
 	var e := scene.instantiate() as RogueEnemy
 	e.target = player
+	tokens.limit = attack_tokens
+	e.tokens = tokens
 	_enemies.add_child(e)
 	e.global_position = pos
 	e.died.connect(_on_enemy_died)

@@ -99,9 +99,10 @@ func test_r48_small_pool_returns_what_it_has() -> void:
 	var p := _pool()
 	var owned: Array[StringName] = [&"fire_strike", &"fire_dash", &"swift_feet", &"quick_hands"]
 	var offer := p.offer(7, owned, 3)
-	var ids := offer.map(func(o: BoonOffer): return o.boon.id)
+	# StringName sorts by address, not alphabetically — compare as Strings.
+	var ids := offer.map(func(o: BoonOffer) -> String: return String(o.boon.id))
 	ids.sort()
-	assert_eq(ids, [&"blazing_rush", &"iron_skin"], "only two left (the synergy is now allowed)")
+	assert_eq(ids, ["blazing_rush", "iron_skin"], "only two left (the synergy is now allowed)")
 
 
 func test_r48_rarity_follows_weights_and_luck() -> void:

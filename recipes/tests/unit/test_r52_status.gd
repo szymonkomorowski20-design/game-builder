@@ -97,5 +97,7 @@ func test_r52_cleanse_and_expired_once() -> void:
 	assert_false(fx.has(&"burn"))
 	assert_almost_eq(sheet.value(&"speed"), 6.0, 1e-6)
 	_run(6.0)
-	ended.sort()
-	assert_eq(ended, [&"burn", &"slow"], "each ended once (by cleanse), not again later")
+	# StringName sorts by address, not alphabetically — compare as Strings, or the order depends on load order.
+	var names := ended.map(func(x: StringName) -> String: return String(x))
+	names.sort()
+	assert_eq(names, ["burn", "slow"], "each ended once (by cleanse), not again later")

@@ -81,6 +81,7 @@ The art is placeholder (capsules, boxes).
 | rusher hp / dmg / telegraph | 30 / 6 / 0.45 | hp, hp, s | data/rusher.tres | — |
 | brute hp / dmg / telegraph | 90 / 12 / 0.8 | hp, hp, s | data/brute.tres | — |
 | wave budget | 3 + 1.5 × depth; +1 wave every 2 depths, max 3 | threat | room.gd | — |
+| attack tokens | 2 | melee enemies winding up or striking at once | room.gd `@export attack_tokens` | 1–3 |
 | boss hp / thresholds / transition | 420 / 66%, 33% / 1.2 | hp, s | boss.gd | 300–700 |
 | boss moves (telegraph/strike/recovery, dmg) | slam 0.7/0.15/1.0 14 · lunge 0.6/0.35/0.9 12 · nova 1.0/0.2/1.2 18 | s, hp | RogueBoss.moves() | telegraph ≥ 0.4 |
 | lunge_lock | 0.75 | × telegraph | boss.gd | 0.6–0.9 |
@@ -93,14 +94,18 @@ The art is placeholder (capsules, boxes).
 - **Readability:**
   - every boss move passes `BossBrain.validate()` (telegraph ≥ 0.4 s, recovery ≥ 0.5 s);
   - every telegraph shows where it hurts, at its true size;
-  - enemy telegraphs are never cancelled by hits.
+  - enemy telegraphs are never cancelled by hits;
+  - at most `attack_tokens` melee enemies wind up at once (AttackTokens). Added in 0.22.0 after the proof game: without
+    it, overlapping tells made a crowded room cost a careful bot most of its health.
 - **Balance at base stats:**
   - a rusher takes about one combo (0.3–1.2 s of perfect play);
   - a brute takes 1–3.5 s;
   - the boss takes 8–40 s;
   - no basic enemy hit is over 20% of base health, and no boss hit over 30%.
-- **Completable:** A8, a simple bot that walks, attacks and dashes out of telegraphs in the last 0.15 s, wins the
-  whole base run. A change that makes A8 fail made the base game too hard or soft-locked a room.
+- **Completable:** A8 wins the whole base run with a simple bot that plays like a careful player:
+  - it walks and attacks;
+  - it starts no swing when a strike lands within 0.35 s (a swing can't be dash-cancelled);
+  - it dashes away from all strikers in the last 0.15 s. A change that makes A8 fail made the base game too hard or soft-locked a room.
 
 ## Behaviours (test IDs)
 | ID | Behaviour | Test |
@@ -109,7 +114,7 @@ The art is placeholder (capsules, boxes).
 | A2 | The hub dummy takes the three swings in order, once each, scaled by attack power | `a2_combo_on_dummy.gd` |
 | A3 | The run door starts a run; the first room is cleared; three boons are offered and the chosen one is owned; doors appear; walking into one enters room 2 | `a3_room_boon_doors.gd` |
 | A4 | An enemy in range telegraphs before hitting; standing still gets you hit; dashing away during the telegraph avoids it | `a4_telegraph_and_dash.gd` |
-| A5 | Dying banks the run's embers (one per kill) and saves them to disk; back to the hub | `a5_death_banks.gd` |
+| A5 | Dying banks the run's embers (one per kill, counted by the room's kill signal) and saves them to disk; back to the hub | `a5_death_banks.gd` |
 | A6 | The shrine opens with `action`, Vitality costs 10 and raises max health at once and in the next run; `attack` closes it | `a6_shrine_upgrade.gd` |
 | A7 | The boss telegraphs, changes phase at 66% and 33%, and a telegraph-reading bot beats it; victory returns to the hub | `a7_boss.gd` |
 | A8 | The whole base run is winnable: hub → 5 rooms (first boon, first door) → boss → victory → embers banked | `a8_full_run.gd` |

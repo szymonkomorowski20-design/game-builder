@@ -10,6 +10,7 @@ signal died(enemy: RogueEnemy)
 @export var tuning: EnemyTuning
 
 var target: Node3D
+var tokens: AttackTokens   ## set by the room: the shared limit on simultaneous attackers
 var brain := EnemyBrain.new()
 var statuses: StatusEffects
 
@@ -25,6 +26,11 @@ var _mat := StandardMaterial3D.new()
 func _ready() -> void:
 	brain.configure(tuning)
 	brain.strike_started.connect(_strike)
+	if tokens != null:
+		brain.gate = func() -> bool: return tokens.take(self)
+	brain.state_changed.connect(func(s: EnemyBrain.State) -> void:
+		if tokens != null and (s == EnemyBrain.State.RECOVER or s == EnemyBrain.State.STAGGER):
+			tokens.give_back(self))
 	health.max_health = tuning.max_health
 	health.current = tuning.max_health
 	health.invulnerability_time = 0.0
@@ -86,5 +92,7 @@ func _strike() -> void:
 
 
 func _die() -> void:
+	if tokens != null:
+		tokens.give_back(self)
 	died.emit(self)
 	queue_free()

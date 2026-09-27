@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.22.0 — 2026-09-27 · lessons from the proof game (phases 1–2)
+Found while building the Hades-like proof game "Ucieczka z Krypty" in autonomous mode (ROADMAP 9.1).
+
+- **Template `action-roguelite-3d`: attack tokens.** At most `attack_tokens` (2) melee enemies may wind up or strike at
+  once:
+  - `AttackTokens`;
+  - an `EnemyBrain.gate` and a `state_changed` signal;
+  - one pool per room.
+
+  The proof game's bot lost ~50 of 60 HP in one crowded third chamber to overlapping tells; with tokens it lost ~10.
+  The genre doc gets a [measured] note.
+- **Template bot plays like a careful player:**
+  - its reach matches the sword's hitbox (1.8 m, was 1.5, which made it circle enemies it could already hit);
+  - it starts no swing when a strike lands within 0.35 s;
+  - it dashes away from the centre of all strikers;
+  - it never "dashes" while a swing is committed, which the dash refuses.
+
+  A5 now counts bones against the kills the room reports, because one swing can kill two.
+- **`note()` in scenarios:** `gb scenario` prints each note under its scenario and keeps them in `--json`. `print()`
+  output was invisible, so diagnosing A8 needed a file.
+- **Recipe tests 48 and 52 were order-dependent:** a `StringName` sorts by its interned address, not alphabetically. The
+  tests now compare Strings. It surfaced when the game interned the same names in another order.
+- **Skills and agents:**
+  - `godot-pitfalls.md`: sorting StringNames; lambdas capture locals by value; `print` vs `note`.
+  - game-implement (autonomous):
+    - take the baseline `git write-tree` right after bootstrap;
+    - don't edit the repo while the checker or playtester verifies it, or give them a clean checkout of the
+      snapshot tree (`read-tree` + `checkout-index`, then `gb verify --path`).
+  - game-checker, spec review mode: from the third round on, CHANGES-REQUIRED only for blocking defects. The proof game
+    needed four rounds, each finding smaller things.
+
 ## 0.21.1 — 2026-09-27 · fixes found by the proof game
 - `gb doctor` in a `Process: autonomous` repo reports "no commit yet" as a WARN pointing to the `git write-tree` snapshots,
   not a MISS: there commits wait for the human, so the MISS blocked every phase gate. Tested.
