@@ -15,10 +15,12 @@
  *   anything else                                             → silence
  */
 
+const path = require('path');
 const {
   readStdin,
   findRepoRoot,
   isGameBuilderRepo,
+  processWeight,
   isGodotProject,
   activeSpecs,
   openIncidents,
@@ -59,6 +61,33 @@ function verifyLine(root) {
   if (v.result === 'PASS') return `Last \`gb verify\`: PASS at ${v.at} (Godot ${v.godotVersion}). Re-run after every change you intend to call done.`;
   return `Last \`gb verify\`: **FAIL** at ${v.at} — failing step(s): ${v.failed.join(', ') || 'unknown'}. ` +
     `The game is known to be broken; fix that (or diagnose it) before building anything new on top.`;
+}
+
+const RIGOR_DOC = path.join(__dirname, '..', 'docs', 'rigor.md');
+
+/** The pipeline line and the PROCESS block for the human's process choice (AGENTS.md `- Process:`). */
+function processBlock(root) {
+  const p = processWeight(root);
+  const warn = p.unknown ? ` AGENTS.md names an unknown process "${p.unknown}" — using standard; ask the human which they meant.` : '';
+  if (p.weight === 'light') {
+    return {
+      pipeline:
+        `game-start → game-discovery (short brief) → game-bootstrap → game-spec (short spec allowed) → ` +
+        `game-pre-implement only if the spec touches saves, autoloads, input action names or shared scenes → ` +
+        `game-implement (phase by phase, gb verify every step; your own Run result with shots you looked at; ` +
+        `game-checker once per spec, before the last human gate) → human playtest gate at least at the end of the spec → game-release.`,
+      process:
+        `PROCESS: light — chosen by the human in AGENTS.md. It lightens paperwork and review rounds, never the spine ` +
+        `below: approved spec, green gb verify with evidence, a playable build per phase, the human's gate and ` +
+        `their word before any commit. Details: ${RIGOR_DOC}.${warn}`,
+    };
+  }
+  return {
+    pipeline:
+      `game-start → game-discovery → game-bootstrap → game-spec (local .ai/skills/spec-writing) → ` +
+      `game-pre-implement → game-implement (phase by phase, gb verify every step; game-checker + game-playtester at each phase gate) → game-test → human playtest gate (game-playtest) → game-release.`,
+    process: `PROCESS: standard (AGENTS.md; the human may choose light — ${RIGOR_DOC}).${warn}`,
+  };
 }
 
 function main() {
@@ -102,13 +131,14 @@ function main() {
     ? `\nOPEN INCIDENT(S) in \`.ai/incidents/\`: ${incidents.join(', ')}. Read the record first and continue that diagnosis (game-diagnose).\n`
     : '';
 
+  const proc = processBlock(root);
   emit(
     'SessionStart',
     `[game-builder] This repo runs the game-builder workflow (AGENTS.md stamped), so it governs this session — ` +
       `including after a context reset. It takes precedence over any web-app workflow (e.g. Sailes) that may also ` +
       `announce itself here: this is a game.\n\n` +
-      `Pipeline: game-start → game-discovery → game-bootstrap → game-spec (local .ai/skills/spec-writing) → ` +
-      `game-pre-implement → game-implement (phase by phase, gb verify every step; game-checker + game-playtester at the gate) → game-test → human playtest gate (game-playtest) → game-release.\n` +
+      `Pipeline: ${proc.pipeline}\n` +
+      `${proc.process}\n` +
       `Side skills: game-audio (sound/music), game-assets (art/models/fonts), recipes (\`gb recipe list\` in the plugin copy).\n` +
       `BROKEN ≠ MISSING: if the request is about something failing (crash, error in the log, physics glitch, FPS drop), ` +
       `use game-diagnose — reproduce it with \`gb\` first; do not treat it as new scope.\n\n` +

@@ -42,6 +42,8 @@ Walk `spec-template.md` section by section. Rules per section:
 - **Non-goals** + backlog entries.
 - **Decisions Ledger** for decisions made in this spec.
 
+**Process: light** (AGENTS.md): a **short spec** is enough. It has goal, non-goals, the Tuning table, a Done-when list (commands + expected results), the tests per Done-when and at most 2 phases, each still ending playable. Open Questions are still resolved with the human, and the review checklist below still applies (`<plugin>/docs/rigor.md`).
+
 ## Step 3 — Review checklist (run before asking for approval)
 - [ ] No open question left; every assumption either confirmed or listed as a decision.
 - [ ] Every phase is playable at its end and has a runnable Done-when.
@@ -51,6 +53,7 @@ Walk `spec-template.md` section by section. Rules per section:
 - [ ] Assets have licences; nothing from a "prototype only" source is planned for release.
 - [ ] Save/input/scene-path compatibility considered.
 - [ ] Scope matches the ladder rung; later ideas are in non-goals/backlog.
+- [ ] Design check (`<plugin>/docs/design-theory.md`): every mechanic serves the brief's target experience; positive loops are capped; every choice has a trade-off; each level/wave adds something new; the difficulty table rises with rests.
 
 ## Step 4 — Approval
 Show the human the spec (or its phase list + Tuning table + Open Questions resolved). On approval: `Status: approved`, commit (`spec: <title>`), hand to `game-pre-implement` (non-trivial) or `game-implement` (small).

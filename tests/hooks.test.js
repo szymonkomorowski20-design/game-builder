@@ -56,6 +56,21 @@ test('router: adopted repo with no spec routes to game-start and states the spin
   assert.match(out, /takes precedence over any web-app workflow/);
 });
 
+test('router: process weight comes from AGENTS.md; light changes the pipeline, never the spine', () => {
+  const std = run(ROUTER, repo({ 'AGENTS.md': STAMPED, 'project.godot': '' }));
+  assert.match(std, /PROCESS: standard/);
+  assert.match(std, /game-checker \+ game-playtester at each phase gate/);
+  const light = run(ROUTER, repo({ 'AGENTS.md': STAMPED + '- Process: light (chosen 2026-09-27)\n', 'project.godot': '' }));
+  assert.match(light, /PROCESS: light/);
+  assert.match(light, /docs[\\/]rigor\.md/);
+  assert.doesNotMatch(light, /game-playtester/, 'light: the implementer writes the Run result itself');
+  assert.match(light, /game-checker once per spec/);
+  assert.match(light, /SPEC → HUMAN → VERIFIED → PLAYABLE → GATED/, 'the spine never relaxes');
+  const odd = run(ROUTER, repo({ 'AGENTS.md': STAMPED + '- Process: turbo\n', 'project.godot': '' }));
+  assert.match(odd, /PROCESS: standard/);
+  assert.match(odd, /unknown process "turbo"/);
+});
+
 test('router: specs in flight are named; implemented/ and README are not', () => {
   const out = run(ROUTER, repo({ 'AGENTS.md': STAMPED, '.ai/specs/2026-09-25-jump.md': '', '.ai/specs/README.md': '', '.ai/specs/implemented/old.md': '' }));
   assert.match(out, /2026-09-25-jump\.md/);

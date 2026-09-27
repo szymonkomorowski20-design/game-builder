@@ -18,12 +18,16 @@ phase that replaces them.
 - Library: `node tools/gb/gb.js assets "<what>" --typ sprite_2d|model_3d|animation|animation_clip|ui_skin` — each
   record shows the pack, licence and path in BAZA-AI; packs with confirmed licences are listed in gry-wiedza
   `fala-0N/paczki/README.md` (Kenney, KayKit, Polygonal Mind, Mesh2Motion rigs and animations, UI skins…).
+- Starter packs per template (checked licences, author pages for the register, known gaps such as side-view
+  platformer tiles, and fonts without Polish letters): `<plugin>/docs/starter-packs.md`.
 - Consistency beats quantity: one style family (one author/pack series) per game where possible.
 - Allowed for release: CC0, CC-BY (credit in game), MIT/BSD/zlib (keep notice), OFL for fonts. **Not:**
   "free for personal use", NC/ND, no licence, ripped/fan art of existing games, Ready Player Me animations with
   other characters, AI output whose model/service terms forbid it.
 
 ## 3. Import (Godot 4.7)
+Full, sourced details (Detect 3D, name suffixes like `-colonly` that delete meshes, edits that survive reimport,
+Blender export settings, importers for Aseprite, Tiled and LDtk): `<plugin>/docs/asset-pipeline.md`.
 - **Pixel art:** *Project Settings → Rendering → Textures → Default Texture Filter = Nearest*, integer scaling
   (`window/stretch` = viewport, scale mode integer), snap 2D transforms to pixel; the scaffold's `--pixel-art` sets these.
 - **Sprites/atlases:** keep sprite sheets whole, `AnimatedSprite2D`/`SpriteFrames` or `AtlasTexture`; `gb lint`

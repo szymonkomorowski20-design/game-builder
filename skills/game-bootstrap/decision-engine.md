@@ -40,6 +40,7 @@ Available templates (each: implemented spec, Tuning resource, unit tests + behav
 | Forward+ (`forward_plus`) | desktop 3D with modern lighting/effects | no web export; heavier GPU requirements |
 | Mobile (`mobile`) | Android/iOS 3D, or light 3D on desktop | some Forward+ effects missing |
 Default recommendation: 2D → Compatibility; 3D desktop-only → Forward+; anything with web → Compatibility.
+Show the platform's consequences from `<plugin>/docs/platforms.md` on the card: for web, no ENet (WebSocket/WebRTC only), audio without bus effects in Sample mode, saves in IndexedDB, mouse capture only after a click. For Android, the human installs the JDK and SDK; the Play Store needs an AAB (Gradle) and a release keystore.
 
 ## Q4 — Resolution & pixel art (decision for 2D)
 - Pixel art: low base resolution (320×180, 384×216, 480×270 — all scale cleanly to 1080p), viewport stretch, nearest filtering, pixel snap. `--pixel-art` sets these; the window opens at ×4.
@@ -63,6 +64,13 @@ Keyboard+mouse / gamepad / touch. Scaffold creates keyboard + gamepad actions (`
 | LFS | repo stays small with big textures/audio/models | every clone needs `git lfs install`; GitHub LFS quota; set up BEFORE the first binary commit |
 Recommend LFS when the brief expects >~300 MB of assets or large 3D/audio sources.
 
+## Q7b — Process weight (decision)
+| Option | ✅ | ⚠️ |
+|---|---|---|
+| **Standard** (default) | a checker and a playtester agent at every phase gate; readiness report per spec; the full paper trail | slower and costlier per phase |
+| Light | a short spec, one checker per spec, your own Run result instead of the playtester agent, a human gate at least at the end of each spec | problems found later, so a late fix costs more; not for saves, multiplayer or release |
+Recommend light for a jam, a toy, a learning project or a one-mechanic experiment (the brief's "why" and deadline answer this). Recommend standard for anything meant for players. The spine never changes. Details: `<plugin>/docs/rigor.md`.
+
 ## Q8 — Optional modules (activate only when the brief needs them)
 Record them in the manifest; they get their own specs later — never scaffolded "just in case":
 save/load · settings menu & key rebinding · localization · dialogue system · inventory · procedural generation · local multiplayer · online multiplayer · achievements/Steamworks · analytics/telemetry (privacy!) · modding.
@@ -70,7 +78,7 @@ save/load · settings menu & key rebinding · localization · dialogue system ·
 ## Output — setup manifest (goes into the brief's Decisions Ledger + ADR-001)
 ```
 Engine: Godot 4.x (pinned: 4.x.y) · Dimension: 2D/3D · Renderer: … · Base resolution: …×… (pixel art: yes/no)
-Platforms: … · Input: … · Tests: gut/gdunit4/none · LFS: yes/no
+Platforms: … · Input: … · Tests: gut/gdunit4/none · LFS: yes/no · Process: standard/light
 Modules (later specs): …
 ```
 Then `gb scaffold` with the matching flags.

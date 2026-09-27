@@ -13,7 +13,7 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 **Use:** spec `approved` and READY (or obviously small). **Not:** no approved spec (→ `game-spec`); NOT-READY (fix the spec); something is broken (reproduce with `gb`, diagnose first).
 
 ## Pre-flight
-1. Read the spec, the readiness report, `.ai/STATE.md`, `.ai/lessons.md`, `AGENTS.md`, and — before writing engine API code — [godot-4.4-4.7-changes.md](godot-4.4-4.7-changes.md) (what changed since your training data). When a check fails in a way that makes no sense, look it up in [godot-pitfalls.md](godot-pitfalls.md) first. For a mechanic that has a tested recipe in the plugin (`recipes/README.md`: movement, camera, health, hitboxes, inventory, saves, dialogue, AI, navigation, audio…), start from the recipe, not from memory.
+1. Read the spec, the readiness report, `.ai/STATE.md`, `.ai/lessons.md`, `AGENTS.md`, and — before writing engine API code — [godot-4.4-4.7-changes.md](godot-4.4-4.7-changes.md) (what changed since your training data). When a check fails in a way that makes no sense, look it up in [godot-pitfalls.md](godot-pitfalls.md) first. For a mechanic that has a tested recipe in the plugin (`recipes/README.md`: movement, camera, health, hitboxes, inventory, saves, dialogue, AI, navigation, audio…), start from the recipe, not from memory. No recipe for it → `<plugin>/docs/reference-games.md` (open-source Godot 4 games, licences checked) for how a real game structures it.
 2. `Status: in-progress`. Branch `feat/<spec-slug>` (never implement on the default branch).
 3. Baseline: `gb verify` — green before you start, or the failure is recorded first.
 4. Long work (> ~5 commits): run log `.ai/runs/{YYYY-MM-DD}-{slug}.md` — goal, phases, decisions, what's left, and after each phase the pasted evidence — so work resumes after a context reset.
@@ -39,6 +39,8 @@ with its Done-when passing **and**, where the spec marks it, the human playing t
 5. **Playtest gate** (if marked): follow `.ai/checklists/playtest.md` — tell the human how to run it (F5 in the editor, or `gb export` build), what to try (3–5 things) and the current Tuning values. **Stop and wait** for their verdict: keep / tweak / cut per mechanic. Record it in the spec with date and commit.
 6. **After a "keep" verdict on feel**: offer to record a replay — `node tools/gb/gb.js record <name>` (the human plays; it becomes a regression test) and to accept screenshots (`gb shot --accept` after you looked).
 7. Update root `STATUS.md` (phase, playable yes/no, verdict).
+
+**Process: light** (AGENTS.md): steps 1, 2 and 7 stay. Step 3 (checker) runs **once per spec**, on the whole spec diff, before the last human gate. Step 4 is your own `Run result` per Done-when (shots opened and looked at, paths on the lines) instead of the playtester agent. Step 5 happens at least at the end of the spec, and at any phase the human asks for. Step 6 is optional. The run log is optional too, but STATE.md is still written at session end. Nothing else relaxes (`<plugin>/docs/rigor.md`).
 
 ## The tuning loop (after a "tweak" verdict)
 Change only Tuning-table values (exported vars/resources), update the table in the spec, `gb verify`, short playtest again. Not a new spec, not new code paths. If the human asks for new behaviour during tuning, that is new scope → Feature Brief → spec.

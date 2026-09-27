@@ -47,10 +47,12 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Pułapki Godota — `skills/game-implement/godot-pitfalls.md` (zmierzone, z poprawkami)
 - [x] Audio: skill `game-audio`, przepisy 34–35, `gb shot --movie` z pomiarem dźwięku; fala 05 biblioteki (paczki CC0/MIT/CC-BY, licencje)
 - [x] Z Claude Code Game Studios (MIT): dowód wizualny „Run result” w game-implement, zrzuty przez Movie Maker
-- [ ] Teoria projektowania (MDA, pętle, flow, krzywe trudności, game feel, level design, playtesty)
-- [ ] Dokumentacja GUT/gdUnit4, platform (itch/butler, web, Android), pipeline assetów (Blender→glTF, Aseprite, LDtk/Tiled)
-- [ ] Gry referencyjne open source w Godocie (MIT, z testami) zindeksowane
-- [ ] Paczki startowe CC0 per gatunek z fal 1–4
+- [x] Teoria projektowania (0.17.0): `docs/design-theory.md` — MDA, pętle, decyzje, nauka, flow i krzywa trudności, game feel, level design, odbiorca, playtesty; każda idea ze źródłem i miejscem w bramkach (brief: docelowe doświadczenie, przegląd specu, raport playtestu, postmortem)
+- [x] Platformy (0.17.0): `docs/platforms.md` — web, itch.io + butler, Android wg dokumentacji gałęzi 4.7 (kopia master w BAZA-AI różni się dla Androida)
+- [x] Pipeline assetów (0.17.0): `docs/asset-pipeline.md` — obrazy/pixel art, audio, Blender→glTF, przyrostki nazw, edycje odporne na reimport, TileMapLayer, Aseprite Wizard / YATI / LDtk
+- [ ] gdUnit4: ścieżka `gb test` dla gdUnit4 nigdy nie uruchomiona (dodatek niezainstalowany) — sprawdzić, gdy ktoś go wybierze; GUT pokryty (game-test + gb)
+- [x] Gry referencyjne (0.17.0): `docs/reference-games.md` — 17 gier Godot 4 z licencjami kodu i assetów sprawdzonymi w repo; żadna nie ma testów automatycznych (ustalenie)
+- [x] Paczki startowe (0.17.0): `docs/starter-packs.md` — paczki z biblioteki per szablon, strony autorów do rejestru; luki: kafelki platformówki 2D z boku, czcionki bez polskich znaków (zmierzone)
 
 ## Etap 5 — Szablony startowe gier
 - [x] Platformówka 2D (0.4.0): ruch ze strojeniem, coyote time, bufor skoku, zmienny skok, poziom z monetami i metą, 3 testy + 8 scenariuszy
@@ -75,7 +77,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 ## Etap 7 — Evale ✅ (0.11.0–0.12.0)
 - [x] 20 scenariuszy napisanych (evals/), test higieny formatu
 - [x] Uruchomienie na świeżych subagentach (Sonnet, przebieg zastępczy) i ocena na artefaktach z dysku — `evals/RESULTS-2026-09-26.md`: końcowo 20/20 PASS; za pierwszym razem 3 FAIL (08, 09, 14) → poprawione skille/narzędzia → ponowne przebiegi PASS; 11 dodatkowych usterek pluginu znalezionych przy zaliczonych evalach, poprawionych w 0.12.0
-- [ ] Później: ten sam zestaw na zainstalowanym pluginie (automatyczne wyzwalanie skilli, router sesji), na innym modelu, kilka powtórzeń
+- [x] Tryb procesu lekki/standard (0.17.0): `docs/rigor.md`, `gb scaffold --rigor`, karta decyzji w bootstrapie, router pokazuje pipeline trybu; kręgosłup bez zmian
+- [ ] Później: ten sam zestaw na zainstalowanym pluginie (automatyczne wyzwalanie skilli, router sesji), na innym modelu, kilka powtórzeń; porównanie kosztu trybu lekkiego i standardowego
 
 ## Etap 8 — Dogfooding
 - [x] Nowa mała gra od zera pluginem: **Lodowy Loch** (łamigłówka, 5 faz, 10 pięter, zapis, dźwięk). Człowiek przeszedł

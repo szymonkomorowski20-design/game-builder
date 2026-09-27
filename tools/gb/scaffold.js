@@ -213,6 +213,7 @@ Status: accepted
 - Base resolution: ${o.width}×${o.height}${o.pixelArt ? ', pixel-art settings (viewport stretch, nearest filter, 2D pixel snap)' : ''}
 - Test framework: ${o.tests}
 - Git LFS for binary assets: ${o.lfs ? 'yes' : 'no'}
+- Process weight: ${o.rigor} (the game-builder plugin's docs/rigor.md; the spine is the same in both)
 
 ## Context
 ${o.adopt ? 'Read from the existing project.godot during adoption (game-bootstrap Case C; Godot defaults where a key is absent). Correct anything the project does differently.' : 'Chosen by the human in game-bootstrap from decision cards; see the Decisions Ledger in `.ai/brief.md`.'}
@@ -231,6 +232,7 @@ function fill(tpl, o) {
     .replace(/\{\{WIDTH\}\}/g, String(o.width))
     .replace(/\{\{HEIGHT\}\}/g, String(o.height))
     .replace(/\{\{PIXEL_NOTE\}\}/g, o.pixelArt ? ' · pixel art (viewport stretch, nearest filter, pixel snap)' : '')
+    .replace(/\{\{RIGOR\}\}/g, o.rigor)
     .replace(/\{\{TESTS\}\}/g, o.tests === 'none' ? 'none yet (decided later; `gb test` reports SKIP)' : `${o.tests} (installed into addons/ — until then \`gb test\` reports SKIP)`);
 }
 
@@ -343,7 +345,7 @@ function scaffold(o, { runGodot = null, dryRun = false } = {}) {
 }
 
 function parseScaffoldArgs(argv) {
-  const o = { dir: process.cwd(), name: null, dim: '2d', renderer: null, pixelArt: false, width: null, height: null, tests: 'gut', lfs: false, engine: null, adopt: false, dryRun: false };
+  const o = { dir: process.cwd(), name: null, dim: '2d', renderer: null, pixelArt: false, width: null, height: null, tests: 'gut', lfs: false, rigor: 'standard', engine: null, adopt: false, dryRun: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const v = () => argv[++i];
@@ -356,6 +358,7 @@ function parseScaffoldArgs(argv) {
     else if (a === '--height') o.height = Number(v());
     else if (a === '--tests') o.tests = v();
     else if (a === '--lfs') o.lfs = true;
+    else if (a === '--rigor') o.rigor = v();
     else if (a === '--engine') o.engine = v();
     else if (a === '--adopt') o.adopt = true;
     else if (a === '--dry-run') o.dryRun = true;
@@ -375,6 +378,7 @@ function parseScaffoldArgs(argv) {
   o.renderer = o.renderer || (o.dim === '3d' ? 'forward_plus' : 'gl_compatibility');
   if (!RENDERERS[o.renderer]) throw new Error(`scaffold: --renderer must be one of ${Object.keys(RENDERERS).join(', ')}`);
   if (!['gut', 'gdunit4', 'none'].includes(o.tests)) throw new Error('scaffold: --tests must be gut, gdunit4 or none');
+  if (!['standard', 'light'].includes(o.rigor)) throw new Error('scaffold: --rigor must be standard or light');
   o.width = o.width || (o.pixelArt ? 320 : 1280);
   o.height = o.height || (o.pixelArt ? 180 : 720);
   o.name = o.name || path.basename(o.dir);

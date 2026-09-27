@@ -1,5 +1,76 @@
 # Changelog
 
+## 0.17.0 — 2026-09-27 · design theory, platforms, asset pipeline, starter packs, reference games, light process
+- **`docs/design-theory.md`:** nine ideas, each with a source and its place at our gates:
+  - MDA;
+  - loops;
+  - interesting decisions;
+  - fun as learning;
+  - flow and difficulty;
+  - game feel;
+  - kishōtenketsu level design;
+  - audience;
+  - playtesting.
+
+  Wired in:
+  - the brief has a "Target experience" section and discovery asks about it;
+  - the spec review has a design check;
+  - the playtest report has aesthetic and difficulty tables;
+  - the postmortem asks which aesthetic landed.
+- **`docs/platforms.md`:** Web, itch.io + butler, and Android per the **4.7-branch** docs. BAZA-AI's main
+  godot-docs copy turned out to be master (4.8-dev), and its Android pages differ: SDK versions, automatic SDK
+  setup, R8. Covers:
+  - web: single-threaded by default; COOP/COEP only for threads; Sample-mode audio; IndexedDB saves; input-event
+    fullscreen; `web_android`/`web_ios`;
+  - itch.io: page and SharedArrayBuffer only for threaded builds;
+  - Android: keystore through environment variables only, AAB needs Gradle.
+
+  Also in this area:
+  - `game-release` points to the doc and no longer suggests `python -m http.server`;
+  - the bootstrap platform card shows the consequences.
+- **`docs/asset-pipeline.md`:** from the 4.7 docs, the importer repositories and the Blender 4.2 manual:
+  - images: pixel art, Detect 3D;
+  - audio formats;
+  - Blender → glTF: +Z front, NLA-stashed actions, deform bones for blend shapes;
+  - name suffixes that delete meshes (`-colonly`, `-navmesh`);
+  - edits that survive reimport (extract materials, inherited scenes);
+  - TileMapLayer;
+  - Aseprite Wizard, YATI (turn off multi-threaded import), and the LDtk importer (quiet since 2025-02).
+
+  `game-assets` links it.
+- **`docs/starter-packs.md`:** library packs per template, with local paths, author pages for the register and
+  notes. Measured on the way:
+  - KayKit characters carry 76–95 animations, including Idle, Running_A and Jump_*;
+  - **Kenney Future fonts lack Polish letters except ó**, while Godot's default Open Sans has all of them.
+
+  Gaps: side-view platformer tiles. Discovery and `game-assets` link it.
+- **`docs/reference-games.md`:** 17 open-source Godot 4 games. Code and asset licences were read from the repos,
+  and 4 were excluded (copyleft, Godot 3, not Godot). None of them has automated tests.
+- **Process weight, standard or light (`docs/rigor.md`):**
+  - `gb scaffold --rigor standard|light` writes `- Process:` to AGENTS.md and ADR-001;
+  - there's a decision card (Q7b) in bootstrap;
+  - the session router reads it and prints the matching pipeline plus a PROCESS line, and names an unknown value
+    instead of guessing;
+  - light: short spec, readiness check only for risky specs, the checker once per spec, the implementer's own
+    Run result instead of the playtester agent, a human gate at least per spec. The spine never relaxes;
+  - standard stays the default (the choice is the human's). Our own cost comparison is still to be measured;
+  - 2 new tests, with a detection proof: the router ignoring the choice turns the test red.
+- An independent agent fact-checked platforms.md and asset-pipeline.md against the 4.7 docs and itch.io: 36 of 38
+  and 38 of 45 claims were confirmed. Fixed after the check:
+  - SharedArrayBuffer: Safari, not Firefox, still needs a popup;
+  - the keystore "letters only" rule is a suggestion, and the human sets the signing environment variables;
+  - `-rigid` converts the node itself;
+  - OBJ wording and the audio sample rate;
+  - `.uid` attributed to our rule;
+  - a mesh's *Save to File* is not promised to survive reimport;
+  - YATI can also crash;
+  - the LDtk importer's README says TileMaps while its code creates TileMapLayer, so check the installed version.
+
+  The rest was re-verified directly: the Blender Actions/NLA rule, and the YATI, Aseprite Wizard and LDtk versions.
+- `gb kb` adds a NOTE when its results quote the master Godot docs, which BAZA-AI keeps next to the pinned 4.7
+  copy and which the search mixes in. For a 4.7 project, trust the `/blob/4.7/` copy. Tested.
+- npm test: 82 tests, 78 pass, 4 skipped (window/export).
+
 ## 0.16.0 — 2026-09-27 · recipes 44–46
 - **44 AnimationTree:**
   - `AnimStates.state_for(on_floor, velocity)` is the one rule: idle/run on the floor, jump while rising, fall

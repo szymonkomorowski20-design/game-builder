@@ -87,6 +87,17 @@ test('the repo copy of gb carries no scaffold (plugin-only)', () => {
   assert.deepEqual(copied, [...require('../tools/gb/gb.js').TOOL_FILES].sort());
 });
 
+test('process weight: standard by default; --rigor light goes to AGENTS.md and ADR-001; other values rejected', () => {
+  const o = opts();
+  sc.scaffold(o);
+  assert.match(fs.readFileSync(path.join(o.dir, 'AGENTS.md'), 'utf8'), /^- Process: standard\b/m);
+  const l = opts(['--rigor', 'light']);
+  sc.scaffold(l);
+  assert.match(fs.readFileSync(path.join(l.dir, 'AGENTS.md'), 'utf8'), /^- Process: light\b/m);
+  assert.match(fs.readFileSync(path.join(l.dir, '.ai', 'adr', 'ADR-001-engine-and-setup.md'), 'utf8'), /Process weight: light/);
+  assert.throws(() => sc.parseScaffoldArgs(['--rigor', 'turbo']), /--rigor must be standard or light/);
+});
+
 test('credits: CREDITS.md from the register; NC/unknown/proprietary licences and missing files fail', () => {
   const C = require('../tools/gb/credits.js');
   const reg = '| Path | Source | Author | Licence | Attribution needed | Added |\n|---|---|---|---|---|---|\n'

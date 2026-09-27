@@ -11,7 +11,7 @@ longer loads, or an asset that cannot ship.
 
 ## When / not
 **Use:** approved spec, non-trivial (more than one script/scene, touches saved data, shared scenes, autoloads, input, assets).
-**Not:** trivial tuning or one-file change; spec still draft; no spec.
+**Not:** trivial tuning or one-file change; spec still draft; no spec. **Process: light** (AGENTS.md): run it only when the spec touches saved data, autoloads, input action names or scenes other specs use (`<plugin>/docs/rigor.md`).
 
 ## Phase 1 — Load context
 1. The spec (fully), `.ai/brief.md`, `AGENTS.md`, `.ai/lessons.md`, `.ai/STATE.md`.

@@ -69,6 +69,14 @@ function wav16(samples) {
   return Buffer.concat([h, data]);
 }
 
+test('kbVersionNote: warns when kb results quote the master Godot docs next to the pinned 4.7 copy', () => {
+  const master = 'Plik lokalny: zrodla/godotengine--godot-docs/tutorials/export/exporting_for_android.rst — linie 1–10';
+  const pinned = 'Plik lokalny: fala-05/zrodla/godotengine--godot-docs-4.7/tutorials/export/exporting_for_android.rst';
+  assert.match(gb.kbVersionNote(`${pinned}\n${master}`), /master.*4\.8-dev.*godot-docs-4\.7/s);
+  assert.equal(gb.kbVersionNote(pinned), '');
+  assert.equal(gb.kbVersionNote('## Some asset pack\nPlik lokalny: assety/fala-01/tiny-dungeon'), '');
+});
+
 test('wavPeakDb: silence is -Infinity, half scale is about -6 dBFS, non-WAV is null', () => {
   const d = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-wav-'));
   fs.writeFileSync(path.join(d, 'silent.wav'), wav16(new Array(100).fill(0)));

@@ -9,6 +9,14 @@ Plan: {link to plan} · Players: {n} · Question: {the one question}
 | Mechanic | Verdict (keep / tweak / cut) | In their words | Observed | Maps to (Tuning row / backlog) |
 |---|---|---|---|---|
 
+## Target experience (from the brief)
+| Aesthetic | Landed? (yes / partly / no) | Evidence (what players did or said) |
+|---|---|---|
+
+## Difficulty (per level / wave)
+| Level | Retries (median) | Time | Players who stopped here |
+|---|---|---|---|
+
 ## Problems seen (by frequency)
 | Problem | Players affected | Where (level / moment) | Severity | Next step |
 |---|---|---|---|---|

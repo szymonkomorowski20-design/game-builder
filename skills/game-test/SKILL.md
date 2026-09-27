@@ -19,7 +19,9 @@ suite is green forever. So: derive from the spec first, freeze with the human, t
 Feel and fun are none of these — they are the human's playtest verdict.
 
 ## Protocol
-**Delegation:** when you implemented the phase yourself, hand the test work to the `game-builder:game-tester` agent (spec path + phase only) — a fresh context has not seen the implementation, which is exactly what step 1 requires. You keep the human conversation (freezing the plan).
+**Process: light** (AGENTS.md): you write the tests yourself, from the spec, **before** the code. Show them failing, and send the case list to the human in one message instead of a separate freeze step. The rest of this skill still applies (`<plugin>/docs/rigor.md`).
+
+**Delegation (standard):** when you implemented the phase yourself, hand the test work to the `game-builder:game-tester` agent (spec path + phase only) — a fresh context has not seen the implementation, which is exactly what step 1 requires. You keep the human conversation (freezing the plan).
 
 1. **Derive from the spec only** (implementation unread — not even "just to check whether the phase is built":
    that comes from the spec's Progress, `STATUS.md` and `git log --oneline`; `scripts/` and `scenes/` stay closed

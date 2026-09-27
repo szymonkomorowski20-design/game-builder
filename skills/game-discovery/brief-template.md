@@ -17,6 +17,9 @@ spec's context section (feature).
 ## Player fantasy
 {One sentence.}
 
+## Target experience
+{1–2 of: sensation · fantasy · narrative · challenge · fellowship · discovery · expression · submission — in the player's words. Who it is for. See `<plugin>/docs/design-theory.md` §1, §8.}
+
 ## Core loop
 - Every ~10 s: {verb}
 - Every ~1 min: {goal}

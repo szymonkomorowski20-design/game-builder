@@ -1,6 +1,7 @@
 # Postmortem — {game} {version} · {date}
 
 ## What we set out to make (brief pillars) vs what shipped
+Target experience (brief): {aesthetics} — which landed, per playtests? Which loop carried the game?
 
 ## Numbers
 | Item | Planned | Actual |

@@ -80,6 +80,19 @@ function isGameBuilderRepo(root) {
   return readStamp(root) !== null;
 }
 
+/**
+ * The human's process choice from AGENTS.md (`- Process: light`). Absent → standard (repos scaffolded
+ * before 0.17.0). An unknown value also falls back to standard, and `unknown` carries it so the router
+ * can say so instead of silently picking.
+ */
+function processWeight(root) {
+  const agents = read(path.join(root, 'AGENTS.md'));
+  const m = agents === null ? null : /^- Process:\s*([A-Za-z-]+)/m.exec(agents);
+  if (!m) return { weight: 'standard', unknown: null };
+  const v = m[1].toLowerCase();
+  return ['standard', 'light'].includes(v) ? { weight: v, unknown: null } : { weight: 'standard', unknown: m[1] };
+}
+
 function activeSpecs(root) {
   try {
     return fs
@@ -142,6 +155,7 @@ module.exports = {
   readStamp,
   isGodotProject,
   isGameBuilderRepo,
+  processWeight,
   activeSpecs,
   openIncidents,
   lastVerify,
