@@ -24,6 +24,7 @@ func run() -> void:
 		guard += 1
 		await bot.fight_until(func() -> bool: return game.state != RogueRun.State.ROOM, 90.0)
 		if game.state == RogueRun.State.REWARD:
+			await wait(0.4)   # the boon choice ignores a pick for its first pick_delay
 			await tap("attack")
 		if game.state == RogueRun.State.DOORS:
 			var doors := game.room.get_children().filter(func(n: Node) -> bool: return n is RogueDoor)

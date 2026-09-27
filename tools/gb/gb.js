@@ -54,6 +54,8 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   export [--preset "Web"] [--smoke]   export presets (templates must be installed); --smoke runs the exported desktop build headless and fails on errors in its log
  Setup (plugin copy of gb)
   scaffold …  ·  harness install  ·  tests install [gut]  ·  doctor
+  snapshot [--path R]                  stage everything and print the tree id (git write-tree) — a phase snapshot without a commit
+  snapshot checkout <tree> <dir>       a clean copy of that snapshot in <dir> (the repo's index untouched) — for a reviewer's gb verify --path
   credits                  CREDITS.md from .ai/assets/REGISTER.md; fails on licences that cannot ship (NC, ND, unknown, proprietary)
   recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
@@ -965,6 +967,7 @@ function main(argv) {
   if (argv[0] === 'scaffold') return cmdScaffold(argv.slice(1));
   if (argv[0] === 'tools' && argv[1] === 'update') return cmdToolsUpdate(parseArgs(argv.slice(2)));
   if (argv[0] === 'doctor') return cmdDoctor(parseArgs(argv.slice(1)));
+  if (argv[0] === 'snapshot') return cmdSnapshot(argv.slice(1));
   if (argv[0] === 'recipe') return cmdRecipe(parseArgs(argv.slice(1)));
   if (argv[0] === 'credits') return cmdCredits(parseArgs(argv.slice(1)));
   const opts = parseArgs(argv);
@@ -1103,6 +1106,54 @@ function toolsOutdated(dir) {
   });
 }
 
+const HARNESS_FILES = ['harness.gd', 'scenario.gd'];
+
+/** Harness framework files that differ from the plugin's (only when the game has the harness). */
+function harnessOutdated(dir) {
+  const src = path.join(PLUGIN_ROOT, 'templates', 'addons', 'gb_harness');
+  const dst = path.join(dir, 'addons', 'gb_harness');
+  if (!fs.existsSync(src) || !fs.existsSync(dst)) return [];
+  return HARNESS_FILES.filter((f) => {
+    const a = safeRead(path.join(src, f));
+    return a !== null && a !== safeRead(path.join(dst, f));
+  });
+}
+
+/**
+ * Autonomous mode keeps phases as tree snapshots instead of commits (commits wait for the human).
+ *   gb snapshot                       → git add -A, git write-tree, prints SNAPSHOT <tree>
+ *   gb snapshot checkout <tree> <dir> → a clean copy of the tree in <dir>, through a temporary index, so a reviewer
+ *                                       can run gb verify --path <dir> while the maker keeps working in the repo
+ */
+function cmdSnapshot(argv) {
+  const opts = parseArgs(argv.filter((a, i) => !(argv[0] === 'checkout' && (i === 0 || i === 1 || i === 2))));
+  const repo = opts.path ? path.resolve(opts.path) : process.cwd();
+  const git = (args, env = {}) => {
+    const r = spawnSync('git', ['-C', repo, ...args], { encoding: 'utf8', env: { ...process.env, ...env } });
+    if (r.status !== 0) throw new UserError(`git ${args.join(' ')}: ${(r.stderr || '').trim()}`);
+    return r.stdout.trim();
+  };
+  if (argv[0] === 'checkout') {
+    const [, tree, out] = argv;
+    if (!tree || !out) throw new UserError('usage: gb snapshot checkout <tree> <dir>');
+    const dir = path.resolve(out);
+    fs.mkdirSync(dir, { recursive: true });
+    const index = path.join(os.tmpdir(), `gb-snapshot-${process.pid}-${Date.now()}.idx`);
+    try {
+      git(['read-tree', tree], { GIT_INDEX_FILE: index });
+      git(['checkout-index', '-a', `--prefix=${dir.replace(/\\/g, '/')}/`], { GIT_INDEX_FILE: index });
+    } finally {
+      fs.rmSync(index, { force: true });
+    }
+    process.stdout.write(`CHECKOUT ${tree} → ${dir}\nNext: node tools/gb/gb.js verify --path "${dir}"\n`);
+    return 0;
+  }
+  git(['add', '-A']);
+  const tree = git(['write-tree']);
+  process.stdout.write(`SNAPSHOT ${tree}\n(staged, no commit — list it in STATUS.md; gb snapshot checkout ${tree} <dir> gives a clean copy)\n`);
+  return 0;
+}
+
 function cmdToolsUpdate(opts) {
   if (!fs.existsSync(path.join(PLUGIN_ROOT, 'templates'))) throw new UserError('tools update runs from the plugin copy of gb: node <plugin>/tools/gb/gb.js tools update --path <game>');
   const dir = opts.path ? path.resolve(opts.path) : findProjectDir(process.cwd());
@@ -1112,6 +1163,10 @@ function cmdToolsUpdate(opts) {
   for (const f of changed) fs.copyFileSync(path.join(HERE, f), path.join(dir, 'tools', 'gb', f));
   if (!fs.existsSync(path.join(dir, 'tools', 'gb', '.gdignore'))) fs.writeFileSync(path.join(dir, 'tools', 'gb', '.gdignore'), '');
   process.stdout.write(changed.length ? `UPDATED tools/gb: ${changed.join(', ')} (ignore-errors.txt untouched)\n` : 'tools/gb already matches the plugin\n');
+  // The harness is framework too: a game scaffolded earlier must get new scenario helpers (e.g. note()).
+  const harness = harnessOutdated(dir);
+  for (const f of harness) fs.copyFileSync(path.join(PLUGIN_ROOT, 'templates', 'addons', 'gb_harness', f), path.join(dir, 'addons', 'gb_harness', f));
+  if (harness.length) process.stdout.write(`UPDATED addons/gb_harness: ${harness.join(', ')}\n`);
   return 0;
 }
 
@@ -1173,6 +1228,8 @@ function cmdDoctor(opts) {
 
   const outdated = toolsOutdated(dir);
   if (outdated && outdated.length) warn(`tools/gb differs from the plugin (${outdated.join(', ')}) — node <plugin>/tools/gb/gb.js tools update --path .`);
+  const staleHarness = harnessOutdated(dir);
+  if (staleHarness.length) warn(`addons/gb_harness differs from the plugin (${staleHarness.join(', ')}) — node <plugin>/tools/gb/gb.js tools update --path .`);
 
   const fw = detectTestFramework(dir);
   (fw ? ok : warn)(`test framework ${fw || 'not installed yet (gb test → SKIP)'}`);

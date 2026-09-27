@@ -205,3 +205,20 @@ test('doctor: no commit yet is a MISS, but only a WARN when the repo runs Proces
   assert.match(auto, /^WARN /);
   assert.match(auto, /write-tree/);
 });
+
+test('snapshot: stages and prints the tree id; checkout gives a clean copy without touching the repo index', () => {
+  const repo = fs.mkdtempSync(path.join(os.tmpdir(), 'gb-snap-'));
+  spawnSync('git', ['init', '-q', repo]);
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'phase one\n');
+  const r = spawnSync(process.execPath, [GB, 'snapshot', '--path', repo], { encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  const tree = /SNAPSHOT ([0-9a-f]{40})/.exec(r.stdout)[1];
+  assert.equal(spawnSync('git', ['-C', repo, 'write-tree'], { encoding: 'utf8' }).stdout.trim(), tree, 'the id is the staged tree');
+  fs.writeFileSync(path.join(repo, 'a.txt'), 'phase two, not in the snapshot\n');
+  const out = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gb-snapout-')), 'copy');
+  const c = spawnSync(process.execPath, [GB, 'snapshot', 'checkout', tree, out, '--path', repo], { encoding: 'utf8' });
+  assert.equal(c.status, 0, c.stderr);
+  // (line endings follow git's checkout settings, e.g. core.autocrlf on Windows)
+  assert.equal(fs.readFileSync(path.join(out, 'a.txt'), 'utf8').replace(/\r\n/g, '\n'), 'phase one\n', 'the copy holds the snapshot, not the working tree');
+  assert.equal(spawnSync('git', ['-C', repo, 'write-tree'], { encoding: 'utf8' }).stdout.trim(), tree, "the repo's index is untouched by the checkout");
+});

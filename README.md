@@ -12,7 +12,7 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
 wydanie.
 
-## Co jest w środku (0.17.0)
+## Co jest w środku (0.23.0)
 
 | Element | Do czego służy |
 |---|---|
@@ -22,12 +22,16 @@ wydanie.
 | 7 szablonów gier | `platformer-2d`, `topdown-2d`, `grid-puzzle-2d`, `cards-2d`, `platformer-3d`, `fps-3d`, `action-roguelite-3d` (jak Hades), każdy z testami i botem-graczem |
 | 52 przepisy | przetestowane mechaniki (ruch, walka, ekwipunek, zapis, dialogi, AI, nawigacja, audio, multiplayer, kamera 3D, animacje, minimapa…), `gb recipe add` |
 | Narzędzie `gb` | weryfikacja gry bez okna, bot-gracz, nagrania Twojej gry jako testy, zrzuty z wzorcami, wydajność, eksport z próbnym uruchomieniem, licencje/napisy, wyszukiwanie w gry-wiedza |
-| Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy/lekki), twarde zasady |
-| `docs/` | instrukcja obsługi, tryb pracy (standardowy/lekki), moduły opcjonalne, raporty z budowy gier |
-| Wiedza (w repo [gry-wiedza](https://github.com/szymonkomorowski20-design/gry-wiedza), `gb doc <nazwa>`) | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne |
+| Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy / lekki / autonomiczny), twarde zasady |
+| `docs/` | instrukcja obsługi, tryby pracy (standardowy / lekki / autonomiczny: bot buduje, Ty grasz w gotową grę), moduły opcjonalne, raporty z budowy gier |
+| Wiedza (w repo [gry-wiedza](https://github.com/szymonkomorowski20-design/gry-wiedza), `gb doc <nazwa>`) | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne, dokument gatunku (action roguelite jak Hades) |
 
-Dowód działania: gra *Lodowy Loch* zbudowana pluginem w 5 fazach i przejdziona przez człowieka
-([raport](docs/dogfood/lodowy-loch.md)). Plan i stan: [ROADMAP.md](ROADMAP.md), zmiany: [CHANGELOG.md](CHANGELOG.md).
+Dowody działania:
+- gra *Lodowy Loch*, zbudowana pluginem w 5 fazach i przejdziona przez człowieka ([raport](docs/dogfood/lodowy-loch.md));
+- gra *Ucieczka z Krypty* (jak Hades), zbudowana w trybie autonomicznym od jednozdaniowego pomysłu do buildu na
+  Windows, z darmowymi assetami ([raport](docs/dogfood/ucieczka-z-krypty.md)).
+
+ Plan i stan: [ROADMAP.md](ROADMAP.md), zmiany: [CHANGELOG.md](CHANGELOG.md).
 
 ## Instalacja
 
@@ -67,6 +71,7 @@ node tools/gb/gb.js record skok   # TY grasz, gb nagrywa → tests/replays/skok.
 node tools/gb/gb.js replay        # odtwarza nagrania bez okna; stan końcowy musi się zgadzać
 node tools/gb/gb.js shot --name menu --compare   # zrzut ekranu vs zaakceptowany wzorzec
 node tools/gb/gb.js perf --seconds 10            # czas klatki, węzły, draw calls vs budżet
+node tools/gb/gb.js snapshot                     # migawka fazy bez commita (git write-tree); snapshot checkout <drzewo> <folder> = czysta kopia
 node tools/gb/gb.js export --preset "Windows Desktop"
 node tools/gb/gb.js kb "coyote time CharacterBody2D"
 node tools/gb/gb.js assets "wybuch" --typ audio

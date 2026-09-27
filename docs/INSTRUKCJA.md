@@ -122,15 +122,29 @@ W folderze gry: `node tools/gb/gb.js <komenda>`
 
 **SKIP to nie PASS.** Jeśli coś zostało pominięte, bot mówi „niesprawdzone”, a nie „działa”.
 
-## 7. Tryb pracy: standardowy albo lekki
+## 7. Tryb pracy: standardowy, lekki albo autonomiczny
 Wybierasz go przy zakładaniu projektu. Później zmieniasz go linijką `- Process:` w pliku `AGENTS.md` gry.
 - **Standardowy** (domyślny): recenzent i agent-tester gry przy każdej fazie, pełna dokumentacja. Dla gier
   „na serio”, z zapisami gry, do wydania.
 - **Lekki**: krótszy spec, jedna recenzja na cały spec, zrzuty sprawdza sam bot, a Ty grasz co najmniej na końcu
   specu. Dla game jamów, prototypów i nauki.
+- **Autonomiczny** („zrób sam”, „prawie bez bramek”):
+  - Ty podajesz pomysł, a bot odpowiada na karty decyzji polecanymi opcjami. Każdą decyzję zapisuje z uzasadnieniem,
+    żebyś mógł ją odwrócić.
+  - Spec zatwierdza niezależny recenzent.
+  - Każdą fazę pilnują maszyny: testy, recenzja, playtest na zrzutach i bot, który przechodzi grę.
+  - Ty grasz w gotową grę według listy w `STATUS.md`.
+  - Zamiast commitów bot robi migawki (`gb snapshot`). Commit robi dopiero na Twoje słowo.
 
-**W obu trybach bez zmian:** Twoje decyzje, zielone `gb verify`, grywalna wersja po każdej fazie, commit na Twoje
-słowo.
+  Przykład: [Ucieczka z Krypty](dogfood/ucieczka-z-krypty.md).
+
+**We wszystkich trybach bez zmian:**
+- zielone `gb verify` i grywalna wersja po każdej fazie;
+- płatne generatory tylko po Twoim „tak”;
+- commit na Twoje słowo.
+
+W standardowym i lekkim decyzje podejmujesz Ty. W autonomicznym bot decyduje, a Ty każdą decyzję możesz odwrócić po
+zagraniu.
 
 ## 8. Grafika, dźwięk i licencje
 - Każdy plik w `assets/` ma wpis w `.ai/assets/REGISTER.md` (źródło, autor, licencja). Bez wpisu nie trafia do

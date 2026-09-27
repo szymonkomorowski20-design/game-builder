@@ -163,9 +163,13 @@ test('tools update refreshes framework files only and keeps ignore-errors.txt', 
   sc.scaffold(o);
   fs.writeFileSync(path.join(o.dir, 'tools', 'gb', 'gb.js'), '// old');
   fs.writeFileSync(path.join(o.dir, 'tools', 'gb', 'ignore-errors.txt'), '# mine\nfoo\n');
+  fs.writeFileSync(path.join(o.dir, 'addons', 'gb_harness', 'scenario.gd'), '# old harness');
   const r = spawnSync(process.execPath, [GB, 'tools', 'update', '--path', o.dir], { encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
   assert.match(r.stdout, /UPDATED tools\/gb: gb\.js/);
+  assert.match(r.stdout, /UPDATED addons\/gb_harness: scenario\.gd/, 'the harness is framework too');
+  assert.equal(fs.readFileSync(path.join(o.dir, 'addons', 'gb_harness', 'scenario.gd'), 'utf8'),
+    fs.readFileSync(path.join(__dirname, '..', 'templates', 'addons', 'gb_harness', 'scenario.gd'), 'utf8'));
   assert.equal(fs.readFileSync(path.join(o.dir, 'tools', 'gb', 'gb.js'), 'utf8'), fs.readFileSync(GB, 'utf8'));
   assert.equal(fs.readFileSync(path.join(o.dir, 'tools', 'gb', 'ignore-errors.txt'), 'utf8'), '# mine\nfoo\n');
   const again = spawnSync(process.execPath, [GB, 'tools', 'update', '--path', o.dir], { encoding: 'utf8' });

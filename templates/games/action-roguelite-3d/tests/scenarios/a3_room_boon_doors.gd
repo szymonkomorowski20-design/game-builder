@@ -18,6 +18,7 @@ func run() -> void:
 	expect_eq(game.offer.size(), 3, "A3 three boons offered")
 	expect_eq(game.ui.mode, RogueUI.Mode.BOONS, "A3 the boon panel is open")
 	await shot("a3_boons")
+	await wait(0.4)   # the boon choice ignores a pick for its first pick_delay (0.35 s)
 	await tap("move_right")
 	var picked := game.offer[game.ui.selected].boon.id
 	await tap("attack")
@@ -27,5 +28,6 @@ func run() -> void:
 	expect_gt(doors.size(), 0, "A3 doors appeared")
 	await shot("a3_doors")
 	await bot.walk_to((doors[0] as RogueDoor).global_position, 0.5)
-	var next := await wait_until(func() -> bool: return game.run.depth == 1 and game.state == RogueRun.State.ROOM, 3.0)
+	# Room 2 may be a rest, whose doors stand at once (DOORS) — entering it is what counts.
+	var next := await wait_until(func() -> bool: return game.run.depth == 1 and (game.state == RogueRun.State.ROOM or game.state == RogueRun.State.DOORS), 3.0)
 	expect(next, "A3 walking into a door enters room 2")

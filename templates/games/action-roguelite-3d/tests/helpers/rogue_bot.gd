@@ -33,9 +33,16 @@ func stop() -> void:
 	steer(Vector3.ZERO)
 
 
+## Walks toward `point`; stops when there, on timeout, or when the area changes (a door moved the hero into another
+## room — the old target means nothing there).
 func walk_to(point: Vector3, radius: float = 0.6, timeout: float = 8.0) -> bool:
 	var t := 0.0
+	var area: Node = run.room if run.room != null else run.hub
 	while t < timeout:
+		var now: Node = run.room if run.room != null else run.hub
+		if now != area:
+			stop()
+			return true
 		var d := point - run.player.global_position
 		d.y = 0.0
 		if d.length() <= radius:

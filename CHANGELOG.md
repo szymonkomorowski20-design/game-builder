@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.23.0 — 2026-09-27 · the proof game is built
+- **ROADMAP 9.1 proof game "Ucieczka z Krypty"** (a Hades-like, autonomous mode):
+  - built from the one-line pitch to a Windows build in one session;
+  - report: `docs/dogfood/ucieczka-z-krypty.md`;
+  - the owner plays it next (STATUS.md checklist).
+- **`gb snapshot` / `gb snapshot checkout <tree> <dir>`:**
+  - a phase snapshot without a commit (git write-tree);
+  - a clean copy through a temporary index, so a reviewer runs `gb verify --path <dir>` while the maker keeps
+    working;
+  - game-implement uses it for autonomous mode.
+
+  Tested.
+- **`gb tools update` refreshes `addons/gb_harness`** (harness.gd, scenario.gd) as well, and `gb doctor` warns
+  when they differ. A game scaffolded before 0.22.0 did not get `note()`. Tested.
+- **Template `action-roguelite-3d` — two game bugs the proof game's scenarios found:**
+  - doors arm after 0.3 s: a rest room shows its doors at once, at the socket the hero just walked through, and the
+    physics server could still place the hero there;
+  - the boon choice ignores a pick for 0.35 s: a mashed attack chose a boon unseen.
+
+  The template bot stops walking when the room changes.
+- **Genre doc** (gry-wiedza): attack tokens and "cheap bodies are not cheap", marked [measured].
+
 ## 0.22.0 — 2026-09-27 · lessons from the proof game (phases 1–2)
 Found while building the Hades-like proof game "Ucieczka z Krypty" in autonomous mode (ROADMAP 9.1).
 

@@ -96,7 +96,11 @@ The art is placeholder (capsules, boxes).
   - every telegraph shows where it hurts, at its true size;
   - enemy telegraphs are never cancelled by hits;
   - at most `attack_tokens` melee enemies wind up at once (AttackTokens). Added in 0.22.0 after the proof game: without
-    it, overlapping tells made a crowded room cost a careful bot most of its health.
+    it, overlapping tells made a crowded room cost a careful bot most of its health;
+  - no input is taken blind (0.23.0, from the proof game):
+    - a door arms `arm_time` (0.3 s) after it appears, so a rest room's instant doors can't catch the hero who just
+      came through the same socket;
+    - the boon choice ignores a pick for `pick_delay` (0.35 s), so a mashed attack doesn't choose unseen.
 - **Balance at base stats:**
   - a rusher takes about one combo (0.3–1.2 s of perfect play);
   - a brute takes 1–3.5 s;

@@ -48,7 +48,7 @@ the end, or when the human says "zrób sam". It is the most relaxed mode, so the
 | Bootstrap | The same cards and the same recording. Prefer a genre template when one exists (e.g. `action-roguelite-3d`). |
 | Spec | The full spec, **approved by an independent `game-checker` review against the brief** (a fresh agent, the spec and the brief only). CHANGES-REQUIRED means fix it and review again. |
 | Implement | Every phase ends playable. The gates are machine gates: `gb verify` green; `game-checker` on the phase diff; `game-playtester` runs it and **looks** at shots/audio; plus a **completability scenario**, where a simple bot finishes the game or the level (template A8, recipe 37). Feel parameters stay in the Tuning table for the human's pass. |
-| Commits | Only on the human's word (their standing rule). Keep a snapshot per phase with `git write-tree` and list the ids in STATUS.md, then commit at the end when the human says so. |
+| Commits | Only on the human's word (their standing rule). Keep a snapshot per phase and list the ids in STATUS.md, then commit at the end when the human says so. Take snapshots with `gb snapshot` (git write-tree), starting right after bootstrap. Reviewers verify a clean copy made with `gb snapshot checkout <tree> <dir>`. |
 | Paid assets | Never without the human's yes for that batch. Use free packs (`gb doc starter-packs`), or placeholders marked as such. |
 | The end | STATUS.md gets a human-gate checklist: how to run the game, 3–5 things to try, the Tuning values, and the Decisions Ledger to review. **The human plays the finished game**; every bot decision can be overturned. |
 

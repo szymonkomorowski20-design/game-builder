@@ -10,7 +10,10 @@ signal shrine_closed
 
 enum Mode { NONE, BOONS, SHRINE }
 
+@export var pick_delay := 0.35   ## s after the boon choice opens when a pick is ignored (a mashed attack must not pick blind)
+
 var mode := Mode.NONE
+var _boons_open_for := 0.0
 var selected := 0
 var _offer: Array[BoonOffer] = []
 var _upgrades: Array[StringName] = []
@@ -61,6 +64,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if mode == Mode.BOONS:
+		_boons_open_for += delta
 	_banner_left = maxf(_banner_left - delta, 0.0)
 	_banner.visible = _banner_left > 0.0
 
@@ -107,6 +112,7 @@ func banner(text: String, seconds: float = 1.6) -> void:
 func show_boons(offer: Array[BoonOffer]) -> void:
 	_offer = offer
 	mode = Mode.BOONS
+	_boons_open_for = 0.0
 	selected = 0
 	_draw_panel()
 
@@ -130,7 +136,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		selected = wrapi(selected - 1, 0, count)
 	elif event.is_action_pressed(next):
 		selected = wrapi(selected + 1, 0, count)
-	elif mode == Mode.BOONS and (event.is_action_pressed(&"attack") or event.is_action_pressed(&"action")):
+	elif mode == Mode.BOONS and (event.is_action_pressed(&"attack") or event.is_action_pressed(&"action")) and _boons_open_for >= pick_delay:
 		mode = Mode.NONE
 		_panel.visible = false
 		boon_chosen.emit(selected)

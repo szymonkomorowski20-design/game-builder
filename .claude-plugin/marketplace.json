@@ -9,7 +9,7 @@
       "name": "game-builder",
       "source": "./",
       "description": "game-start → game-discovery → game-bootstrap → spec → phased implementation; every phase a playable build verified by the engine (gb verify) and played by the human.",
-      "version": "0.22.0"
+      "version": "0.23.0"
     }
   ]
 }
