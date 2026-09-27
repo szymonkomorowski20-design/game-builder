@@ -11,6 +11,7 @@ signal hit_landed(target: Node3D, damage: int)
 @export var attack_action: StringName = &"action"
 @export var move_scale_attacking := 0.25   ## the owner multiplies its speed by move_scale()
 @export var hitbox: Area3D                  ## mask it to the enemies' layer only
+@export var damage_multiplier := 1.0        ## the owner's power (boons, upgrades — recipe 48); damage = round(step × this)
 
 var combo := ComboAttack.new()
 var _last_hit_id := {}   # target instance id → the swing's hit id that already hit it
@@ -69,5 +70,6 @@ func _hit_overlapping() -> void:
 		if _last_hit_id.get(id, -1) == combo.hit_id:
 			continue
 		_last_hit_id[id] = combo.hit_id
-		body.take_hit(step.damage, push)
-		hit_landed.emit(body, step.damage)
+		var dealt := roundi(step.damage * damage_multiplier)
+		body.take_hit(dealt, push)
+		hit_landed.emit(body, dealt)

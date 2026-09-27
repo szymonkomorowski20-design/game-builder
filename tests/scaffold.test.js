@@ -169,6 +169,24 @@ test('tools update refreshes framework files only and keeps ignore-errors.txt', 
   assert.match(again.stdout, /already matches/);
 });
 
+test('templates: "recipes" in template.json are added with their dependencies and tests, from the plugin (no copies in the template)', () => {
+  const tdir = path.join(__dirname, '..', 'templates', 'games', 'zz-recipe-probe');
+  fs.mkdirSync(path.join(tdir, 'scenes'), { recursive: true });
+  fs.writeFileSync(path.join(tdir, 'template.json'), JSON.stringify({ name: 'zz-recipe-probe', description: 'test only', dim: '2d', main_scene: 'res://scenes/main.tscn', tests: 'gut', recipes: ['06'] }));
+  fs.writeFileSync(path.join(tdir, 'scenes', 'main.tscn'), '[gd_scene format=3]\n\n[node name="Main" type="Node2D"]\n');
+  try {
+    const o = sc.parseScaffoldArgs(['--dir', tmp(), '--template', 'zz-recipe-probe', '--engine', '4.7']);
+    const report = sc.scaffold(o);
+    assert.ok(fs.existsSync(path.join(o.dir, 'recipes', '06-hitbox-hurtbox', 'hitbox.gd')), 'the recipe itself');
+    assert.ok(fs.existsSync(path.join(o.dir, 'recipes', '05-health', 'health.gd')), 'its dependency (Health)');
+    assert.ok(fs.readdirSync(path.join(o.dir, 'tests', 'scenarios')).some((f) => f.startsWith('r06_')), 'its scenario');
+    assert.ok(fs.readdirSync(path.join(o.dir, 'tests', 'unit')).some((f) => f.startsWith('test_r05_')), 'the dependency\'s unit test');
+    assert.ok(report.some((l) => /RECIPES .*05-health.*06-hitbox-hurtbox/.test(l)), report.join('\n'));
+  } finally {
+    fs.rmSync(tdir, { recursive: true, force: true });
+  }
+});
+
 test('templates: platformer-2d is listed; an unknown template is rejected with the list', () => {
   assert.ok(sc.listTemplates().includes('platformer-2d'));
   assert.ok(sc.listTemplates().includes('topdown-2d'));
@@ -196,6 +214,14 @@ test('recipes: dependencies come from class_name use; add resolves them first', 
   const order = R.resolve(info, ['23']);
   assert.ok(order.indexOf('09-inventory') < order.indexOf('11-shop') && order.indexOf('11-shop') < order.indexOf('23-hud'));
   assert.throws(() => R.resolve(info, ['99']), /unknown recipe/);
+});
+
+test('recipes: a node NAME in a scene or an inner enum with a class_name\'s spelling is not a dependency', () => {
+  const info = R.catalog(RECIPES);
+  assert.ok(!info['47-melee-combo'].deps.includes('06-hitbox-hurtbox'), `47 deps: ${info['47-melee-combo'].deps}`);
+  assert.ok(!info['51-boss-phases'].deps.includes('14-state-machine'), `51 deps: ${info['51-boss-phases'].deps}`);
+  assert.ok(info['50-run-meta'].deps.includes('48-boons-modifiers'), 'a real use (StatSheet) still counts');
+  assert.ok(info['52-status-effects'].deps.includes('48-boons-modifiers'), 'StatModifier/StatSheet');
 });
 
 test('recipes: every recipe has a README and at least one test', () => {
@@ -279,6 +305,21 @@ test('e2e: platformer-3d template passes its own 8 scenarios and unit tests out 
   assert.equal(v.status, 0, v.stdout);
   assert.match(v.stdout, /PASS scenarios \(8\/8 passing\)/);
   assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
+});
+
+test('e2e: action-roguelite-3d template gets its recipes and actions, and passes every scenario (a bot wins the run) out of the box', { skip, timeout: 1200000 }, () => {
+  const dir = path.join(tmp(), 'rogue');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'Rogue', '--template', 'action-roguelite-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /RECIPES 05-health, 13-save-load, 43-dash-knockback, 47-melee-combo, 48-boons-modifiers, 49-encounter-director, 50-run-meta, 51-boss-phases, 52-status-effects/);
+  const pg = fs.readFileSync(path.join(dir, 'project.godot'), 'utf8');
+  assert.match(pg, /^attack=\{/m);
+  assert.match(pg, /^dash=\{/m);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 900000 });
+  assert.equal(v.status, 0, v.stdout);
+  const sc = /PASS scenarios \((\d+)\/(\d+) passing\)/.exec(v.stdout);
+  assert.ok(sc && sc[1] === sc[2] && Number(sc[1]) >= 14, v.stdout);
+  assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
 });
 
 test('e2e: fps-3d template adds its own input actions (shoot on the mouse) and passes its scenarios out of the box', { skip, timeout: 900000 }, () => {

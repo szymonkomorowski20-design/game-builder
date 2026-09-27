@@ -65,6 +65,7 @@ func test_r51_attack_cycle_timings() -> void:
 	assert_true(boss.is_telegraphing())
 	_frames(roundi(a.telegraph / DT) - 1)
 	assert_true(boss.is_telegraphing(), "still telegraphing one frame before the end")
+	assert_almost_eq(boss.state_elapsed(), a.telegraph - DT, 1e-3, "state_elapsed tracks the telegraph")
 	_frames(1)
 	assert_true(boss.is_striking(), "strike right after the telegraph")
 	_frames(roundi(a.strike / DT))

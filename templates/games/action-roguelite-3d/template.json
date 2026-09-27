@@ -1,0 +1,15 @@
+{
+  "name": "action-roguelite-3d",
+  "description": "Action roguelite starter (Hades-like, original): a hub with a training dummy, an upgrade shrine and the run door; runs of rooms with waves from an encounter director, a boon choice after the room, doors that show their reward, two enemy types with telegraphed attacks, a phased boss with a readability contract; melee combo with input buffer, dash with invulnerability that cancels recovery, run currency banked on death, permanent upgrades saved to disk. Built on recipes 05, 13, 43, 47–52 (added with their tests); behaviour scenarios + unit tests.",
+  "dim": "3d",
+  "main_scene": "res://scenes/run/run.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut",
+  "recipes": ["05", "13", "43", "47", "48", "49", "50", "51", "52"],
+  "actions": {
+    "attack": { "keys": ["J"], "mouse": [1], "joy_buttons": [2] },
+    "dash": { "keys": ["K", "Shift"], "joy_buttons": [0] }
+  }
+}

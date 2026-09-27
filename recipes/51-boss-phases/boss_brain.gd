@@ -55,6 +55,11 @@ func is_recovering() -> bool:
 	return state == State.ATTACK_RECOVERY
 
 
+## Seconds spent in the current state — lets a host sync visuals (a filling telegraph) and lets tests act on time.
+func state_elapsed() -> float:
+	return _t
+
+
 func is_invulnerable() -> bool:
 	return state == State.TRANSITION or state == State.DEAD
 

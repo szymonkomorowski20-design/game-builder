@@ -1,5 +1,40 @@
 # Changelog
 
+## 0.20.0 — 2026-09-27 · template action-roguelite-3d (Hades-like), gb check sees autoloads, templates built on recipes
+- **`gb scaffold --template action-roguelite-3d`** — an original Hades-like starter:
+  - a hub with a training dummy, an upgrade shrine and the run door;
+  - runs of 5 rooms with director waves (a spawn warning before every enemy);
+  - a boon choice and doors that show their reward;
+  - rushers and brutes with two-cue telegraphs that hits never cancel;
+  - a boss with 66%/33% phases, an invulnerable transition, adds, and slam/lunge/nova moves, each showing where it
+    hurts at its true size;
+  - a melee combo and an invulnerable dash that cancels recovery;
+  - embers banked on death, and Vitality/Might upgrades saved with the save recipe.
+  - Built on recipes 05, 13, 43 and 47–52, which scaffold adds with their tests.
+  - Scenarios A1–A8. **A8: a bot wins the whole base run** (the "completable at base stats" contract).
+  - Unit contracts: enemy brain, boons, boss readability (`validate()`), and balance (time-to-kill bands; no hit
+    over 20% or 30% of base health).
+  - Stable over `--repeat 3`.
+  - Detection covers 4 cases. A missing i-frame check was caught only after strengthening A1.
+- **What the test bot found and what was fixed:**
+  - the boss lunge had no ground telegraph;
+  - its lane was drawn 1.6 m wide but hurt 3 m wide;
+  - it tracked the player until the hit, so no late sidestep worked. It now locks at `lunge_lock`;
+  - brutes hit for 30% of health (now 20%).
+- **Templates can list `recipes` in template.json.** Scaffold adds them exactly like `gb recipe add` (dependencies +
+  tests), so a template never carries a drifting copy. Tested.
+- **Recipe dependency detection is fixed.** Only node *types* count in scenes, comments and strings are ignored,
+  and names a recipe declares itself (an inner `enum State`) don't count. Before, 47 wrongly pulled in 05 and 06,
+  and 51 pulled in 14. Tested.
+- **`gb check` no longer fails every script that uses an autoload** (`Events`, `GbHarness`…). It now checks in
+  `_initialize()`, where autoload names are known; before, in `_init()`, they weren't (measured). Tested.
+- Recipes:
+  - 43 `Dash.is_ready()`;
+  - 47 `ComboMelee3D.damage_multiplier`;
+  - 51 `BossBrain.state_elapsed()`.
+
+  Each has a test or documentation.
+
 ## 0.19.0 — 2026-09-27 · genre pack "action roguelite": recipes 47–52, genre doc
 - The first genre-pack systems (goal: build a Hades-like on your own). Each recipe has unit tests and a
   bot scenario (except 52), plus detection proofs:

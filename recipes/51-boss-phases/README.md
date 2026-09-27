@@ -15,6 +15,7 @@
 - `min_phase` holds moves back until the fight escalates.
 - The next move is weighted among the unlocked ones, **never the same twice in a row** when there's a choice, from a
   seeded RNG.
+- **`state_elapsed()`** says how far into the current telegraph/strike/recovery it is. Use it to sync visuals and to time a test bot's reaction.
 - **`validate()`** is the readability contract. It returns every move whose telegraph is shorter than
   `min_telegraph` (0.4 s by default) or whose recovery is shorter than `min_window`. Run it in a test over your real
   boss data.

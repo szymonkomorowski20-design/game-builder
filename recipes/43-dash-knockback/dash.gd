@@ -26,6 +26,11 @@ func tick(delta: float) -> void:
 	_since_start += delta
 
 
+## True when try_start() would succeed now (the cooldown is over).
+func is_ready() -> bool:
+	return _since_start >= cooldown
+
+
 func is_dashing() -> bool:
 	return _since_start < duration
 

@@ -103,7 +103,7 @@ dla konkretnej partii.
 - [x] Przepisy 47–52 (0.19.0): kombinacje ataków wręcz (okna, bufor, anulowanie), modyfikatory statystyk i „dary” (boony) z
       rzadkością i synergiami, reżyser spotkań (fale, budżet, drzwi), struktura runu (pokoje, nagrody, śmierć → hub,
       waluta między runami), bossowie z fazami i zapowiadanymi atakami, efekty statusów
-- [ ] Szablon `action-roguelite-3d` (kamera izometryczna, ruch, zryw, kombinacje, 2 typy wrogów, pokoje z falami,
+- [x] Szablon `action-roguelite-3d` (0.20.0) (kamera izometryczna, ruch, zryw, kombinacje, 2 typy wrogów, pokoje z falami,
       wybór daru, boss, śmierć i nowy run, waluta) z bot-scenariuszami
 - [ ] Tryb pracy „autonomiczny” (bramki maszynowe między fazami, człowiek na końcu) — do decyzji przy grze-dowodzie
 - [ ] Gra-dowód zbudowana pluginem od zera + raport

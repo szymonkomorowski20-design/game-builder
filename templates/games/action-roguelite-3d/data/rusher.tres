@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="EnemyTuning" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/enemy_tuning.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+max_health = 30
+move_speed = 3.6
+attack_range = 1.5
+telegraph = 0.45
+strike = 0.12
+recover = 0.7
+damage = 6
+knockback = 5.0
+body_scale = 1.0
+color = Color(0.85, 0.35, 0.3, 1)

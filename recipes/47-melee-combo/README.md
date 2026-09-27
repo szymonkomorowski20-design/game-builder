@@ -18,6 +18,7 @@
   - It reads the attack action and sizes an `Area3D` hitbox forward (-Z) to the step's `reach`.
   - While the swing is active, it calls `take_hit(damage, push)` on each overlapping body **once per `hit_id`**.
   - `move_scale()` slows the owner while swinging.
+  - `damage_multiplier` scales every swing (feed it the owner's attack power from recipe 48).
   - `default_combo()` is a three-swing starting point: two quick cuts, then a slower finisher with more reach and
     push.
 

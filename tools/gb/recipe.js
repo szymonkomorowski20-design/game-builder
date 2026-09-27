@@ -24,6 +24,18 @@ function testsFor(root, dir) {
   return [...unit, ...scen];
 }
 
+/**
+ * The text that can USE a class: in a scene only node types (node names like "Hitbox" are just names); in a
+ * script everything except comments and string literals ("Health (recipe 05)" in a comment is not a use).
+ */
+function usedIdentifiers(file, text) {
+  if (file.endsWith('.tscn')) return [...text.matchAll(/\btype="(\w+)"/g)].map((m) => m[1]).join('\n');
+  return text
+    .split('\n')
+    .map((line) => line.replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g, '""').replace(/#.*$/, ''))
+    .join('\n');
+}
+
 /** Map of recipe dir → { title, classes defined, recipes it depends on }. */
 function catalog(root) {
   const dirs = recipeDirs(root);
@@ -41,10 +53,14 @@ function catalog(root) {
     info[d] = { title, classes, deps: [] };
   }
   for (const d of dirs) {
-    const text = [...walk(path.join(root, d)).filter((f) => /\.(gd|tscn)$/.test(f)), ...testsFor(root, d)].map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+    const files = [...walk(path.join(root, d)).filter((f) => /\.(gd|tscn)$/.test(f)), ...testsFor(root, d)];
+    const raw = files.map((f) => fs.readFileSync(f, 'utf8')).join('\n');
+    const code = files.map((f) => usedIdentifiers(f, fs.readFileSync(f, 'utf8'))).join('\n');
+    // A name the recipe declares itself (an inner enum/class/const) shadows a global class of the same spelling.
+    const local = new Set([...code.matchAll(/^\s*(?:enum|class|const)\s+(\w+)/gm)].map((m) => m[1]));
     const deps = new Set();
-    for (const [cls, o] of Object.entries(owner)) if (o !== d && new RegExp(`\\b${cls}\\b`).test(text)) deps.add(o);
-    for (const m of text.matchAll(/res:\/\/(\d\d-[\w-]+)\//g)) if (m[1] !== d && info[m[1]]) deps.add(m[1]);
+    for (const [cls, o] of Object.entries(owner)) if (o !== d && !local.has(cls) && new RegExp(`\\b${cls}\\b`).test(code)) deps.add(o);
+    for (const m of raw.matchAll(/res:\/\/(\d\d-[\w-]+)\//g)) if (m[1] !== d && info[m[1]]) deps.add(m[1]);
     info[d].deps = [...deps].sort();
   }
   return info;

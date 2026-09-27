@@ -5,7 +5,7 @@ knockback that stacks several hits into a launch across the level, or pushes tow
 
 **Solution:** two pure objects the body asks every physics frame. `Dash`: `try_start(dir)` (refused during the
 cooldown or without a direction), `velocity()` during the burst, `is_invulnerable()` through the burst +
-`iframes_after`. `Knockback`: `hit(source, body_position, strength)` pushes away from the source, decaying linearly
+`iframes_after`, `is_ready()` when the cooldown is over (for UI and bots). `Knockback`: `hit(source, body_position, strength)` pushes away from the source, decaying linearly
 over `duration`; a new hit replaces the push. `DashMover` shows the priority: dash, then knockback, then walking.
 Hits go through `take_hit()`, which respects the i-frames.
 

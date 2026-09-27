@@ -25,7 +25,9 @@ func _walk(dir: String, out: Array) -> void:
 	d.list_dir_end()
 
 
-func _init() -> void:
+## _initialize, not _init: autoload names (Events, GbHarness…) are only known to the compiler after the main loop
+## starts — checking in _init reports every script that uses an autoload as broken (measured 2026-09-27).
+func _initialize() -> void:
 	var files: Array = []
 	_walk("res://", files)
 	# Never load this checker itself: re-loading the running SceneTree script (a project copy of

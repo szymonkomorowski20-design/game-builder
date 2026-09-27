@@ -29,6 +29,7 @@ Available templates (each: implemented spec, Tuning resource, unit tests + behav
 | `cards-2d` | card combat: seeded deck, hand, energy, attack/block cards as data, enemy intents, win/lose | 4 scenarios C1–C4 + unit (incl. a balance contract) |
 | `platformer-3d` | 3D run & jump on the ground plane (coyote time, buffer, variable jump), chase camera on a spring arm that stays in front of walls, coins → goal; Forward+, Jolt | 7 scenarios D1–D7 + unit |
 | `fps-3d` | first-person shooter: mouse/stick look (screen_relative), movement relative to the view, hitscan weapon with fire interval, targets with health (one moving, one behind cover), clear the arena; adds its own `shoot` (LMB/F/RT) and `look_*` actions | 6 scenarios F1–F6 + unit |
+| `action-roguelite-3d` | Hades-like action roguelite (original): hub with training dummy and upgrade shrine; runs of 5 rooms with director waves, boon choices, doors that show their reward; two enemy types with readable telegraphs; a phased boss; melee combo + invulnerable dash; death banks embers, upgrades saved. Built on recipes 05, 13, 43, 47–52 (added with their tests); pair it with `gb doc genre-action-roguelite`; adds `attack` and `dash` actions | 8 scenarios A1–A8 (A8: a bot wins the whole base run) + unit contracts (readability, balance) |
 
 ## Q2 — Dimension & camera (usually already in the brief → confirm)
 2D side / 2D top-down / 2D isometric / 3D third-person / 3D first-person / 3D top-down.

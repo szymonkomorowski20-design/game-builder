@@ -1,0 +1,135 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/hub/hub.gd" id="1_hub"]
+[ext_resource type="Script" path="res://recipes/47-melee-combo/combo_dummy.gd" id="2_dummy"]
+
+[sub_resource type="StandardMaterial3D" id="FloorMat"]
+albedo_color = Color(0.25, 0.3, 0.28, 1)
+
+[sub_resource type="CapsuleShape3D" id="DummyShape"]
+radius = 0.45
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="DummyMat"]
+albedo_color = Color(0.8, 0.65, 0.4, 1)
+
+[sub_resource type="CapsuleMesh" id="DummyMesh"]
+material = SubResource("DummyMat")
+radius = 0.45
+height = 1.6
+
+[sub_resource type="BoxShape3D" id="Zone"]
+size = Vector3(2.4, 2.5, 2.4)
+
+[sub_resource type="StandardMaterial3D" id="ShrineMat"]
+albedo_color = Color(0.4, 0.8, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.5, 0.8, 1)
+
+[sub_resource type="CylinderMesh" id="ShrineMesh"]
+material = SubResource("ShrineMat")
+top_radius = 0.5
+bottom_radius = 0.7
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="DoorMat"]
+albedo_color = Color(1, 0.6, 0.3, 1)
+emission_enabled = true
+emission = Color(0.6, 0.3, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="DoorMesh"]
+material = SubResource("DoorMat")
+size = Vector3(0.3, 2.5, 2)
+
+[node name="Hub" type="Node3D"]
+script = ExtResource("1_hub")
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(16, 1, 12)
+material = SubResource("FloorMat")
+
+[node name="WallNorth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -6.5)
+use_collision = true
+size = Vector3(18, 2, 1)
+
+[node name="WallWest" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.5, 1, 0)
+use_collision = true
+size = Vector3(1, 2, 14)
+
+[node name="WallSouth" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 6.5)
+use_collision = true
+size = Vector3(18, 0.5, 1)
+
+[node name="PlayerStart" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3)
+
+[node name="Dummy" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, -2)
+collision_layer = 4
+collision_mask = 0
+script = ExtResource("2_dummy")
+
+[node name="Shape" type="CollisionShape3D" parent="Dummy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("DummyShape")
+
+[node name="Look" type="MeshInstance3D" parent="Dummy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("DummyMesh")
+
+[node name="DummyLabel" type="Label3D" parent="Dummy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+billboard = 1
+text = "Training dummy"
+font_size = 40
+pixel_size = 0.012
+outline_size = 8
+
+[node name="Shrine" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.5)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="Shrine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("Zone")
+
+[node name="Look" type="MeshInstance3D" parent="Shrine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("ShrineMesh")
+
+[node name="Label" type="Label3D" parent="Shrine"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+billboard = 1
+text = "Shrine (E)"
+font_size = 40
+pixel_size = 0.012
+outline_size = 8
+
+[node name="RunDoor" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 0)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="RunDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.25, 0)
+shape = SubResource("Zone")
+
+[node name="Look" type="MeshInstance3D" parent="RunDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 1.25, 0)
+mesh = SubResource("DoorMesh")
+
+[node name="Label" type="Label3D" parent="RunDoor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+billboard = 1
+text = "Start a run →"
+font_size = 40
+pixel_size = 0.012
+outline_size = 8

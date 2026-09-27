@@ -85,11 +85,12 @@ Załóż pusty folder (np. `Pulpit/gry/moja-gra`), otwórz w nim Claude Code i n
 | `cards-2d` | walka karciana: energia, zamiary przeciwnika, karty jako dane, test balansu |
 | `platformer-3d` | bieg i skok w 3D, kamera na sprężynie, która nie wchodzi w ściany, monety i meta |
 | `fps-3d` | widok z pierwszej osoby, strzał, cele, osłony |
+| `action-roguelite-3d` | gra w stylu Hadesa: hub z manekinem i kapliczką ulepszeń, runy z 5 pokoi, dary do wyboru, drzwi z nagrodami, 2 typy wrogów z czytelnymi zapowiedziami, boss z fazami, śmierć zachowuje walutę; bot przechodzi cały run |
 
 Każdy szablon ma już testy i scenariusze bota, który gra za Ciebie.
 
 ## 5. Przepisy (gotowe, przetestowane mechaniki)
-Plugin ma **46 przepisów**, na przykład:
+Plugin ma **52 przepisy**, na przykład:
 - ruch, kamera, trzęsienie ekranu;
 - zdrowie, trafienia, pociski, broń;
 - ekwipunek, sklep, zapis gry, dialogi, zadania;

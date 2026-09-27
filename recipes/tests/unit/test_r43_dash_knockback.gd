@@ -24,7 +24,9 @@ func test_r43_cooldown_blocks_a_second_dash() -> void:
 	d.try_start(Vector2.RIGHT)
 	_run(d, d.duration + 0.05)
 	assert_false(d.try_start(Vector2.RIGHT), "blocked during the cooldown")
+	assert_false(d.is_ready(), "is_ready agrees")
 	_run(d, d.cooldown)
+	assert_true(d.is_ready(), "ready after the cooldown")
 	assert_true(d.try_start(Vector2.RIGHT), "allowed after the cooldown")
 
 

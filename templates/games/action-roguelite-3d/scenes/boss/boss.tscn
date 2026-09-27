@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/boss/boss.gd" id="1_boss"]
+
+[sub_resource type="CapsuleShape3D" id="BodyShape"]
+radius = 0.9
+height = 2.8
+
+[sub_resource type="CapsuleMesh" id="BodyMesh"]
+radius = 0.9
+height = 2.8
+
+[sub_resource type="CylinderMesh" id="Disc"]
+top_radius = 1.0
+bottom_radius = 1.0
+height = 0.02
+
+[sub_resource type="BoxMesh" id="LaneMesh"]
+size = Vector3(1.6, 0.02, 6)
+
+[node name="Boss" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 3
+script = ExtResource("1_boss")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+shape = SubResource("BodyShape")
+
+[node name="Look" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
+mesh = SubResource("BodyMesh")
+
+[node name="Telegraph" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("Disc")
+
+[node name="Lane" type="Node3D" parent="."]
+
+[node name="Strip" type="MeshInstance3D" parent="Lane"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, -3)
+mesh = SubResource("LaneMesh")

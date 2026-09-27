@@ -327,6 +327,15 @@ function scaffold(o, { runGodot = null, dryRun = false } = {}) {
     if (f.src) fs.copyFileSync(f.src, dst);
     else fs.writeFileSync(dst, f.content);
   }
+  // A template can be built on the plugin's tested recipes: they are added exactly as `gb recipe add` would
+  // (with dependencies and their tests), so the template never carries its own drifting copy of them.
+  if (o.templateInfo && Array.isArray(o.templateInfo.recipes) && o.templateInfo.recipes.length) {
+    if (dryRun) report.push(`RECIPES ${o.templateInfo.recipes.join(', ')} (would be added)`);
+    else {
+      const r = require('./recipe.js').add(path.join(PLUGIN, 'recipes'), o.dir, o.templateInfo.recipes);
+      report.push(`RECIPES ${r.recipes.join(', ')} (${r.added.length} files added, ${r.skipped.length} kept)`);
+    }
+  }
   if (!dryRun && runGodot) {
     const args = ['--headless', '--path', o.dir, '--script', path.join(o.dir, 'tools', 'gb', 'setup_input.gd')];
     // A template can declare its own actions (e.g. shoot on the left mouse button); Godot still writes them.

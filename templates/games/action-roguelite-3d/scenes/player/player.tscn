@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/player/player.gd" id="1_player"]
+[ext_resource type="Resource" path="res://data/player_tuning.tres" id="2_tuning"]
+[ext_resource type="Script" path="res://recipes/47-melee-combo/combo_melee_3d.gd" id="3_melee"]
+[ext_resource type="Script" path="res://recipes/05-health/health.gd" id="4_health"]
+
+[sub_resource type="CapsuleShape3D" id="BodyShape"]
+radius = 0.4
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="BodyMat"]
+albedo_color = Color(0.35, 0.65, 1, 1)
+
+[sub_resource type="CapsuleMesh" id="BodyMesh"]
+material = SubResource("BodyMat")
+radius = 0.4
+height = 1.6
+
+[sub_resource type="BoxMesh" id="NoseMesh"]
+size = Vector3(0.2, 0.2, 0.5)
+
+[sub_resource type="BoxShape3D" id="HitShape"]
+resource_local_to_scene = true
+size = Vector3(1.6, 1.4, 1.8)
+
+[node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_player")
+tuning = ExtResource("2_tuning")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BodyShape")
+
+[node name="Look" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("BodyMesh")
+
+[node name="Nose" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -0.45)
+mesh = SubResource("NoseMesh")
+
+[node name="Melee" type="Node3D" parent="." node_paths=PackedStringArray("hitbox")]
+script = ExtResource("3_melee")
+attack_action = &"attack"
+hitbox = NodePath("Hitbox")
+
+[node name="Hitbox" type="Area3D" parent="Melee"]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="Melee/Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.9)
+shape = SubResource("HitShape")
+
+[node name="Health" type="Node" parent="."]
+script = ExtResource("4_health")
+max_health = 60

@@ -160,6 +160,19 @@ test('verify: a healthy project passes every step', { skip }, () => {
   assert.equal(report.steps.find((s) => s.step === 'check').failedScripts.length, 0);
 });
 
+test('check: a script that uses an autoload by name passes (autoloads are known when scripts are checked)', { skip }, () => {
+  const d = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'gb-auto-')), 'game');
+  fs.cpSync(path.join(FIX, 'ok'), d, { recursive: true });
+  fs.appendFileSync(path.join(d, 'project.godot'), '\n[autoload]\n\nBus="*res://bus.gd"\n');
+  fs.writeFileSync(path.join(d, 'bus.gd'), 'extends Node\n\nvar flag := true\n');
+  fs.writeFileSync(path.join(d, 'uses_bus.gd'), 'extends Node\n\n\nfunc read() -> bool:\n\treturn Bus.flag\n');
+  const r = spawnSync(process.execPath, [GB, 'check', '--json', '--path', d], { encoding: 'utf8', timeout: 600000 });
+  const report = JSON.parse(r.stdout);
+  const check = report.steps.find((s) => s.step === 'check');
+  assert.deepEqual(check.failedScripts, [], r.stdout);
+  assert.equal(r.status, 0);
+});
+
 test('verify: a parse error fails and names the broken script', { skip }, () => {
   const { code, report } = verify('parse-error');
   assert.equal(code, 1);
