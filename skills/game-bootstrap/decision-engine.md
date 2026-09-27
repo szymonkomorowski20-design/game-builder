@@ -27,6 +27,7 @@ Available templates (each: implemented spec, Tuning resource, unit tests + behav
 | `topdown-2d` | 8-direction movement, shooting, chasing enemies with contact damage, waves, heart, win/lose | 8 scenarios T1–T8 + unit |
 | `grid-puzzle-2d` | push-box puzzle: single-step moves, undo, restart, 3 levels, BFS solver proving each level solvable | 4 scenarios G1–G4 + unit |
 | `cards-2d` | card combat: seeded deck, hand, energy, attack/block cards as data, enemy intents, win/lose | 4 scenarios C1–C4 + unit (incl. a balance contract) |
+| `platformer-3d` | 3D run & jump on the ground plane (coyote time, buffer, variable jump), chase camera on a spring arm that stays in front of walls, coins → goal; Forward+, Jolt | 7 scenarios D1–D7 + unit |
 
 ## Q2 — Dimension & camera (usually already in the brief → confirm)
 2D side / 2D top-down / 2D isometric / 3D third-person / 3D first-person / 3D top-down.

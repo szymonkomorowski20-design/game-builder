@@ -258,6 +258,18 @@ test('e2e: platformer-2d template passes its own 9 scenarios and unit tests out 
   assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
 });
 
+test('e2e: platformer-3d template passes its own 8 scenarios and unit tests out of the box (Forward+, Jolt)', { skip, timeout: 900000 }, () => {
+  const dir = path.join(tmp(), 'p3d');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'P3D', '--template', 'platformer-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /IMPORT {2}ok/);
+  assert.match(fs.readFileSync(path.join(dir, 'project.godot'), 'utf8'), /config\/features=PackedStringArray\("4\.\d+", "Forward Plus"\)/);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(v.status, 0, v.stdout);
+  assert.match(v.stdout, /PASS scenarios \(8\/8 passing\)/);
+  assert.match(v.stdout, /PASS test \(gut: 5\/5 passing\)/);
+});
+
 test('e2e: recipes copied into a fresh game (with dependencies) pass gb verify there', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'rg');
   const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'RG', '--dim', '2d'], { encoding: 'utf8', timeout: 600000 });

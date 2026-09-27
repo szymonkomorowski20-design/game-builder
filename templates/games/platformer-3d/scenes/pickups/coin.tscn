@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_coin"]
+radius = 0.45
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_coin"]
+top_radius = 0.35
+bottom_radius = 0.35
+height = 0.08
+
+[sub_resource type="StandardMaterial3D" id="Mat_coin"]
+albedo_color = Color(1, 0.84, 0.2, 1)
+metallic = 0.6
+roughness = 0.3
+
+[node name="Coin" type="Area3D" groups=["coins"]]
+collision_layer = 0
+collision_mask = 2
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("SphereShape3D_coin")
+
+[node name="Look" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("CylinderMesh_coin")
+surface_material_override/0 = SubResource("Mat_coin")

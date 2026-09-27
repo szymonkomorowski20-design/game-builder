@@ -55,7 +55,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Top-down 2D (0.9.0): arena, strzelanie, fale, wrogowie z obrażeniami kontaktowymi, 3 testy + 8 scenariuszy T1–T8, dowody wykrycia
 - [x] Puzzle na siatce (0.10.0): model + undo + solver BFS dowodzący rozwiązywalności poziomów, 6 testów + 4 scenariusze
 - [x] Karty (0.11.0): walka karciana, energia, zamiary przeciwnika, dane kart, 11 testów (z kontraktem balansu) + 4 scenariusze
-- [ ] 3D TPS/FPS — z testami i licencjami
+- [x] 3D: szablon `platformer-3d` (0.13.0) — ruch i skok w 3D, kamera na sprężynie przed ścianami, monety → meta; 7 scenariuszy D1–D7 + testy jednostkowe, Forward+ i Jolt
+- [ ] 3D: kamera orbitująca myszą/gałką (przepis), szablon strzelanki TPS/FPS
 
 ## Etap 6 — Role i pozostałe skille ✅ (0.6.0–0.8.0)
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement

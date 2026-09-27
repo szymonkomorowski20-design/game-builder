@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.13.0 — 2026-09-27 · 3D platformer template (stage 5)
+- `gb scaffold --template platformer-3d`: a 3D starter, green at scaffold time. Forward+, Jolt, 1280×720.
+  - Movement on the ground plane with acceleration, friction and air control; the body turns to face the movement.
+  - Jump from height + time to apex, faster fall, variable jump, coyote time, jump buffer. All numbers are in
+    `PlayerTuning` (metres).
+  - Chase camera on a `SpringArm3D`: fixed angle, the world is its only collision layer, and it stays in front of
+    walls.
+  - A CSG course: a gap, a raised platform, a pillar, 5 coins (masked to the player — Jolt reports static bodies
+    too), and a goal.
+  - 5 unit tests and scenarios D1–D7 plus smoke; `--repeat 10` stable.
+- Detection proven: a spring arm without collision turns D4 red (the camera ends up behind the pillar), and no coyote
+  timer turns D3 red.
+- Caught while building it:
+  - A hand-written `Transform3D` in a .tscn is row-major. A column-major rotation pointed the camera into the ground;
+    D4 measured the arm at 1.5 m in the open.
+  - The screenshots showed the camera inside the player next to a wall, an ugly sky under the horizon, and the goal
+    message covering the player.
+  - godot-pitfalls.md gains three rows: row-major Transform3D, camera close to walls, Jolt Area3D.
+- game-bootstrap lists the template; the scaffold e2e test covers it.
+
 ## 0.12.2 — 2026-09-27 · more fixes from Lodowy Loch (stage 8, phases 4–5)
 - Recipe 13 (versioned saves), interrupted writes. `save` writes `.tmp`, removes the old file, then renames. A
   crash between the last two steps left only `.tmp`, and the next load reported MISSING, so the player lost

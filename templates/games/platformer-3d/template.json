@@ -1,0 +1,10 @@
+{
+  "name": "platformer-3d",
+  "description": "3D platformer starter with a chase camera: tuned movement on the ground plane (acceleration, jump from height + time to apex, coyote time, jump buffer, variable jump), a spring-arm camera that never goes through walls, a short course with a gap, a raised platform, coins and a goal; 7 behaviour scenarios + unit tests.",
+  "dim": "3d",
+  "main_scene": "res://scenes/level/level_1.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut"
+}
