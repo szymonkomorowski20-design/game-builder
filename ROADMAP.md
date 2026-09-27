@@ -73,4 +73,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [ ] Później: ten sam zestaw na zainstalowanym pluginie (automatyczne wyzwalanie skilli, router sesji), na innym modelu, kilka powtórzeń
 
 ## Etap 8 — Dogfooding
-- [ ] Platformówka i top-down zbudowane pluginem; wnioski wpisane do skilli; adopcja NEMORAX
+- [x] Nowa mała gra od zera pluginem: **Lodowy Loch** (łamigłówka, 5 faz, 10 pięter, zapis, dźwięk). Człowiek przeszedł
+      całość: „wszystko działa”. Wnioski wpisane do narzędzi i skilli w 0.12.1–0.12.2, raport w `docs/dogfood/lodowy-loch.md`.
+- [ ] Pierwszy prawdziwy przebieg CI na GitHubie (repo gry jest lokalne — wysłanie decyduje właściciel)
+- [ ] Pętla strojenia po werdykcie „tweak” i odpowiedzi na szczegółowe pytania z bramek (nie zostały sprawdzone)
+- [ ] Adopcja NEMORAX — odłożona decyzją właściciela (wybrał nową grę)
