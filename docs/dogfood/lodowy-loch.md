@@ -66,9 +66,10 @@ them as unanswered.
 - The windowed "shot + compare" test is fixed, and the release note says to run `GB_TEST_WINDOW=1` too.
 
 ## Numbers
-- About 25 hours of agent work over two days, 5 phases.
-- 5 checker rounds that asked for changes, 7 approvals (with or without nits); 5 playtester runs.
-- 30 GUT tests, 8 scenarios, 13 accepted baselines, 11 detection proofs.
+- 5 phases over two days (2026-09-26 → 27). Working time was not measured.
+- 8 checker rounds: 3 CHANGES-REQUIRED (phases 1, 4 and 5) and 5 APPROVE/NITS. 5 playtester runs.
+- 30 GUT tests, 8 scenarios, 13 accepted baselines, 8 detection proofs in the game (phase 1: 2, phases 2–4: 1 each,
+  phase 5: 3).
 - Assets: 5 tiles, 4 sound effects and 1 music track, all CC0, each with a REGISTER row, a copied licence file and a
   hash matched against the source pack by the checker.
 - Performance on the largest floor: frame p95 4.17 ms, 42 draw calls.
