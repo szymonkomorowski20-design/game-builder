@@ -1,0 +1,88 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://47-melee-combo/combo_fighter.gd" id="1_fighter"]
+[ext_resource type="Script" path="res://47-melee-combo/combo_melee_3d.gd" id="2_melee"]
+[ext_resource type="Script" path="res://47-melee-combo/combo_dummy.gd" id="3_dummy"]
+
+[sub_resource type="CapsuleShape3D" id="BodyShape"]
+radius = 0.4
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="FighterMat"]
+albedo_color = Color(0.35, 0.65, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="DummyMat"]
+albedo_color = Color(0.9, 0.55, 0.3, 1)
+
+[sub_resource type="CapsuleMesh" id="FighterMesh"]
+material = SubResource("FighterMat")
+radius = 0.4
+height = 1.6
+
+[sub_resource type="CapsuleMesh" id="DummyMesh"]
+material = SubResource("DummyMat")
+radius = 0.4
+height = 1.6
+
+[sub_resource type="BoxShape3D" id="HitShape"]
+resource_local_to_scene = true
+size = Vector3(1.4, 1.4, 1.6)
+
+[sub_resource type="BoxMesh" id="Nose"]
+size = Vector3(0.2, 0.2, 0.5)
+
+[node name="ComboDemo" type="Node3D"]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 8, 0)
+
+[node name="Camera" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.642788, 0.766044, 0, -0.766044, 0.642788, 0, 4.2, 3.2)
+current = true
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(20, 1, 20)
+
+[node name="Fighter" type="CharacterBody3D" parent="."]
+collision_layer = 2
+script = ExtResource("1_fighter")
+
+[node name="Shape" type="CollisionShape3D" parent="Fighter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BodyShape")
+
+[node name="Look" type="MeshInstance3D" parent="Fighter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("FighterMesh")
+
+[node name="Nose" type="MeshInstance3D" parent="Fighter"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -0.45)
+mesh = SubResource("Nose")
+
+[node name="Melee" type="Node3D" parent="Fighter" node_paths=PackedStringArray("hitbox")]
+script = ExtResource("2_melee")
+hitbox = NodePath("Hitbox")
+
+[node name="Hitbox" type="Area3D" parent="Fighter/Melee"]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="Fighter/Melee/Hitbox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.8)
+shape = SubResource("HitShape")
+
+[node name="Dummy" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1.2)
+collision_layer = 4
+script = ExtResource("3_dummy")
+
+[node name="Shape" type="CollisionShape3D" parent="Dummy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BodyShape")
+
+[node name="Look" type="MeshInstance3D" parent="Dummy"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("DummyMesh")

@@ -1,5 +1,50 @@
 # Changelog
 
+## 0.19.0 — 2026-09-27 · genre pack "action roguelite": recipes 47–52, genre doc
+- The first genre-pack systems (goal: build a Hades-like on your own). Each recipe has unit tests and a
+  bot scenario (except 52), plus detection proofs:
+  - **47 melee combo:**
+    - `ComboAttack` runs windup → active → recovery, with a 0.15 s input buffer;
+    - a press in the last recovery loops the combo;
+    - a dash cancels recovery only;
+    - a new hit id per swing.
+    - `ComboMelee3D` hits each target once per swing.
+    - Detection: no buffer, dash-cancel in windup, and no per-swing guard (4 hits per swing).
+  - **48 stat modifiers and boons:**
+    - `StatSheet` computes (base + flat) × (1 + Σ increased) × Π more, independent of order;
+    - boons have rarity scaling and synergies via `requires_tags`;
+    - `BoonPool.offer` is seeded and gives distinct, unowned boons, with luck.
+    - Detection covers 4 rules. A weak test was found and strengthened: "never offers owned" had checked a single
+      seed, now it checks 100.
+  - **49 encounter director:**
+    - threat budget per depth, waves that fill it and mix types, types unlocked by depth;
+    - the next wave only when the last is dead; `cleared` once.
+    - Detection covers 4 rules.
+  - **50 run structure and meta:**
+    - doors show their reward;
+    - the first room is combat with a boon, the boss is last, a rest comes before the boss;
+    - no shop after a shop, elites from a depth;
+    - death banks all currency, and upgrade costs rise;
+    - `MetaProgress` goes through to/from dict.
+    - The scenario caught a demo economy where the first upgrade was unreachable.
+  - **51 boss phases:**
+    - HP thresholds stop overflow damage;
+    - the transition is invulnerable;
+    - telegraph → strike → recovery, with no repeated move;
+    - phase-locked moves;
+    - `validate()` holds the readability contract (telegraph ≥ 0.4 s, a window to punish).
+    - The scenario measures the on-screen telegraph before each strike. Detection covers 5 rules.
+  - **52 status effects:** damage over time with exact ticks, REFRESH/STACK with a cap, stat statuses through
+    `StatSheet` that are never doubled and are restored on end, cleanse.
+- **Genre doc** `gb doc genre-action-roguelite` (gry-wiedza): principles and typical ranges for combat, enemies,
+  build variety, run structure, meta, bosses, onboarding and pitfalls. It comes from research across 7 games (84
+  sources, marked by confidence) and ends with a principle → recipe table. The discovery and spec skills read
+  `genre-*` docs when the pitch is in that genre.
+- **Harness:** a scenario script with a parse error now fails at once ("could not load scenario script") instead of
+  waiting for the frame cap (76 s in a window). Tested.
+- godot-pitfalls: new row, measured in recipe 47. GodotPhysics doesn't report `StaticBody3D` to an `Area3D`.
+- Recipes: 193/193 GUT, 23/23 scenarios (×5 stable).
+
 ## 0.18.0 — 2026-09-27 · knowledge moved to gry-wiedza, licences, hooks rewritten
 - **Split:** the tool stays here and the knowledge moved to the gry-wiedza repo.
   - `design-theory`, `platforms`, `asset-pipeline`, `starter-packs` and `reference-games` now live in

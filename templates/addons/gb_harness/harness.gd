@@ -189,10 +189,12 @@ func _load_replay(path: String) -> void:
 
 
 func _run_scenario(path: String) -> void:
-	var script := load(path)
-	if script == null:
+	var script := load(path) as Script
+	# A script with a parse error still loads as a Script object, but cannot be instantiated; fail now instead of
+	# waiting for the frame cap.
+	if script == null or not script.can_instantiate():
 		print("GB_SCENARIO name=%s result=FAIL failures=1" % path)
-		print("GB_EXPECT_FAIL could not load scenario script")
+		print("GB_EXPECT_FAIL could not load scenario script (parse error? see the SCRIPT ERROR lines)")
 		finish(1)
 		return
 	var sc: Node = script.new()

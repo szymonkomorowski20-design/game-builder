@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 151/151 GUT tests, 18/18 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
+Last full run: 193/193 GUT tests, 23/23 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -70,6 +70,12 @@ Last full run: 151/151 GUT tests, 18/18 bot scenarios (also 5× via --repeat), G
 | [44-animation-tree](44-animation-tree/README.md) | AnimationTree state machine driven by movement | animation code scattered through the player script, animations that flicker between states, a fall animation that never plays | test_r44_anim_states.gd, r44_animation_tree.gd |
 | [45-minimap](45-minimap/README.md) | Minimap (drawn, aspect kept, off-map pinned to the edge) | a minimap that stretches the level (distances lie), loses things that are off the map, or renders the level twice | test_r45_minimap.gd, r45_minimap.gd |
 | [46-multiplayer-spawn-sync](46-multiplayer-spawn-sync/README.md) | Multiplayer spawning + sync (MultiplayerSpawner, MultiplayerSynchronizer) | avatars must appear for late joiners, vanish everywhere when their owner leaves and move without clients teleporting themselves | test_r46_net_world.gd, r46_net_world.gd |
+| [47-melee-combo](47-melee-combo/README.md) | Melee combo (windup / active / recovery, input buffer, dash-cancel) | mushy melee: eaten presses, hitboxes on for the whole swing, one swing hitting five times | test_r47_combo.gd, r47_melee_combo.gd |
+| [48-boons-modifiers](48-boons-modifiers/README.md) | Stat modifiers and boons (rarity, synergies, seeded offers) | build variety that breaks: order-dependent stacking, repeated offers, synergies before their parts, unreproducible offers | test_r48_boons.gd, r48_boons.gd |
+| [49-encounter-director](49-encounter-director/README.md) | Encounter director (threat budget, waves, room cleared) | hand-placed rooms don't scale and random spawns are unfair or repetitive | test_r49_encounters.gd, r49_encounter.gd |
+| [50-run-meta](50-run-meta/README.md) | Run structure and meta progression | blind doors, bad pacing, death erasing all progress, broken upgrade economy | test_r50_run_meta.gd, r50_run_meta.gd |
+| [51-boss-phases](51-boss-phases/README.md) | Boss phases and telegraphed attacks | bosses that are an HP pile: phases skipped by burst, unreadable or repetitive attacks | test_r51_boss.gd, r51_boss.gd |
+| [52-status-effects](52-status-effects/README.md) | Status effects (damage over time, stacks, stat changes) | burns ticking once too often, doubled slows that never end, uncapped stacks | test_r52_status.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —

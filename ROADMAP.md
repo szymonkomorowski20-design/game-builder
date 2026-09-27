@@ -88,3 +88,25 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [ ] Pierwszy prawdziwy przebieg CI na GitHubie (repo gry jest lokalne — wysłanie decyduje właściciel)
 - [ ] Pętla strojenia po werdykcie „tweak” i odpowiedzi na szczegółowe pytania z bramek (nie zostały sprawdzone)
 - [ ] Adopcja NEMORAX — odłożona decyzją właściciela (wybrał nową grę)
+
+## Etap 9 — Paczki gatunkowe (cel właściciela, 2026-09-27)
+Cel: game-builder samodzielnie buduje **dobrą grę w gatunku** typu Hades, Call of Duty, Warcraft, Assassin's Creed —
+w skali indie (dopracowana gra na 20–60 min), nie AAA. Mechaniki gatunku tak; postaci, nazwy i grafiki cudzych gier nie.
+Każda paczka: **szablon** (mini-gra z testami) + **przepisy systemów gatunku** (kod + testy + dowody wykrycia) +
+**dokument gatunku** w gry-wiedza/wiedza (`gb doc`) + **gra-dowód** zbudowana pluginem od zera.
+Decyzje właściciela: kolejność Hades → FPS → RTS → akcja 3. osoby; gry-dowody „prawie bez bramek” (bot buduje
+całość, człowiek gra w gotową wersję); assety najpierw darmowe (CC0 z biblioteki), płatne generatory tylko po „tak”
+dla konkretnej partii.
+
+### 9.1 Jak Hades — akcja z góry, roguelite (w toku)
+- [x] Dokument gatunku `gry-wiedza/wiedza/genre-action-roguelite.md` (`gb doc genre-action-roguelite`): badanie 124 faktów z 84 źródeł (7 gier), zasady → przepisy (0.19.0)
+- [x] Przepisy 47–52 (0.19.0): kombinacje ataków wręcz (okna, bufor, anulowanie), modyfikatory statystyk i „dary” (boony) z
+      rzadkością i synergiami, reżyser spotkań (fale, budżet, drzwi), struktura runu (pokoje, nagrody, śmierć → hub,
+      waluta między runami), bossowie z fazami i zapowiadanymi atakami, efekty statusów
+- [ ] Szablon `action-roguelite-3d` (kamera izometryczna, ruch, zryw, kombinacje, 2 typy wrogów, pokoje z falami,
+      wybór daru, boss, śmierć i nowy run, waluta) z bot-scenariuszami
+- [ ] Tryb pracy „autonomiczny” (bramki maszynowe między fazami, człowiek na końcu) — do decyzji przy grze-dowodzie
+- [ ] Gra-dowód zbudowana pluginem od zera + raport
+### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy
+### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność
+### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

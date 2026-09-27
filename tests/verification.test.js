@@ -132,6 +132,20 @@ test('scenario: failing expectations and unknown actions are reported, exit 1', 
   }
 });
 
+test('scenario: a scenario script with a parse error fails fast with a clear reason (no wait for the frame cap)', { skip, timeout: 600000 }, () => {
+  const bad = path.join(game(), 'tests', 'scenarios', 'zz_parse.gd');
+  fs.writeFileSync(bad, 'extends GbScenario\n\n\nfunc run() -> void:\n\texpect_eq(1, 1)\n');
+  try {
+    const t0 = Date.now();
+    const r = gb('scenario', 'res://tests/scenarios/zz_parse.gd', '--path', game());
+    assert.equal(r.status, 1, r.stdout);
+    assert.match(r.stdout, /could not load scenario script/);
+    assert.ok(Date.now() - t0 < 30000, `took ${Date.now() - t0} ms`);
+  } finally {
+    fs.rmSync(bad);
+  }
+});
+
 test('record → replay reproduces the final tracked state; a tampered recording fails', { skip, timeout: 600000 }, () => {
   const dir = game();
   const rep = path.join(dir, 'tests', 'replays');

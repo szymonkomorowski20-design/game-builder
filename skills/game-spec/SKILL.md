@@ -25,7 +25,7 @@ derived from it (`game-test`); the readiness check reads it (`game-pre-implement
 If `.ai/skills/spec-writing/SKILL.md` exists, follow it — it is this method tuned to the repo. This skill adds the review checklist below and is the fallback when no local copy exists.
 
 ## Step 1 — Skeleton + Open Questions gate
-1. Read `.ai/brief.md` (+ the Feature Brief), `AGENTS.md`, `.ai/lessons.md`, existing specs touching the area, and — for mechanics — `node tools/gb/gb.js kb "<mechanic> godot 4"` for known approaches and pitfalls.
+1. Read `.ai/brief.md` (+ the Feature Brief), `AGENTS.md`, `.ai/lessons.md`, existing specs touching the area, and — for mechanics — `node tools/gb/gb.js kb "<mechanic> godot 4"` for known approaches and pitfalls. If the game's genre has a `gb doc genre-*` document, map its principles to phases and recipes (its last table does this) and put its readability/fairness rules into Done-when checks, e.g. a boss's `validate()` passing or offers seeded.
 2. Write the skeleton from `spec-template.md` with `Status: draft`.
 3. List **Open Questions** — everything that changes design or scope and that the brief does not answer (e.g. "Czy odbicie piłki zależy od miejsca uderzenia w paletkę?", "Co się dzieje przy remisie?"). Ask them via `AskUserQuestion` in rounds of 3–4 with options and a recommendation. **Hard gate:** the spec is not finalised while any is open.
 

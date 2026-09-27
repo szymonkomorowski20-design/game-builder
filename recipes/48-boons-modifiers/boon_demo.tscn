@@ -1,0 +1,36 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://48-boons-modifiers/boon_demo.gd" id="1_demo"]
+
+[node name="BoonDemo" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_demo")
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 620.0
+offset_bottom = 46.0
+text = "Choose a boon  (move_left / move_right, action)"
+
+[node name="Cards" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 90.0
+offset_right = 620.0
+offset_bottom = 210.0
+theme_override_constants/separation = 20
+
+[node name="Stats" type="Label" parent="."]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 290.0
+offset_right = 620.0
+offset_bottom = 340.0
+autowrap_mode = 3
