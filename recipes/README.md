@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 137/137 GUT tests, 15/15 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
+Last full run: 151/151 GUT tests, 18/18 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -67,10 +67,13 @@ Last full run: 137/137 GUT tests, 15/15 bot scenarios (also 5× via --repeat), G
 | [41-checkpoints](41-checkpoints/README.md) | Checkpoints (furthest one wins, never backwards) | after dying the player should restart at the last checkpoint — but walking back over an earlier flag must not move the respawn point back | test_r41_checkpoints.gd, r41_checkpoints.gd |
 | [42-moving-platform](42-moving-platform/README.md) | Moving platform that carries the player | a platform moving along waypoints must carry whoever stands on it, sideways and upward, without the rider sliding off | test_r42_platform_path.gd, r42_moving_platform.gd |
 | [43-dash-knockback](43-dash-knockback/README.md) | Dash and knockback (with i-frames) | a dash that can be spammed or leaves the player hittable mid-dash; knockback that stacks into a launch or pushes toward the enemy | test_r43_dash_knockback.gd, r43_dash_knockback.gd |
+| [44-animation-tree](44-animation-tree/README.md) | AnimationTree state machine driven by movement | animation code scattered through the player script, animations that flicker between states, a fall animation that never plays | test_r44_anim_states.gd, r44_animation_tree.gd |
+| [45-minimap](45-minimap/README.md) | Minimap (drawn, aspect kept, off-map pinned to the edge) | a minimap that stretches the level (distances lie), loses things that are off the map, or renders the level twice | test_r45_minimap.gd, r45_minimap.gd |
+| [46-multiplayer-spawn-sync](46-multiplayer-spawn-sync/README.md) | Multiplayer spawning + sync (MultiplayerSpawner, MultiplayerSynchronizer) | avatars must appear for late joiners, vanish everywhere when their owner leaves and move without clients teleporting themselves | test_r46_net_world.gd, r46_net_world.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —
 its migration test was proven to fail when the migration is broken.
 
 ## Not yet covered
-AnimationTree state machines, minimap, multiplayer spawning/synchronizers, save-to-cloud, mod loading — planned in `ROADMAP.md`.
+Save-to-cloud, mod loading, client-side prediction/interpolation for multiplayer — planned in `ROADMAP.md`.

@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://44-animation-tree/anim_demo.gd" id="1_demo"]
+[ext_resource type="Script" path="res://44-animation-tree/anim_body.gd" id="2_body"]
+[ext_resource type="Script" path="res://44-animation-tree/character_animator.gd" id="3_animator"]
+
+[sub_resource type="RectangleShape2D" id="BodyShape"]
+size = Vector2(16, 24)
+
+[sub_resource type="RectangleShape2D" id="FloorShape"]
+size = Vector2(1200, 20)
+
+[node name="AnimDemo" type="Node2D"]
+script = ExtResource("1_demo")
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(320, 300)
+
+[node name="Shape" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Look" type="ColorRect" parent="Floor"]
+offset_left = -600.0
+offset_top = -10.0
+offset_right = 600.0
+offset_bottom = 10.0
+color = Color(0.3, 0.32, 0.38, 1)
+
+[node name="Body" type="CharacterBody2D" parent="."]
+position = Vector2(200, 270)
+script = ExtResource("2_body")
+
+[node name="Shape" type="CollisionShape2D" parent="Body"]
+shape = SubResource("BodyShape")
+
+[node name="Look" type="ColorRect" parent="Body"]
+offset_left = -8.0
+offset_top = -12.0
+offset_right = 8.0
+offset_bottom = 12.0
+pivot_offset = Vector2(8, 24)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="Body"]
+
+[node name="AnimationTree" type="AnimationTree" parent="Body"]
+
+[node name="Animator" type="Node" parent="Body" node_paths=PackedStringArray("tree", "body")]
+script = ExtResource("3_animator")
+tree = NodePath("../AnimationTree")
+body = NodePath("..")

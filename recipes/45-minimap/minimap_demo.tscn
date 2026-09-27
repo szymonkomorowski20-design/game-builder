@@ -1,0 +1,45 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://01-topdown-movement/top_down_mover.gd" id="1_mover"]
+[ext_resource type="Script" path="res://45-minimap/minimap.gd" id="2_minimap"]
+
+[sub_resource type="CircleShape2D" id="MoverShape"]
+radius = 8.0
+
+[node name="MinimapDemo" type="Node2D"]
+
+[node name="Mover" type="CharacterBody2D" parent="." groups=["minimap_player"]]
+position = Vector2(200, 180)
+motion_mode = 1
+script = ExtResource("1_mover")
+
+[node name="Shape" type="CollisionShape2D" parent="Mover"]
+shape = SubResource("MoverShape")
+
+[node name="Look" type="ColorRect" parent="Mover"]
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(0.45, 0.75, 1, 1)
+
+[node name="Enemy" type="Node2D" parent="." groups=["minimap_enemy"]]
+position = Vector2(600, 300)
+
+[node name="Coin" type="Node2D" parent="." groups=["minimap_pickup"]]
+position = Vector2(100, 100)
+
+[node name="FarAway" type="Node2D" parent="." groups=["minimap_enemy"]]
+position = Vector2(5000, 180)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Minimap" type="Control" parent="HUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 480.0
+offset_top = 10.0
+offset_right = 630.0
+offset_bottom = 110.0
+script = ExtResource("2_minimap")
+world_rect = Rect2(0, 0, 640, 360)

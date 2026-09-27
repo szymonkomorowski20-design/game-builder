@@ -15,7 +15,7 @@ relative path (`Game`), which RPCs require. ENet over `127.0.0.1` on a random hi
 (`_until`) instead of fixed frames. The same pattern scales to 2–4 clients.
 
 **Next steps for a real game:** `MultiplayerSpawner` (players/bullets appear on every peer) and
-`MultiplayerSynchronizer` (position/animation replication with interpolation), a lobby, reconnect, and a
+`MultiplayerSynchronizer` (position/animation replication) — **recipe 46**; then interpolation, a lobby, reconnect, and a
 latency test (artificial delay) — each with its own test in this style.
 
 **Web:** browsers have no low-level networking — only HTTP, WebSocket (client) and WebRTC (4.7 docs). Use

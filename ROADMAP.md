@@ -42,7 +42,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Dokumentacja Godota w wersji przypiętej (gałąź 4.7) — w BAZA-AI (fala 05) + referencja zmian 4.4–4.7 z oficjalnych przewodników migracji
 - [x] Biblioteka przepisów mechanik: 35 z 98 testami GUT i 11 scenariuszami; `gb recipe list/add` kopiuje je z testami do gry (dowód e2e)
 - [x] Przepisy 40–43 (0.14.0): kamera orbitująca 3D, punkty kontrolne, ruchoma platforma, zryw i odrzut — z dowodami wykrycia
-- [ ] Kolejne przepisy: AnimationTree, minimapa, multiplayer spawner/synchronizer
+- [x] Przepisy 44–46 (0.16.0): AnimationTree, minimapa, multiplayer spawner/synchronizer — z dowodami wykrycia
+- [ ] Kolejne przepisy: zapis w chmurze, mody, przewidywanie/interpolacja po stronie klienta
 - [x] Pułapki Godota — `skills/game-implement/godot-pitfalls.md` (zmierzone, z poprawkami)
 - [x] Audio: skill `game-audio`, przepisy 34–35, `gb shot --movie` z pomiarem dźwięku; fala 05 biblioteki (paczki CC0/MIT/CC-BY, licencje)
 - [x] Z Claude Code Game Studios (MIT): dowód wizualny „Run result” w game-implement, zrzuty przez Movie Maker

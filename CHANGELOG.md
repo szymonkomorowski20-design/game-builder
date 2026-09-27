@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.16.0 — 2026-09-27 · recipes 44–46
+- **44 AnimationTree:**
+  - `AnimStates.state_for(on_floor, velocity)` is the one rule: idle/run on the floor, jump while rising, fall
+    otherwise.
+  - `CharacterAnimator` calls `travel()` only when the state changes.
+  - `AnimStates.build_machine()` builds a fully connected state machine with cross-fades in code.
+  - The scenario checks the state machine's current node, not the animator's own variable.
+  - Detection: jump and fall swapped → unit test and scenario red.
+- **45 minimap:**
+  - `Minimap` draws the level scaled uniformly (aspect kept, centred) with a dot per tracked group.
+  - Things off the map are pinned to the edge, inset by the dot radius; `map_point` is pure.
+  - Detection: per-axis scale → 2 unit tests red.
+- **46 multiplayer spawning + sync:**
+  - `NetWorld` + `NetAvatar`: the server spawns an avatar per peer through a `MultiplayerSpawner`
+    (`spawn_function`). Late joiners get everyone; leaving despawns on every peer.
+  - A `MultiplayerSynchronizer` replicates `position` (ALWAYS mode, in the spawn packet).
+  - Clients only send input. The server rejects NaN/INF, clamps it to length 1, moves at `SPEED` and keeps
+    avatars inside `bounds`.
+  - Tested in one process with three multiplayer roots (8 GUT tests). A side-by-side demo with a scenario that
+    presses a key on the client.
+  - Detection, each red:
+    - no clamp;
+    - no NaN guard;
+    - ON_CHANGE instead of ALWAYS (a tampered client copy stays wrong);
+    - no despawn;
+    - an avatar without a synchronizer (scenario).
+  - Stable: 5 scenario repeats, 3 GUT runs.
+- godot-pitfalls: 3 new measured rows:
+  - ON_CHANGE sync leaves stale client copies;
+  - NaN survives `limit_length`;
+  - children leave the tree before their parent's `_exit_tree`.
+- Recipes: 151/151 GUT, 18/18 scenarios (`node tools/recipes.js`).
+
 ## 0.15.0 — 2026-09-27 · first-person shooter template, template input actions
 - `gb scaffold --template fps-3d`, green at scaffold time.
   - Mouse look from `screen_relative` with a pitch clamp, and right-stick look.

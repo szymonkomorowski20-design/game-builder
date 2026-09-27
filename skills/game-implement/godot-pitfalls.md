@@ -32,6 +32,9 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | 3D chase camera ends up inside the player's head next to a wall | `SpringArm3D` shortens exactly as designed | fade/hide the player mesh under ~1.5 m of arm, or raise the camera — a design decision for the spec |
 | Mouse-look sensitivity changes with the window size | `InputEventMouseMotion.relative` is scaled by the viewport stretch (×10 measured in a headless run) | use `screen_relative` (4.3+) for camera look; `relative` stays right for dragging things in the viewport |
 | `Area3D` pickup fires for the floor/walls under Jolt (4.5+) | Jolt reports overlaps with static bodies | give the pickup a mask with only the player's layer |
+| A client's copy of a synced node stays wrong (tampered, or missed an update) | `MultiplayerSynchronizer` in `ON_CHANGE` mode sends only changes | `ALWAYS` for moving state (the next packet corrects it); `ON_CHANGE` for rare state such as HP or a name — recipe 46 |
+| One client's NaN input freezes or teleports an avatar for everyone | `Vector2(NAN, 0).limit_length(1)` is still NaN | reject `not dir.is_finite()` on the server before clamping — recipe 46 |
+| Cleanup in a parent's `_exit_tree` errors on its children (`multiplayer`, `get_path()`) | children leave the tree before their parent | let each node clean up in its own `_exit_tree`, or keep references (a peer, a path) taken while in the tree |
 
 ## Physics and navigation
 
