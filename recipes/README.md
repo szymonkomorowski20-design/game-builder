@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 119/119 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-27).
+Last full run: 137/137 GUT tests, 15/15 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -63,10 +63,14 @@ Last full run: 119/119 GUT tests, 11/11 bot scenarios, Godot 4.7.2 (2026-09-27).
 | [37-level-validation](37-level-validation/README.md) | Level validation (completable, no soft-locks) | a level edit or a generator seed makes the exit unreachable, hides a coin behind a wall, or puts a | test_r37_level_validation.gd |
 | [38-colorblind-check](38-colorblind-check/README.md) | Colour-blind check (palette test + screen overlay) | red vs green teams, health bars, "good/bad" pickups — ~8 % of men can't tell some of these apart, | test_r38_colorblind.gd |
 | [39-multiplayer-basics](39-multiplayer-basics/README.md) | Multiplayer basics (server-authoritative, tested in one process) | networked games trust clients ("I have 1000 points"), and multiplayer code is hard to test — two | test_r39_multiplayer.gd |
+| [40-orbit-camera-3d](40-orbit-camera-3d/README.md) | 3D orbit camera (mouse or stick) with camera-relative movement | a third-person game needs a camera the player can turn with the mouse or the right stick, that never flips, never looks from inside a wall | test_r40_orbit_camera.gd, r40_orbit_camera.gd |
+| [41-checkpoints](41-checkpoints/README.md) | Checkpoints (furthest one wins, never backwards) | after dying the player should restart at the last checkpoint — but walking back over an earlier flag must not move the respawn point back | test_r41_checkpoints.gd, r41_checkpoints.gd |
+| [42-moving-platform](42-moving-platform/README.md) | Moving platform that carries the player | a platform moving along waypoints must carry whoever stands on it, sideways and upward, without the rider sliding off | test_r42_platform_path.gd, r42_moving_platform.gd |
+| [43-dash-knockback](43-dash-knockback/README.md) | Dash and knockback (with i-frames) | a dash that can be spammed or leaves the player hittable mid-dash; knockback that stacks into a launch or pushes toward the enemy | test_r43_dash_knockback.gd, r43_dash_knockback.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —
 its migration test was proven to fail when the migration is broken.
 
 ## Not yet covered
-AnimationTree state machines, multiplayer spawning/synchronizers, save-to-cloud, mod loading — planned in `ROADMAP.md`.
+AnimationTree state machines, minimap, multiplayer spawning/synchronizers, save-to-cloud, mod loading — planned in `ROADMAP.md`.

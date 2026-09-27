@@ -1,0 +1,42 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://42-moving-platform/moving_platform.gd" id="1_platform"]
+[ext_resource type="Script" path="res://42-moving-platform/rider.gd" id="2_rider"]
+
+[sub_resource type="RectangleShape2D" id="PlatformShape"]
+size = Vector2(96, 16)
+
+[sub_resource type="RectangleShape2D" id="RiderShape"]
+size = Vector2(16, 24)
+
+[node name="PlatformDemo" type="Node2D"]
+
+[node name="Platform" type="AnimatableBody2D" parent="."]
+position = Vector2(200, 240)
+script = ExtResource("1_platform")
+waypoints = PackedVector2Array(0, 0, 160, 0, 160, -80)
+speed = 80.0
+
+[node name="Shape" type="CollisionShape2D" parent="Platform"]
+shape = SubResource("PlatformShape")
+
+[node name="Look" type="ColorRect" parent="Platform"]
+offset_left = -48.0
+offset_top = -8.0
+offset_right = 48.0
+offset_bottom = 8.0
+color = Color(0.7, 0.55, 0.38, 1)
+
+[node name="Rider" type="CharacterBody2D" parent="."]
+position = Vector2(200, 219)
+script = ExtResource("2_rider")
+
+[node name="Shape" type="CollisionShape2D" parent="Rider"]
+shape = SubResource("RiderShape")
+
+[node name="Look" type="ColorRect" parent="Rider"]
+offset_left = -8.0
+offset_top = -12.0
+offset_right = 8.0
+offset_bottom = 12.0
+color = Color(0.45, 0.75, 1, 1)

@@ -1,0 +1,52 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://40-orbit-camera-3d/orbit_camera.gd" id="1_cam"]
+[ext_resource type="Script" path="res://40-orbit-camera-3d/orbit_mover.gd" id="2_mover"]
+
+[sub_resource type="CapsuleShape3D" id="Capsule"]
+radius = 0.4
+height = 1.6
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh"]
+radius = 0.4
+height = 1.6
+
+[sub_resource type="SphereShape3D" id="ArmShape"]
+radius = 0.3
+
+[node name="OrbitDemo" type="Node3D"]
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 8, 0)
+
+[node name="Floor" type="CSGBox3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+use_collision = true
+size = Vector3(30, 1, 30)
+
+[node name="Mover" type="CharacterBody3D" parent="." node_paths=PackedStringArray("camera")]
+collision_layer = 2
+script = ExtResource("2_mover")
+camera = NodePath("../Orbit")
+
+[node name="Shape" type="CollisionShape3D" parent="Mover"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("Capsule")
+
+[node name="Look" type="MeshInstance3D" parent="Mover"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("CapsuleMesh")
+
+[node name="Orbit" type="Node3D" parent="." node_paths=PackedStringArray("target")]
+script = ExtResource("1_cam")
+target = NodePath("../Mover")
+
+[node name="Pitch" type="Node3D" parent="Orbit"]
+
+[node name="Arm" type="SpringArm3D" parent="Orbit/Pitch"]
+collision_mask = 1
+shape = SubResource("ArmShape")
+spring_length = 6.0
+
+[node name="Camera" type="Camera3D" parent="Orbit/Pitch/Arm"]
+current = true

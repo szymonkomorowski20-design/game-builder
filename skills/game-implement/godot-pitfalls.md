@@ -30,6 +30,7 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | Node names compare unequal | `Node.name` is a `StringName` | compare with `&"Idle"` or `String(node.name)` |
 | A hand-written 3D rotation in a `.tscn` points the wrong way (camera looks into the ground, light shines upward) | `Transform3D(…)` in a scene file lists the basis **row by row** (x.x, y.x, z.x, x.y, …), not as the column vectors | write rows, or set `rotation_degrees` in the scene instead; a scenario that measures the result (e.g. spring arm length in the open) catches it |
 | 3D chase camera ends up inside the player's head next to a wall | `SpringArm3D` shortens exactly as designed | fade/hide the player mesh under ~1.5 m of arm, or raise the camera — a design decision for the spec |
+| Mouse-look sensitivity changes with the window size | `InputEventMouseMotion.relative` is scaled by the viewport stretch (×10 measured in a headless run) | use `screen_relative` (4.3+) for camera look; `relative` stays right for dragging things in the viewport |
 | `Area3D` pickup fires for the floor/walls under Jolt (4.5+) | Jolt reports overlaps with static bodies | give the pickup a mask with only the player's layer |
 
 ## Physics and navigation

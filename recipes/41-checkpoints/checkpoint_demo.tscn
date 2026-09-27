@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://41-checkpoints/checkpoint_level.gd" id="1_level"]
+[ext_resource type="Script" path="res://01-topdown-movement/top_down_mover.gd" id="2_mover"]
+[ext_resource type="Script" path="res://41-checkpoints/checkpoint.gd" id="3_cp"]
+
+[sub_resource type="CircleShape2D" id="MoverShape"]
+radius = 8.0
+
+[sub_resource type="RectangleShape2D" id="CpShape"]
+size = Vector2(16, 64)
+
+[node name="CheckpointDemo" type="Node2D"]
+script = ExtResource("1_level")
+
+[node name="Mover" type="CharacterBody2D" parent="." groups=["player"]]
+position = Vector2(100, 180)
+motion_mode = 1
+script = ExtResource("2_mover")
+
+[node name="Shape" type="CollisionShape2D" parent="Mover"]
+shape = SubResource("MoverShape")
+
+[node name="Look" type="ColorRect" parent="Mover"]
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(0.45, 0.75, 1, 1)
+
+[node name="CheckpointA" type="Area2D" parent="."]
+position = Vector2(250, 180)
+script = ExtResource("3_cp")
+order = 0
+
+[node name="Shape" type="CollisionShape2D" parent="CheckpointA"]
+shape = SubResource("CpShape")
+
+[node name="Flag" type="ColorRect" parent="CheckpointA"]
+offset_left = -4.0
+offset_top = -32.0
+offset_right = 4.0
+offset_bottom = 32.0
+
+[node name="CheckpointB" type="Area2D" parent="."]
+position = Vector2(450, 180)
+script = ExtResource("3_cp")
+order = 1
+
+[node name="Shape" type="CollisionShape2D" parent="CheckpointB"]
+shape = SubResource("CpShape")
+
+[node name="Flag" type="ColorRect" parent="CheckpointB"]
+offset_left = -4.0
+offset_top = -32.0
+offset_right = 4.0
+offset_bottom = 32.0

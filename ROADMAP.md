@@ -41,7 +41,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 ## Etap 4 — Wiedza, fala 05 (0.5.0–0.8.0; zostały dodatki)
 - [x] Dokumentacja Godota w wersji przypiętej (gałąź 4.7) — w BAZA-AI (fala 05) + referencja zmian 4.4–4.7 z oficjalnych przewodników migracji
 - [x] Biblioteka przepisów mechanik: 35 z 98 testami GUT i 11 scenariuszami; `gb recipe list/add` kopiuje je z testami do gry (dowód e2e)
-- [ ] Kolejne przepisy do ~45: AnimationTree, multiplayer, checkpointy, ruchome platformy, dash/knockback, minimapa, dostępność
+- [x] Przepisy 40–43 (0.14.0): kamera orbitująca 3D, punkty kontrolne, ruchoma platforma, zryw i odrzut — z dowodami wykrycia
+- [ ] Kolejne przepisy: AnimationTree, minimapa, multiplayer spawner/synchronizer
 - [x] Pułapki Godota — `skills/game-implement/godot-pitfalls.md` (zmierzone, z poprawkami)
 - [x] Audio: skill `game-audio`, przepisy 34–35, `gb shot --movie` z pomiarem dźwięku; fala 05 biblioteki (paczki CC0/MIT/CC-BY, licencje)
 - [x] Z Claude Code Game Studios (MIT): dowód wizualny „Run result” w game-implement, zrzuty przez Movie Maker
@@ -56,7 +57,8 @@ PC + web · Claude Code · nazwa `game-builder` · baza wiedzy: gry-wiedza/BAZA-
 - [x] Puzzle na siatce (0.10.0): model + undo + solver BFS dowodzący rozwiązywalności poziomów, 6 testów + 4 scenariusze
 - [x] Karty (0.11.0): walka karciana, energia, zamiary przeciwnika, dane kart, 11 testów (z kontraktem balansu) + 4 scenariusze
 - [x] 3D: szablon `platformer-3d` (0.13.0) — ruch i skok w 3D, kamera na sprężynie przed ścianami, monety → meta; 7 scenariuszy D1–D7 + testy jednostkowe, Forward+ i Jolt
-- [ ] 3D: kamera orbitująca myszą/gałką (przepis), szablon strzelanki TPS/FPS
+- [x] 3D: kamera orbitująca myszą/gałką — przepis 40 (0.14.0)
+- [ ] 3D: szablon strzelanki TPS/FPS
 
 ## Etap 6 — Role i pozostałe skille ✅ (0.6.0–0.8.0)
 - [x] Role (celowo mało — pomiar CCGS: cięższy proces dał gorszą grę): `game-checker` (recenzja diffu względem specu, tylko odczyt), `game-tester` (testy ze specu przed kodem), `game-playtester` (uruchamia grę, zrzuty i dźwięk, Run result, pytania do człowieka), `game-researcher` (fakty ze źródłami); wpięte w game-implement/test/spec/pre-implement

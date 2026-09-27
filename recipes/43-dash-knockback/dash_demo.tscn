@@ -1,0 +1,23 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://43-dash-knockback/dash_mover.gd" id="1_mover"]
+
+[sub_resource type="CircleShape2D" id="MoverShape"]
+radius = 8.0
+
+[node name="DashDemo" type="Node2D"]
+
+[node name="Mover" type="CharacterBody2D" parent="."]
+position = Vector2(120, 180)
+motion_mode = 1
+script = ExtResource("1_mover")
+
+[node name="Shape" type="CollisionShape2D" parent="Mover"]
+shape = SubResource("MoverShape")
+
+[node name="Look" type="ColorRect" parent="Mover"]
+offset_left = -8.0
+offset_top = -8.0
+offset_right = 8.0
+offset_bottom = 8.0
+color = Color(0.45, 0.75, 1, 1)

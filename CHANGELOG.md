@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.14.0 — 2026-09-27 · recipes 40–43
+- **40 orbit camera 3D:**
+  - `OrbitCamera`: yaw rig, pitch child, spring arm. Mouse (while captured) or the optional
+    `camera_left/right/up/down` actions; pitch is clamped and yaw wraps.
+  - `camera_relative(input, yaw)`: "up = away from the camera" at any yaw.
+  - Found building it: `InputEventMouseMotion.relative` is scaled by the viewport stretch. Mouse look turned 10×
+    too far in a headless run, and in a game sensitivity would change with the window size. The recipe uses
+    `screen_relative` (4.3+); a new godot-pitfalls row; the scenario fails on `relative`.
+- **41 checkpoints:** `CheckpointTracker` — the furthest checkpoint wins, backtracking never moves the respawn back,
+  and the start is used before any checkpoint (2D or 3D positions). A `Checkpoint` Area2D and a demo level on
+  recipe 01's mover.
+- **42 moving platform:**
+  - `PlatformPath`: pure ping-pong route at constant speed.
+  - `MovingPlatform`: an `AnimatableBody2D` with `sync_to_physics` that carries a `CharacterBody2D` rider sideways
+    and upward.
+  - Verified the claim: the same platform as a `StaticBody2D` moved by `position` leaves the rider behind; it falls
+    to y ≈ 1500 and the scenario goes red.
+- **43 dash + knockback:**
+  - `Dash`: burst, cooldown counted from the start, i-frames through the burst + `iframes_after`.
+  - `Knockback`: away from the source, linear decay; a new hit replaces the push.
+  - `DashMover`: priority dash > knockback > walking; `take_hit` respects the i-frames.
+- Detection proven:
+  - 41 "last touched wins": the unit test and scenario go red.
+  - 43 without the cooldown: the unit test and scenario go red.
+  - 40 with `relative` and 42 with `StaticBody2D`: the scenarios go red.
+- Recipes: 137/137 GUT, 15/15 scenarios, stable over 5 repeats.
+
 ## 0.13.0 — 2026-09-27 · 3D platformer template (stage 5)
 - `gb scaffold --template platformer-3d`: a 3D starter, green at scaffold time. Forward+, Jolt, 1280×720.
   - Movement on the ground plane with acceleration, friction and air control; the body turns to face the movement.
