@@ -61,7 +61,7 @@ SOFTWARE.
   implement, with a human deciding at each gate) comes from it. No Sailes code or text is included. The session
   hooks were rewritten from scratch on 2026-09-27. A line-by-line comparison against sailes-app-builder 1.28.2
   finds no shared line of 60+ characters except one standard PowerShell invocation line
-  (`powershell -ExecutionPolicy Bypass -File .enable-plugin.ps1`).
+  (`powershell -ExecutionPolicy Bypass -File .\enable-plugin.ps1`).
 - **Game-design literature** in the gry-wiedza library's guides (MDA, flow, game feel, …): cited by author and
   title, with no quotations beyond short phrases.
 
