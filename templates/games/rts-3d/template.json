@@ -1,0 +1,24 @@
+{
+  "name": "rts-3d",
+  "description": "Real-time strategy skirmish starter (Warcraft / StarCraft-like, original): the player against a computer opponent on a mirrored 72 m map. Workers gather gold and wood (saturation per mine, the nearest drop-off), build farms, barracks and a stable on a placement grid that says why it refuses, and train footmen, archers and riders with a counter triangle (bonus before armour, a type table, a damage floor). Selection by click, box (units over buildings), double-click and control groups; the smart right-click, shift queues, attack-move, formation targets; an RTS camera with edge/key/drag pan and a minimap; fog of war with an overlay; a skirmish AI with a priority list, growing attack waves, retreat and honest difficulty. Built on recipes 58–65 (added with their tests); behaviour scenarios + unit contracts, including a bot that wins the skirmish.",
+  "dim": "3d",
+  "main_scene": "res://scenes/skirmish/skirmish.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut",
+  "recipes": ["58", "59", "60", "61", "62", "63", "64", "65"],
+  "actions": {
+    "attack_move": { "keys": ["A"] },
+    "stop": { "keys": ["S"] },
+    "build_menu": { "keys": ["B"] },
+    "cmd_1": { "keys": ["Q"] },
+    "cmd_2": { "keys": ["W"] },
+    "cmd_3": { "keys": ["E"] },
+    "cmd_4": { "keys": ["R"] },
+    "cam_left": { "keys": ["Left"] },
+    "cam_right": { "keys": ["Right"] },
+    "cam_up": { "keys": ["Up"] },
+    "cam_down": { "keys": ["Down"] }
+  }
+}

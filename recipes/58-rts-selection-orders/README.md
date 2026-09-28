@@ -50,6 +50,8 @@ optionally `alive: bool`, `is_resource: bool` and `finished: bool`.
 - a box in world space under a tilted camera selects a trapezoid, not what the player sees;
 - enemies mixing into an own selection, and then receiving orders;
 - groups that keep freed nodes (always `is_instance_valid`);
+- a freed target read into a typed variable or parameter (`var t: Object = order.target`): Godot refuses a freed
+  instance there with a script error, and the order never ends. Read it as a Variant, then `is_instance_valid`;
 - a method named `_set` (it overrides `Object._set` and fails to parse).
 
 **Test:** `tests/unit/test_r58_selection_orders.gd`:

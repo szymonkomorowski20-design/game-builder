@@ -66,6 +66,14 @@ func test_r63_target_priority() -> void:
 	assert_null(RtsCombat.pick_target(Vector3.ZERO, 0.4, c), "nothing in range")
 
 
+func test_r63_freed_candidates_and_current_are_skipped() -> void:
+	var gone := Node3D.new()
+	var here := Dummy.new()
+	var c := [{"node": gone, "at": Vector3(1, 0, 0)}, {"node": here, "at": Vector3(3, 0, 0)}]
+	gone.free()
+	assert_eq(RtsCombat.pick_target(Vector3.ZERO, 8.0, c, gone), here, "a freed target and a freed current are skipped without an error")
+
+
 func test_r63_leash() -> void:
 	assert_false(RtsCombat.should_give_up(Vector3.ZERO, Vector3(5, 0, 0), 8.0))
 	assert_true(RtsCombat.should_give_up(Vector3.ZERO, Vector3(9, 0, 0), 8.0))

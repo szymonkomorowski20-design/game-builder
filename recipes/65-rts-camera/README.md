@@ -31,7 +31,9 @@ targets from `ground_point(mouse)` (or a physics ray for units and buildings).
 **Pitfalls:**
 - a pan speed that ignores the zoom;
 - normalising the edge direction without clamping (corners 1.41× faster);
-- edge panning while the window is unfocused, or during a drag box;
+- edge panning while the window is unfocused, the mouse is outside it, or in a headless test run, where the mouse
+  reads (0, 0) — a corner — and the view drifts on its own (found in the RTS template; `mouse_in_window()` guards it);
+- edge panning during a drag box;
 - `project_position` math done by hand instead of the camera's rays;
 - bounds on the camera instead of the pivot (a tilted view shows past the edge).
 

@@ -35,7 +35,7 @@ func _process(delta: float) -> void:
 	var acts: Array = pan_actions
 	if acts.size() == 4:
 		dir = Input.get_vector(acts[0], acts[1], acts[2], acts[3])
-	if edge_pan and dir == Vector2.ZERO:
+	if edge_pan and dir == Vector2.ZERO and mouse_in_window():
 		var vp := get_viewport()
 		dir = edge_direction(vp.get_mouse_position(), vp.get_visible_rect().size, edge_margin)
 	if dir != Vector2.ZERO:
@@ -56,6 +56,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if m != null and _drag:
 		var k := distance / 400.0
 		position = clamp_to(position + Vector3(-m.relative.x * k, 0.0, -m.relative.y * k), bounds)
+
+
+## Edge panning needs a focused window with the mouse inside it: otherwise (another window on top, the mouse outside,
+## or a headless run, where the mouse reads (0, 0) — a corner) the view would drift on its own.
+func mouse_in_window() -> bool:
+	if DisplayServer.get_name() == "headless" or not DisplayServer.window_is_focused():
+		return false
+	return get_viewport().get_visible_rect().has_point(get_viewport().get_mouse_position())
 
 
 func zoom(by: float) -> void:

@@ -26,7 +26,8 @@ static func make(kind: Kind, at: Vector3 = Vector3.ZERO, target: Object = null) 
 
 
 ## The right-click order for this unit: see the table above.
-static func smart(team: int, can_gather: bool, can_build: bool, target: Object, ground: Vector3) -> Dictionary:
+## `target` is a Variant on purpose: a freed object passed to an `Object` parameter is a script error.
+static func smart(team: int, can_gather: bool, can_build: bool, target: Variant, ground: Vector3) -> Dictionary:
 	if target != null and is_instance_valid(target) and _alive(target):
 		var t := int(target.get(&"team"))
 		if bool(target.get(&"is_resource")):
@@ -78,12 +79,13 @@ func idle() -> bool:
 func _drop_dead_targets() -> void:
 	while not queue.is_empty():
 		var o: Dictionary = queue[0]
-		var t: Object = o.target
+		var t = o.target                        # a Variant: the target may have been freed (see smart())
+		var gone: bool = t == null or not is_instance_valid(t)
 		var over := false
 		if o.kind == Kind.ATTACK or o.kind == Kind.GATHER:
-			over = t == null or not is_instance_valid(t) or not _alive(t)
+			over = gone or not _alive(t)
 		elif o.kind == Kind.BUILD:
-			over = t == null or not is_instance_valid(t) or bool(t.get(&"finished"))
+			over = gone or bool(t.get(&"finished"))
 		if not over:
 			return
 		queue.pop_front()

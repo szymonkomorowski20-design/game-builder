@@ -20,6 +20,9 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | A test that sorts `StringName`s passes, then fails after unrelated code is added | `StringName` sorts by its interned address, not alphabetically, so the order depends on what was loaded first (recipe 52's test failed in the proof game) | compare as `String`s: `names.map(func(x): return String(x))` then `sort()`, or compare sets |
 | A lambda "finds" a value but the variable is still `null` after `wait_until(func(): …)` | GDScript lambdas capture locals **by value**; assigning to an outer local inside the lambda changes only its copy | write through a container: `var found: Array[Node] = []` … `found.append(n)` inside the lambda |
 | `print()` from a scenario is nowhere in the `gb scenario` report | gb shows only its own markers from the Godot log | use `note("…")` in the scenario — gb prints each line under the scenario and keeps them in `--json` |
+| A scripted click in a headless scenario lands far from where it was aimed (×20 measured) | `Input.parse_input_event` takes window coordinates, and the headless window is tiny while the viewport is 1280×720, so the position is scaled | push mouse events into the viewport instead: `get_viewport().push_input(ev, true)` (viewport coordinates); keys can still go through `Input.parse_input_event` (the rts-3d template's `RtsHands`) |
+| The camera drifts away in every headless scenario | edge pan reads the mouse at (0, 0), a corner, when there is no real pointer | pan with the screen edges only while the mouse is inside a focused window (recipe 65's `mouse_in_window()`) |
+| `Lambda capture at index 0 was freed. Passed "null" instead.` from a `wait_until` | the lambda captured a node that was freed while it waited (a building destroyed, a unit killed) | capture a container instead: `var held := [node]` … `func(): return not is_instance_valid(held[0])` |
 
 ## Scenes, nodes, time
 
@@ -40,6 +43,8 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | A client's copy of a synced node stays wrong (tampered, or missed an update) | `MultiplayerSynchronizer` in `ON_CHANGE` mode sends only changes | `ALWAYS` for moving state (the next packet corrects it); `ON_CHANGE` for rare state such as HP or a name — recipe 46 |
 | One client's NaN input freezes or teleports an avatar for everyone | `Vector2(NAN, 0).limit_length(1)` is still NaN | reject `not dir.is_finite()` on the server before clamping — recipe 46 |
 | Cleanup in a parent's `_exit_tree` errors on its children (`multiplayer`, `get_path()`) | children leave the tree before their parent | let each node clean up in its own `_exit_tree`, or keep references (a peer, a path) taken while in the tree |
+| `Trying to assign invalid previously freed instance` when a unit dies | a typed variable, parameter, loop variable (`for u: Unit in list`) or typed lambda parameter received an Object that was already freed: the typed assignment checks it and stops the script | hold what can die in an untyped (`Variant`) variable and test `is_instance_valid(x)` before use; loop with `for x: Variant in list` (recipes 58, 59, 63 and the rts-3d template) |
+| A child's `_ready` finds its parent not set up (an overlay or HUD reading the game's state) | children are ready before their parent | `if not parent.is_node_ready(): await parent.ready` |
 
 ## Physics and navigation
 
@@ -55,6 +60,8 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | A respawned or teleported player instantly triggers the area it just left (a door, a fight's trigger) | after `global_position = …` the physics server still reports the body at its old place for a frame, so `overlaps_body()` and area signals see it there | arm the area a short time after a teleport or reset (0.3 s: the roguelite template's doors, the FPS template's encounter zones) |
 | A 3D hit on the head counts as the body | the head's collision shape sits inside the body capsule (e.g. the capsule grows back after crouching), and the ray meets the capsule first | keep the head sphere above the capsule in every stance; test a headshot after a crouch and stand (FPS template M4) |
 | A hitscan's first shot lands high | the shot was cast after its own recoil kick moved the view | cast along the view as it was when the trigger released the shot; the kick moves the next shot (FPS template M3) |
+| Buildings placed during the game don't change the paths; units walk into them | a `NavigationRegion3D` bakes the geometry of its own children only (the default source), so a building added elsewhere is not cut out | add obstacles under the navigation region and rebake after placing or removing one (`bake_navigation_mesh(true)`, one bake at a time) |
+| A unit sent to a building or a mine never arrives, or walks around to its far side | reach measured to the obstacle's centre, and a navigation target inside an obstacle ends the path at the nearest navigable point, often behind it | measure reach to the near edge (a `closest_point` of the footprint) and walk to a point on the near side |
 
 ## Data, saves, localization, audio
 

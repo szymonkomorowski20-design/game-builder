@@ -108,7 +108,7 @@ func add_to_group(n: int) -> void:
 	if not _all_own():
 		return
 	var g: Array = groups.get(n, [])
-	for c in selected:
+	for c: Variant in selected:
 		if not g.has(c):
 			g.append(c)
 	groups[n] = g
@@ -117,7 +117,7 @@ func add_to_group(n: int) -> void:
 ## n: select group n (its living members). Returns whether it had any.
 func recall_group(n: int) -> bool:
 	var g: Array[Object] = []
-	for c in groups.get(n, []):
+	for c: Variant in groups.get(n, []):
 		if _alive(c):
 			g.append(c)
 	groups[n] = g
@@ -130,21 +130,21 @@ func recall_group(n: int) -> bool:
 ## Drops the dead and the freed from the selection and the groups (call when something dies).
 func prune() -> void:
 	var keep: Array[Object] = []
-	for c in selected:
+	for c: Variant in selected:
 		if _alive(c):
 			keep.append(c)
 	if keep.size() != selected.size():
 		_replace(keep)
 	for n in groups:
 		var g: Array = groups[n]
-		groups[n] = g.filter(func(c: Object) -> bool: return _alive(c))
+		groups[n] = g.filter(func(c: Variant) -> bool: return _alive(c))
 
 
 ## The selected units (not buildings) — what an order goes to.
 func units() -> Array[Object]:
 	var out: Array[Object] = []
-	for c in selected:
-		if _own(c) and not bool(c.get(&"is_building")):
+	for c: Variant in selected:
+		if _alive(c) and _own(c) and not bool(c.get(&"is_building")):
 			out.append(c)
 	return out
 
@@ -161,15 +161,15 @@ func _replace(list: Array) -> void:
 	changed.emit()
 
 
-func _own(c: Object) -> bool:
+func _own(c: Variant) -> bool:
 	return int(c.get(&"team")) == team
 
 
 func _all_own() -> bool:
-	return selected.all(func(c: Object) -> bool: return _own(c))
+	return selected.all(func(c: Variant) -> bool: return _alive(c) and _own(c))
 
 
-static func _alive(c: Object) -> bool:
+static func _alive(c: Variant) -> bool:
 	if c == null or not is_instance_valid(c):
 		return false
 	var a = c.get(&"alive")

@@ -30,7 +30,7 @@ func try_occupy(worker: Object) -> bool:
 		return false
 	if gathering.has(worker):
 		return true
-	gathering = gathering.filter(func(w: Object) -> bool: return is_instance_valid(w))
+	gathering = gathering.filter(func(w: Variant) -> bool: return is_instance_valid(w))   # a dead worker frees its slot
 	if gathering.size() >= max_gatherers:
 		return false
 	gathering.append(worker)

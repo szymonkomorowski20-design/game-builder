@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.28.0 — 2026-09-28 · the `rts-3d` template (ROADMAP 9.3)
+- **`rts-3d`: a real-time strategy skirmish** (Warcraft / StarCraft-like, original) against a computer opponent on a
+  mirrored 72 m map, built on recipes 58–65 (added with their tests):
+  - workers gather gold and wood; farms, barracks and a stable go up on a grid that says why it refuses (Polish
+    messages); footmen, archers and riders in a counter triangle;
+  - selection by click, box, double-click and control groups; the smart right-click, shift queues, attack-move,
+    formation targets; the RTS camera; a minimap; fog of war with a soft overlay; an end screen;
+  - a computer player at three honest difficulties (think speed, wave size, a named income multiplier; it sees only
+    through its own fog), and a `player_bot` that plays the player's side for the tests;
+  - 9 scenarios R1–R9 (R9: the bot beats the normal computer, in 6–16 simulated minutes so far) and unit contracts:
+    complete data, the tech tree, **the counter triangle at equal cost on a balance sheet** (420, 720 and 1260 gold),
+    the bonuses along the triangle, the economy, sieges;
+  - a performance scene (`tests/fixtures/perf_battle.tscn`, 40 against 40) and its own budget: physics 10 ms for
+    the worst frame of each second (8.9 ms measured; frame p95 1.5 ms). A scaffold keeps the template's budget;
+  - 15 deliberate breaks, 13 caught by the tests; the spec says why the other two need none;
+  - what building it found is in its spec (`.ai/specs/implemented/template-rts-3d.md`) and in the genre document's
+    new "Measured in a skirmish" section (gry-wiedza).
+- **Recipe fixes found while building the template:**
+  - **58, 59, 63:** a unit that died while held (an order's target, a selection, a gathering slot, a target
+    candidate) no longer stops the script: they are held untyped and checked with `is_instance_valid`;
+  - **59:** a worker waiting at a full node moves to another after `max_wait` (it waited forever at one tree);
+  - **64:** waves are capped by the largest army the supply allows (`max_wave_size`); no farms at the supply ceiling;
+    an attacking wave is ordered again on every think (it stood idle after a fight); a step waiting for its
+    requirement holds the order instead of being skipped (a second barracks came before the first); defence when
+    the base is attacked (`threat()`);
+  - **65:** edge pan only while the mouse is inside the window (headless tests drifted: the mouse reads (0, 0));
+  - **62:** the README gives the measured cost of 1 m and 2 m cells in an 80-unit battle;
+  - the recipes' full run: 280/280 GUT tests (8 new), 24/24 scenarios.
+- **godot-pitfalls:** 7 rows (a freed instance in a typed variable; a lambda capturing a freed node; headless clicks
+  through `push_input`; edge pan headless; children ready before the parent; buildings outside the navigation region;
+  walking to an obstacle's centre).
+- **Docs:** the decision engine, the README and the Polish guide list `rts-3d`; the guide counts 65 recipes.
+
 ## 0.27.0 — 2026-09-28 · the RTS recipes (ROADMAP 9.3)
 - **Recipes 58–65**, each with a README (Problem / Solution / Tuning / Host / Pitfalls / Test) and tests:
   - **58 selection and orders:**

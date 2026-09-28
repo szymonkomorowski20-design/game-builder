@@ -117,6 +117,29 @@ func test_r58_control_groups() -> void:
 	assert_eq(s.selected.size(), 2, "and keeps the selection")
 
 
+class Body:
+	extends Node3D
+	var team := 0
+	var kind: StringName = &"footman"
+	var is_building := false
+	var alive := true
+
+
+func test_r58_a_freed_unit_leaves_the_selection_and_groups() -> void:
+	var a := Body.new()
+	var b := Body.new()
+	var s := _sel()
+	var at := func(o: Object) -> Vector2: return Vector2(10, 10) if o == a else Vector2(20, 10)
+	s.box([a, b], Rect2(0, 0, 50, 50), at)
+	s.assign_group(3)
+	b.free()
+	s.prune()
+	assert_eq(s.selected, [a] as Array[Object], "the freed one is gone, without an error")
+	assert_eq((s.groups[3] as Array).size(), 1, "and from the group")
+	assert_eq(s.units(), [a] as Array[Object])
+	a.free()
+
+
 func test_r58_changed_fires_only_on_a_change() -> void:
 	var a := Thing.new(Vector2(10, 10))
 	var s := _sel()
@@ -162,6 +185,18 @@ func test_r58_queue_shift_stop_patrol() -> void:
 	o.done()
 	assert_eq(o.current().at, Vector3(0, 0, 0), "a patrol goes back and forth")
 	assert_false(o.idle())
+
+
+func test_r58_a_freed_target_ends_its_order_without_an_error() -> void:
+	var tree := Node3D.new()                     # a depleted tree, freed by the game
+	var o := RtsOrders.new()
+	o.give(RtsOrders.make(RtsOrders.Kind.GATHER, Vector3.ZERO, tree))
+	o.give(RtsOrders.make(RtsOrders.Kind.MOVE, Vector3(4, 0, 0)), true)
+	tree.free()
+	assert_eq(o.current().kind, RtsOrders.Kind.MOVE, "the gather is over; the queued move follows")
+	var gone := Node3D.new()
+	gone.free()
+	assert_eq(RtsOrders.smart(0, true, true, gone, Vector3(1, 0, 1)).kind, RtsOrders.Kind.MOVE, "a right click on a freed thing is a move")
 
 
 func test_r58_a_dead_target_ends_its_order() -> void:

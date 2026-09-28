@@ -70,6 +70,14 @@ func test_r59_supply_is_reserved_and_capped() -> void:
 	assert_true(s.can_fit(0), "a free item always fits")
 
 
+func test_r59_a_dead_worker_frees_its_slot() -> void:
+	var n := RtsResourceNode.new(&"gold", 100, 1)
+	var dead := Node.new()
+	assert_true(n.try_occupy(dead))
+	dead.free()
+	assert_true(n.try_occupy(RefCounted.new()), "the freed worker's slot is free again, without an error")
+
+
 func test_r59_a_node_has_slots_and_runs_out() -> void:
 	var n := RtsResourceNode.new(&"gold", 25, 2)
 	var a := RefCounted.new()
@@ -135,7 +143,7 @@ func test_r59_moves_on_from_a_spent_node_and_uses_the_nearest_drop() -> void:
 	var first := RtsResourceNode.new(&"wood", 10, 2, Vector3(4, 0, 0))
 	var second := RtsResourceNode.new(&"wood", 100, 2, Vector3(0, 0, 4))
 	var g := _gatherer(stock, first, Vector3.ZERO)
-	g.find_node = func(kind: StringName, _from: Vector3) -> RtsResourceNode: return second if kind == &"wood" and not second.is_spent() else null
+	g.find_node = func(kind: StringName, _from: Vector3, _busy: RtsResourceNode) -> RtsResourceNode: return second if kind == &"wood" and not second.is_spent() else null
 	var drops := [Vector3.ZERO]
 	g.find_drop = func(from: Vector3) -> Vector3:
 		var best := Vector3.INF
@@ -153,6 +161,21 @@ func test_r59_moves_on_from_a_spent_node_and_uses_the_nearest_drop() -> void:
 	_run([h], 3.5)
 	assert_false(where.is_empty(), "it delivered again")
 	assert_eq(where[where.size() - 1], Vector3(0, 0, 5), "at the new, nearer drop-off")
+
+
+func test_r59_a_long_wait_moves_to_another_node() -> void:
+	var busy := RtsResourceNode.new(&"wood", 1000, 1, Vector3(1, 0, 0))
+	var free := RtsResourceNode.new(&"wood", 1000, 1, Vector3(3, 0, 0))
+	busy.try_occupy(RefCounted.new())               # someone is chopping it
+	var stock := RtsStockpile.new()
+	var g := _gatherer(stock, busy, Vector3.ZERO)
+	g.find_node = func(_k: StringName, _from: Vector3, skip: RtsResourceNode) -> RtsResourceNode: return free if skip != free else busy
+	var h := Host.new(g, Vector3(1, 0, 0))
+	_run([h], 1.0)
+	assert_eq(g.state, RtsGatherer.State.WAIT, "it waits a little")
+	_run([h], 2.5)
+	assert_eq(g.node, free, "then goes to the free tree")
+	assert_true(g.state == RtsGatherer.State.GATHERING or g.state == RtsGatherer.State.TO_DROP, "and works")
 
 
 func test_r59_stop_keeps_the_load() -> void:

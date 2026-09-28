@@ -19,8 +19,9 @@
     Put it in the spec's balance sheet and in a contract test.
 - **`RtsGatherer`** (one per worker): TO_NODE → WAIT → GATHERING → TO_DROP → deposit → back.
   - The body walks to `target()` and calls `tick(delta, arrived)`.
-  - `find_node` finds the next node when one is spent; `find_drop` finds the nearest drop-off, asked when the load is
-    ready.
+  - `find_node(kind, from, busy)` finds the next node when one is spent, or when the worker has waited `max_wait`
+    for a slot (the game should prefer nodes with free slots and skip `busy`); `find_drop` finds the nearest
+    drop-off, asked when the load is ready.
   - `stop()` (another order) gives up the slot and keeps the load.
 
 **Tuning:**
@@ -46,6 +47,7 @@ Balance with `income_per_minute`, not by feel: one worker on an 8 m trip at 4 m/
 - no slot limit (income grows without bound);
 - a drop-off chosen when the trip starts instead of when the load is ready;
 - a spent node's workers stuck in WAIT;
+- workers queuing at the nearest node while another stands free (found in the RTS template; `max_wait` fixes it);
 - a worker ordered away losing its load (players notice).
 
 **Test:** `tests/unit/test_r59_economy.gd`:

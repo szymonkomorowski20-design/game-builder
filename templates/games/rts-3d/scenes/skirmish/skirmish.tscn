@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/core/rts_game.gd" id="1_g"]
+[ext_resource type="Resource" path="res://data/rules.tres" id="2_r"]
+[ext_resource type="Script" path="res://recipes/65-rts-camera/rts_camera.gd" id="3_c"]
+[ext_resource type="Script" path="res://scripts/ui/rts_player_input.gd" id="4_i"]
+[ext_resource type="Script" path="res://scripts/ui/rts_hud.gd" id="5_h"]
+[ext_resource type="Script" path="res://scripts/world/rts_fog_overlay.gd" id="6_f"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+sky_top_color = Color(0.35, 0.55, 0.85, 1)
+sky_horizon_color = Color(0.75, 0.82, 0.9, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+ambient_light_energy = 0.8
+tonemap_mode = 2
+
+[node name="Skirmish" type="Node3D"]
+script = ExtResource("1_g")
+rules = ExtResource("2_r")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.25, -0.433013, 0, 0.866025, 0.5, 0.5, -0.433013, 0.75, 0, 20, 0)
+light_energy = 1.1
+shadow_enabled = true
+directional_shadow_max_distance = 80.0
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="CameraRig" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 0, 18)
+script = ExtResource("3_c")
+bounds = Rect2(-30, -30, 60, 60)
+pan_actions = ["cam_left", "cam_right", "cam_up", "cam_down"]
+min_distance = 16.0
+max_distance = 48.0
+distance = 32.0
+pitch = 58.0
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig"]
+current = true
+fov = 50.0
+
+[node name="PlayerInput" type="Node" parent="."]
+script = ExtResource("4_i")
+
+[node name="FogOverlay" type="MeshInstance3D" parent="."]
+script = ExtResource("6_f")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("5_h")

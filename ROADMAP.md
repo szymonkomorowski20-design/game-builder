@@ -131,6 +131,9 @@ dla konkretnej partii.
   („magiczne pudełko”, sloty formacji, przydział bez krzyżowania, dotarcie tłumu), mgła wojny, walka (premie przed
   pancerzem, tabela typów, minimum obrażeń, priorytet celów), AI (lista priorytetów, fale, odwrót, jawna trudność),
   kamera RTS; 272 testy GUT przepisów, 29 dowodów wykrywania
-- [ ] Szablon `rts-3d` (baza, robotnicy, 2 surowce, koszary, 3 jednostki z kontrami, mgła, AI; bot wygrywa potyczkę)
+- [x] Szablon `rts-3d` (0.28.0): potyczka z komputerem na lustrzanej mapie 72 m — robotnicy, złoto i drewno, farmy,
+  koszary i stajnia, piechur / łucznik / jeździec w trójkącie kontr, mgła z nakładką, minimapa, grupy, szyki, komputer
+  na 3 poziomach; 9 scenariuszy R1–R9 (R9: bot wygrywa potyczkę) + kontrakty liczb (trójkąt kontr przy równym koszcie),
+  13 z 15 celowych usterek wykrytych (dwie pozostałe opisane jako niepotrzebne testu), budżet wydajności bitwy 40 na 40
 - [ ] Gra-dowód RTS zbudowana autonomicznie + raport
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

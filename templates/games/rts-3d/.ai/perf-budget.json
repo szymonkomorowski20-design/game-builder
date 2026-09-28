@@ -1,0 +1,9 @@
+{
+  "_comment": "gb perf fails when a measured value exceeds its budget. frame_ms and draw_calls are only checked in a window run. Spec: the battle scene (tests/fixtures/perf_battle.tscn, 40 against 40 plus workers, fog on, vsync off, --seconds 120). Physics is Godot's worst physics frame of each second: an RTS battle of ~86 GDScript units measured 8.9 ms at worst (4.2 ms on average of those worst frames, script cost p95 2.1 ms a frame headless), so the budget is 10 ms, which still fits a 60 fps frame.",
+  "frame_ms_p95": 16.7,
+  "process_ms_p95": 8,
+  "physics_ms_p95": 10,
+  "draw_calls_max": 2000,
+  "nodes_max": 20000,
+  "static_memory_mb_max": 1024
+}

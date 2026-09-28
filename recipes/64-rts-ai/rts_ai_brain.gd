@@ -3,25 +3,33 @@ extends RefCounted
 ## A skirmish opponent (recipe 64) built the way commercial RTS AIs are (see the genre doc): a priority list checked a
 ## few times a second, attack waves, and difficulty as reaction time and income — honestly named, not hidden.
 ## Every `think_interval` seconds it:
-##   1. builds a farm when free supply runs low and none is on its way;
+##   1. builds a farm when free supply runs low and none is on its way (not at the supply ceiling);
 ##   2. keeps making workers up to `worker_target`;
 ##   3. walks the build order (a list of {kind, count}): the first entry it has fewer of than `count` is the goal —
 ##      it is ordered when affordable, otherwise the AI **saves up** for it (it doesn't skip ahead to cheaper things);
-##      an entry locked by the tech tree is skipped (list prerequisites before what needs them);
-##   4. sends the army as a wave (attack-move to the enemy's base) once it has `wave_size` units; each wave is bigger;
-##   5. pulls the wave back home when the fight goes badly (its power below `retreat_ratio` × the enemy's there).
+##      an entry locked by the tech tree waits when what unlocks it is on its way (`unlocking`), and is skipped when
+##      nothing is (list prerequisites before what needs them);
+##   4. sends the army as a wave (attack-move to the enemy's base) once it has `wave_size` units; each wave is bigger,
+##      up to `max_wave_size` (a wave larger than the supply allows would never leave);
+##   4b. between waves, sends the army at enemies that come near its buildings (`threat()`);
+##   5. keeps the wave pushing (idle units of a wave are sent on at the enemy's base — the base moves as buildings
+##      fall), and pulls it back home when the fight goes badly (its power below `retreat_ratio` × the enemy's there).
 ## The game gives it a `world` object with these methods (the test has a fake one):
 ##   count(kind) -> int                 own ones, including those being made
 ##   pending(kind) -> int               those being made
 ##   supply_free() -> int
+##   supply_maxed() -> bool             (optional) at the supply ceiling: farms would add nothing
 ##   can_afford(kind) -> bool
 ##   available(kind) -> bool            the tech tree allows it
+##   unlocking(kind) -> bool            (optional) what it needs is being built or researched now
+##   threat() -> Vector3                (optional) the nearest enemy near its buildings, or Vector3.INF
 ##   order(kind) -> bool                start making / building it
 ##   army() -> Array                    own military units
 ##   power(units: Array) -> float       their fighting value (e.g. the sum of cost)
 ##   enemy_power_near(at: Vector3) -> float
 ##   army_centre() -> Vector3
-##   attack(units: Array, at: Vector3); retreat(units: Array, to: Vector3)
+##   attack(units: Array, at: Vector3)  called every think while a wave is out: order the idle ones only
+##   retreat(units: Array, to: Vector3)
 ##   enemy_base() -> Vector3; home() -> Vector3
 
 signal decided(what: String)
@@ -35,6 +43,7 @@ var supply_margin := 4
 var think_interval := 1.0
 var wave_size := 6
 var wave_growth := 2
+var max_wave_size := 20
 var retreat_ratio := 0.6
 var attacking := false
 var waves_sent := 0
@@ -70,7 +79,8 @@ func tick(delta: float) -> void:
 
 func think() -> void:
 	# 1. Supply first: a blocked AI is a dead AI.
-	if world.supply_free() < supply_margin and world.pending(farm_kind) == 0 and world.available(farm_kind):
+	var maxed: bool = world.has_method(&"supply_maxed") and world.supply_maxed()
+	if not maxed and world.supply_free() < supply_margin and world.pending(farm_kind) == 0 and world.available(farm_kind):
 		if world.can_afford(farm_kind) and world.order(farm_kind):
 			decided.emit("farm")
 		return                                  # save for the farm before anything else
@@ -84,7 +94,9 @@ func think() -> void:
 		if world.count(kind) >= int(step.count):
 			continue
 		if not world.available(kind):
-			continue                            # locked by tech: its prerequisite should come earlier in the list
+			if world.has_method(&"unlocking") and world.unlocking(kind):
+				break                           # its prerequisite is on its way: wait, don't jump ahead
+			continue                            # nothing unlocks it yet: its prerequisite should come earlier in the list
 		if world.can_afford(kind) and world.order(kind):
 			decided.emit("build " + String(kind))
 		break                                   # the top goal waits for money; nothing cheaper jumps the queue
@@ -99,7 +111,12 @@ func think() -> void:
 			world.retreat(army, world.home())
 			attacking = false
 			decided.emit("retreat")
-	elif army.size() >= wave_size:
+		else:
+			world.attack(army, world.enemy_base())      # keep pushing: the world re-orders idle units only
+	elif world.has_method(&"threat") and world.threat() != Vector3.INF:
+		world.attack(army, world.threat())           # defend: the idle army goes at whoever came near the base
+		decided.emit("defend")
+	elif army.size() >= mini(wave_size, max_wave_size):
 		world.attack(army, world.enemy_base())
 		attacking = true
 		waves_sent += 1

@@ -16,11 +16,18 @@ and income. Every `think_interval` seconds it:
 3. **The build order**, a list of `{kind, count}`: the first entry it has fewer of is the goal.
    - It is bought when affordable. Otherwise the AI saves up for it; cheaper things don't jump the queue, or it never
      techs.
-   - An entry locked by the tech tree is skipped, so list prerequisites first.
+   - An entry locked by the tech tree waits while what unlocks it is being built (`unlocking`, optional in the
+     world). Otherwise it is skipped, so list prerequisites first. (Found in the RTS template: skipping while the
+     first barracks was going up made the AI start a second one and starve.)
 4. **Waves:** once the army has `wave_size` units it attack-moves to the enemy base as one group. Each wave is
-   `wave_growth` bigger.
-5. **Retreat:** when the wave's power falls below `retreat_ratio` × the enemy's power there, it goes home. The next wave
-   waits for its size.
+   `wave_growth` bigger, up to `max_wave_size` (found in the RTS template: waves outgrew the largest army the supply
+   allows, and the AI never attacked again).
+5. **Push or retreat:** while a wave is out, idle units of it are sent on at the enemy base (it moves as buildings
+   fall). When the wave's power falls below `retreat_ratio` × the enemy's power there, it goes home, and the next
+   wave waits for its size.
+
+At the supply ceiling (`supply_maxed()`, optional in the world) it stops building farms. Between waves, when enemies
+come near its buildings (`threat()`, optional), the idle army goes at them.
 
 The game gives it a `world` object (see the class header for the methods: counts, costs, tech, supply, orders, army
 power, attack and retreat). The recipe's test uses a fake world, so the decisions are tested apart from the game.

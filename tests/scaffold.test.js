@@ -344,6 +344,22 @@ test('e2e: military-fps-3d template gets its recipes and actions, and passes eve
   assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
 });
 
+test('e2e: rts-3d template gets its recipes, actions and perf budget, and passes every scenario (a bot wins the skirmish) out of the box', { skip, timeout: 1200000 }, () => {
+  const dir = path.join(tmp(), 'rts');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'Rts', '--template', 'rts-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /RECIPES 58-rts-selection-orders, 59-rts-economy, 60-rts-build-produce, 61-rts-group-move, 62-rts-fog-of-war, 63-rts-combat, 64-rts-ai, 65-rts-camera/);
+  const pg = fs.readFileSync(path.join(dir, 'project.godot'), 'utf8');
+  for (const a of ['attack_move', 'stop', 'build_menu', 'cmd_1', 'cmd_4', 'cam_left', 'cam_down']) assert.match(pg, new RegExp(`^${a}=\{`, 'm'), a);
+  // The template's own budget (an 80-unit battle) wins over the generic one.
+  assert.match(fs.readFileSync(path.join(dir, '.ai', 'perf-budget.json'), 'utf8'), /"physics_ms_p95": 10/);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 900000 });
+  assert.equal(v.status, 0, v.stdout);
+  const sc = /PASS scenarios \((\d+)\/(\d+) passing\)/.exec(v.stdout);
+  assert.ok(sc && sc[1] === sc[2] && Number(sc[1]) >= 11, v.stdout);
+  assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
+});
+
 test('e2e: fps-3d template adds its own input actions (shoot on the mouse) and passes its scenarios out of the box', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'fps');
   const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'FPS', '--template', 'fps-3d'], { encoding: 'utf8', timeout: 600000 });

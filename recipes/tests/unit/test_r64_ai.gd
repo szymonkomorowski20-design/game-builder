@@ -16,6 +16,10 @@ class FakeWorld:
 	var enemy_power := 0.0
 	var orders: Array[StringName] = []
 	var attacks := 0
+	var maxed := false
+	var coming := {}
+	var danger := Vector3.INF
+	var attack_at := Vector3.INF
 	var retreats := 0
 	var army_units: Array = []
 
@@ -27,6 +31,15 @@ class FakeWorld:
 
 	func supply_free() -> int:
 		return supply
+
+	func supply_maxed() -> bool:
+		return maxed
+
+	func unlocking(kind: StringName) -> bool:
+		return coming.has(kind)
+
+	func threat() -> Vector3:
+		return danger
 
 	func can_afford(kind: StringName) -> bool:
 		return gold >= int(costs.get(kind, 0))
@@ -54,8 +67,9 @@ class FakeWorld:
 	func army_centre() -> Vector3:
 		return Vector3.ZERO
 
-	func attack(_units: Array, _at: Vector3) -> void:
+	func attack(_units: Array, at: Vector3) -> void:
 		attacks += 1
+		attack_at = at
 
 	func retreat(_units: Array, _to: Vector3) -> void:
 		retreats += 1
@@ -133,12 +147,59 @@ func test_r64_waves_grow_and_retreat_when_losing() -> void:
 	w.enemy_power = 300.0                          # 4 × 60 = 240 < 300 × 0.6? no: 240 > 180
 	b.think()
 	assert_eq(w.retreats, 0, "a fair fight: stay")
+	assert_eq(w.attacks, 2, "and keep pushing")
+	assert_eq(b.waves_sent, 1, "the same wave")
 	w.enemy_power = 500.0                          # 240 < 300
 	b.think()
 	assert_eq(w.retreats, 1, "outmatched: back home")
 	assert_false(b.attacking)
 	b.think()
-	assert_eq(w.attacks, 1, "the next wave waits for 6")
+	assert_eq(w.attacks, 2, "the next wave waits for 6")
+
+
+func test_r64_waves_are_capped_and_no_farms_at_the_ceiling() -> void:
+	var w := FakeWorld.new()
+	w.counts[&"worker"] = 3
+	var b := _brain(w)
+	b.wave_size = 30
+	b.max_wave_size = 10
+	for i in 10:
+		w.army_units.append(i)
+	b.think()
+	assert_eq(b.waves_sent, 1, "a wave the supply can't reach is capped at max_wave_size")
+	w.supply = 0
+	w.gold = 500
+	w.maxed = true
+	b.think()
+	assert_false(w.orders.has(&"farm"), "at the supply ceiling a farm adds nothing")
+
+
+func test_r64_a_step_waits_while_its_prerequisite_is_coming() -> void:
+	var w := FakeWorld.new()
+	w.counts[&"worker"] = 3
+	w.gold = 1000
+	w.locked[&"footman"] = true
+	w.coming[&"footman"] = true               # its barracks is being built
+	var b := _brain(w)
+	b.build_order = [{"kind": &"footman", "count": 4}, {"kind": &"barracks", "count": 2}] as Array[Dictionary]
+	b.think()
+	assert_false(w.orders.has(&"barracks"), "it waits for the barracks under way instead of starting a second")
+	w.coming.erase(&"footman")
+	b.think()
+	assert_true(w.orders.has(&"barracks"), "nothing on its way: the locked step is skipped")
+
+
+func test_r64_the_army_defends_the_base() -> void:
+	var w := FakeWorld.new()
+	w.counts[&"worker"] = 3
+	var b := _brain(w)
+	b.wave_size = 10
+	w.army_units = [1, 2, 3]
+	w.danger = Vector3(3, 0, 4)
+	b.think()
+	assert_eq(w.attacks, 1, "three units, no wave yet — but raiders at the base")
+	assert_eq(w.attack_at, Vector3(3, 0, 4), "they go at the raiders")
+	assert_eq(b.waves_sent, 0, "a defence is not a wave")
 
 
 func test_r64_the_think_interval_is_the_reaction_time() -> void:

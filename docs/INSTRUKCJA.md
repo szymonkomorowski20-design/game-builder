@@ -87,11 +87,12 @@ Załóż pusty folder (np. `Pulpit/gry/moja-gra`), otwórz w nim Claude Code i n
 | `fps-3d` | widok z pierwszej osoby, strzał, cele, osłony |
 | `action-roguelite-3d` | gra w stylu Hadesa: hub z manekinem i kapliczką ulepszeń, runy z 5 pokoi, dary do wyboru, drzwi z nagrodami, 2 typy wrogów z czytelnymi zapowiedziami, boss z fazami, śmierć zachowuje walutę; bot przechodzi cały run |
 | `military-fps-3d` | misja w stylu Call of Duty: karabin i pistolet z odrzutem, celowaniem i przeładowaniem, bieg i kucanie, zdrowie z regeneracją; żołnierze chowają się za osłonami, wychylają się seriami, obchodzą i krzyczą, co robią; dziedziniec, magazyn, radiostacja, posiłki, ewakuacja; punkty kontrolne; bot przechodzi całą misję |
+| `rts-3d` | potyczka w stylu Warcrafta z komputerem: robotnicy zbierają złoto i drewno, budowa farm, koszar i stajni na siatce, która mówi, czemu nie można budować; piechurzy, łucznicy i jeźdźcy, z których każdy wygrywa z jednym i przegrywa z drugim; zaznaczanie ramką, grupy pod cyframi, rozkazy prawym przyciskiem, atak w marszu, szyki; kamera RTS i minimapa; mgła wojny; komputer na trzech poziomach trudności; bot wygrywa potyczkę |
 
 Każdy szablon ma już testy i scenariusze bota, który gra za Ciebie.
 
 ## 5. Przepisy (gotowe, przetestowane mechaniki)
-Plugin ma **57 przepisów**, na przykład:
+Plugin ma **65 przepisów**, na przykład:
 - ruch, kamera, trzęsienie ekranu;
 - zdrowie, trafienia, pociski, broń;
 - ekwipunek, sklep, zapis gry, dialogi, zadania;
@@ -99,7 +100,8 @@ Plugin ma **57 przepisów**, na przykład:
 - muzyka adaptacyjna, lokalizacja, dostępność dla daltonistów;
 - multiplayer, kamera 3D, punkty kontrolne, ruchome platformy, zryw, animacje postaci, minimapa;
 - walka jak w Hadesie: kombinacje ciosów, dary, fale wrogów, bossowie z fazami, efekty statusów;
-- strzelanka jak Call of Duty: broń z odrzutem, rozrzutem, celowaniem i przeładowaniem, strefy trafień, zdrowie z regeneracją, wspomaganie celowania na padzie, żołnierze chowający się za osłonami.
+- strzelanka jak Call of Duty: broń z odrzutem, rozrzutem, celowaniem i przeładowaniem, strefy trafień, zdrowie z regeneracją, wspomaganie celowania na padzie, żołnierze chowający się za osłonami;
+- strategia jak Warcraft: zaznaczanie i rozkazy, ekonomia z robotnikami, budowa na siatce i produkcja, ruch grupy w szyku, mgła wojny, walka z typami pancerza, komputerowy przeciwnik, kamera RTS.
 
 Bot kopiuje przepis razem z jego testami:
 ```

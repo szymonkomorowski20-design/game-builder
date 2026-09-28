@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/skirmish/skirmish.tscn" id="1_s"]
+
+[node name="Skirmish" instance=ExtResource("1_s")]
+bot_team = 0

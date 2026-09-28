@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 272/272 GUT tests, 24/24 bot scenarios, Godot 4.7.2 (2026-09-28).
+Last full run: 280/280 GUT tests, 24/24 bot scenarios, Godot 4.7.2 (2026-09-28).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).

@@ -35,13 +35,13 @@ func hits_to_kill(attack: Dictionary, target: Dictionary, hp: float) -> int:
 
 ## The best target for a unit at `from` with `acquire` range. candidates: [{node, at: Vector3, is_building: bool,
 ## attacking_me: bool, visible: bool}]. `current`: the node it fights now (kept if still a candidate in range).
-static func pick_target(from: Vector3, acquire: float, candidates: Array, current: Object = null) -> Object:
+static func pick_target(from: Vector3, acquire: float, candidates: Array, current: Variant = null) -> Object:
 	var best: Object = null
 	var best_score := INF
 	for c in candidates:
 		if not bool(c.get("visible", true)):
 			continue
-		var node: Object = c.node
+		var node = c.node                            # a Variant: the candidate may have been freed
 		if node == null or not is_instance_valid(node):
 			continue
 		var d := from.distance_to(c.at)
