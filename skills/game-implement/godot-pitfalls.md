@@ -68,6 +68,8 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | Silence in the browser build | autoplay policy | start audio after the first click/keypress |
 | Reverb/generated audio missing on web | web **Sample** playback mode | *Default Playback Type.web* = Stream, test the web export |
 | Engine error `stream_playbacks.is_empty()` | `get_stream_playback()` on an `AudioStreamPlayer` that is not playing | check `player.playing` first; for `AudioStreamPolyphonic` call `play()` once before `play_stream()`; for `AudioStreamInteractive` set `initial_clip` before playing |
+| A physics spike every second in a busy fight, average frame fine | an effect makes a new mesh / material per shot (tracers) | share one mesh and one material per colour; stretch with `scale` after `look_at` |
+| The exported exe won't start on Windows 11 ("application control policy blocked this file") | Smart App Control blocks a new unsigned exe; with the pack embedded every build is a new exe | `binary_format/embed_pck=false`: the exe is the stock template, the game is the `.pck` beside it; never switch the protection off |
 | Audio tests fail headless | — | they don't: the dummy driver plays streams (`playing == true`) — test logic, leave sound quality to the playtest |
 
 ## Project files

@@ -51,6 +51,19 @@ func test_two_soldiers_need_seconds_to_kill_a_player_in_the_open() -> void:
 	assert_gt(_seconds_to_kill_player(2, 1.3), 2.5, "even on hard (× 1.3) two need > 2.5 s")
 
 
+## The mission keeps the limit the lethality contract assumes: at most 2 soldiers peek and fire at once. The bot
+## scenarios cannot see this grow — a careful bot still wins against 5 at once (measured in the proof game).
+func test_the_mission_lets_at_most_two_soldiers_fire_at_once() -> void:
+	var probe := MilMission.new()
+	var tokens := probe.attack_tokens
+	probe.free()
+	var state := (load("res://scenes/mission/mission.tscn") as PackedScene).get_state()
+	for p in state.get_node_property_count(0):
+		if state.get_node_property_name(0, p) == &"attack_tokens":
+			tokens = int(state.get_node_property_value(0, p))
+	assert_eq(tokens, 2, "at most 2 soldiers fire at once")
+
+
 func test_bursts_leave_gaps_to_peek_back() -> void:
 	assert_gt(SOLDIER.burst_pause, 0.3, "a pause between bursts")
 	assert_gt(SOLDIER.peek_wait, 1.0, "a soldier stays down > 1 s between peeks")

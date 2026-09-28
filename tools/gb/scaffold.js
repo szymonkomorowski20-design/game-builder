@@ -175,7 +175,7 @@ script_export_mode=2
   return `${preset(0, 'Windows Desktop', 'build/windows/game.exe')}
 [preset.0.options]
 
-binary_format/embed_pck=true
+binary_format/embed_pck=false
 
 ${preset(1, 'Web', 'build/web/index.html')}
 [preset.1.options]

@@ -48,6 +48,8 @@ var soldier_hits := 0
 
 var _dead_for := -1.0
 var _restart_zone_in := -1.0
+var _tracer_mesh: BoxMesh                     ## one unit-long box for every tracer, stretched per shot
+var _tracer_materials := {}                  ## colour → its material, made once
 
 @onready var player: MilPlayer = $Player
 @onready var hud: MilHud = $HUD
@@ -267,18 +269,25 @@ func spawn_tracer(from: Vector3, to: Vector3, color: Color) -> void:
 	var length := from.distance_to(to)
 	if length < 0.1:
 		return
+	# One mesh and one material per colour, shared: a new material per shot cost a ~6 ms physics step every second in
+	# a busy fight (measured in the proof game "Operacja Pył").
+	if _tracer_mesh == null:
+		_tracer_mesh = BoxMesh.new()
+		_tracer_mesh.size = Vector3(0.012, 0.012, 1.0)
+	var mat: StandardMaterial3D = _tracer_materials.get(color)
+	if mat == null:
+		mat = StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = color
+		_tracer_materials[color] = mat
 	var m := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(0.012, 0.012, length)
-	var mat := StandardMaterial3D.new()
-	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	mat.albedo_color = color
-	box.material = mat
-	m.mesh = box
+	m.mesh = _tracer_mesh
+	m.material_override = mat
 	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	effects.add_child(m)
 	m.global_position = (from + to) * 0.5
 	m.look_at_from_position(m.global_position, to, Vector3.UP if absf((to - from).normalized().y) < 0.99 else Vector3.RIGHT)
+	m.scale = Vector3(1.0, 1.0, length)
 	get_tree().create_timer(0.06).timeout.connect(m.queue_free)
 
 

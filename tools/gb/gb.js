@@ -51,6 +51,8 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   record [name] [--scene res://x.tscn]   the human plays; input saved to tests/replays/<name>.json
   shot [--name N] [--frames 60] [--scene X] [--compare | --accept] [--threshold 0] [--tolerance 0.02]
   perf [--seconds 10] [--scene X] [--headless]      frame/process/physics time, nodes, draw calls vs .ai/perf-budget.json
+                                                    (process/physics are Godot's worst frame of each second; --seconds
+                                                    counts 60 frames a second, so a fast game runs it in less time)
   export [--preset "Web"] [--smoke]   export presets (templates must be installed); --smoke runs the exported desktop build headless and fails on errors in its log
  Setup (plugin copy of gb)
   scaffold …  ·  harness install  ·  tests install [gut]  ·  doctor
@@ -754,7 +756,7 @@ function smokeRun(ctx, exe, platform, frames = 180) {
   const text = safeRead(log) || `${r.stdout || ''}\n${r.stderr || ''}`;
   const parsed = parseLog(text, ctx.ignores);
   const reasons = [];
-  if (r.error) reasons.push(`could not start ${exe}: ${r.error.message}`);
+  if (r.error) reasons.push(`could not start ${exe}: ${r.error.message}` + (process.platform === 'win32' ? ' — on Windows 11, Smart App Control or another application-control policy may block a new unsigned exe that has the game pack inside it; export with binary_format/embed_pck=false (the exe is then the stock template, the game is the .pck beside it)' : ''));
   if (!safeRead(log)) reasons.push('the build wrote no log file (crashed before start?)');
   if (parsed.errors.length) reasons.push(`${parsed.errors.length} error(s) in the exported build's log: ${parsed.errors.slice(0, 3).map((e) => e.message || e).join(' | ')}`);
   return { status: reasons.length ? 'fail' : 'ok', reasons, frames, log, exit: r.status };

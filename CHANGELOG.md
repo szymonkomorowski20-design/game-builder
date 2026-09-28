@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.26.1 — 2026-09-28 · what the FPS proof game's last phase found
+- **`military-fps-3d`: tracers share one mesh and one material per colour.** A new material per shot made the worst
+  physics step of each second ~8 ms in a busy fight (measured in "Operacja Pył"; shared: 1.7 ms) while the average
+  frame looked fine.
+- **`military-fps-3d`: a contract pins "at most 2 soldiers fire at once".** A detection proof showed the bot scenarios
+  cannot see it: a careful bot still wins with 5 at once. Bot runs prove a mission can be finished fairly, not that it
+  is not too hard.
+- **`gb perf` warms up for 1 s as well as 30 frames.** At ~500 fps, 30 frames were the scene still loading, and
+  Godot's process / physics monitors (the worst frame of each second) then reported the start instead of the game.
+  The help says what those monitors are.
+- **New games export the Windows build with the pack beside the exe (`embed_pck=false`).** Windows 11 Smart App
+  Control blocked the proof game's new unsigned exe with the pack inside; the stock template exe runs. `gb export
+  --smoke` names the cause when an exe cannot start on Windows.
+- **godot-pitfalls:** both, as rows.
+- **The FPS proof game's report:** `docs/dogfood/operacja-pyl.md` (ROADMAP 9.2: three missions, 90 unit tests, 34
+  scenarios, the bot finishes the whole campaign through the menus).
+
 ## 0.26.0 — 2026-09-28 · a WAV the first import refuses; long scenarios
 - **A scenario can declare a longer run: `const GB_MINUTES := 12`** (1–30 simulated minutes; the default stays 5).
   - For a whole campaign played by a bot through the real menus: three missions take a careful bot about 5.6

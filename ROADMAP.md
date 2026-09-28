@@ -107,7 +107,7 @@ dla konkretnej partii.
       wybór daru, boss, śmierć i nowy run, waluta) z bot-scenariuszami
 - [x] Tryb pracy „autonomiczny” (0.21.0): bot decyduje polecanymi opcjami (zapisane do przeglądu), spec zatwierdza checker, bramki maszynowe + scenariusz „bot przechodzi grę”, człowiek gra w gotową grę; bez zmian: bezpieczeństwo, licencje, płatne assety za zgodą, commit na słowo
 - [x] Gra-dowód zbudowana pluginem od zera + raport (0.23.0): **Ucieczka z Krypty**, zbudowana autonomicznie w jednej sesji, z darmowymi assetami. Ma 10 komnat, 4 typy wrogów + elitę, 18 darów, Strażnika z 3 fazami, menu i build Windows. Liczby: 126 testów, 31 scenariuszy, 31 mutacji, bot przechodzi grę na 3 ziarnach. Raport w `docs/dogfood/ucieczka-z-krypty.md`. Czeka na werdykt właściciela po zagraniu.
-- [ ] `gb perf`: monitory TIME_PROCESS/TIME_PHYSICS_PROCESS w oknie nie są czasem CPU klatki (18/16 ms w pustej scenie przy klatce 4,17 ms) — zbadać i poprawić budżet
+- [x] `gb perf`: monitory TIME_PROCESS/TIME_PHYSICS_PROCESS to najgorsza klatka z każdej sekundy (tak liczy je Godot), więc krótki pomiar pokazywał start sceny. Od 0.26.1 rozgrzewka trwa też 1 s, a pomoc mówi, czym są te monitory; w grze-dowodzie FPS pomiar na 18 000 klatek pokazał prawdziwy koszt (i znalazł skok fizyki od smug)
 - [ ] `gb recipe add`: zależności używane tylko przez demo przepisu (np. demo przepisu 41 chodzi ruchem 2D z przepisu 01, więc gra FPS dostaje przepis 01) — oznaczać je jako demo-only albo usamodzielnić dema
 ### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy (w toku)
 - [x] Przepisy 53–57 (0.24.0):
@@ -122,6 +122,6 @@ dla konkretnej partii.
 - [x] Szablon `military-fps-3d` (0.25.0): misja od placu startowego przez dziedziniec, magazyn i radiostację do ewakuacji;
   broń z przepisów 53–56, żołnierze z przepisu 57 (okopani na starcie, posiłki z ukrycia), uczciwe spawny, punkty
   kontrolne; 10 scenariuszy (bot przechodzi misję), kontrakty TTK, śmiertelności i czytelności, 15 dowodów wykrywania
-- [ ] Gra-dowód FPS zbudowana autonomicznie + raport
+- [x] Gra-dowód FPS zbudowana autonomicznie + raport (0.26.1): **Operacja Pył** — 3 misje na Księżycu (silnik kroków misji: dotarcie, walka, przytrzymanie, ładunki, obrona, ucieczka), 4 typy żołnierzy z granatami i ciężkim w pancerzu, menu, ustawienia, zapis, build Windows. Liczby: 90 testów, 34 scenariusze (bot przechodzi całą kampanię przez menu), 54 mutacje. Raport w `docs/dogfood/operacja-pyl.md`. Czeka na werdykt właściciela po zagraniu.
 ### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

@@ -139,11 +139,14 @@ func _physics_process(_delta: float) -> void:
 
 
 const PERF_WARMUP_FRAMES := 30
+const PERF_WARMUP_SECONDS := 1.0   ## and at least this much time: at 500 fps, 30 frames are the scene still loading
+var _perf_time := 0.0
 
 
 func _process(delta: float) -> void:
 	_render_frame += 1
-	if _perf and _render_frame > PERF_WARMUP_FRAMES:
+	_perf_time += delta
+	if _perf and _render_frame > PERF_WARMUP_FRAMES and _perf_time > PERF_WARMUP_SECONDS:
 		_perf_samples.append([
 			delta * 1000.0,
 			Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0,
@@ -260,7 +263,7 @@ func _write_outputs() -> void:
 
 func _perf_summary() -> Dictionary:
 	var cols := ["frame_ms", "process_ms", "physics_ms", "draw_calls", "nodes", "static_memory_mb"]
-	var out := {"frames": _perf_samples.size(), "warmup_frames_skipped": PERF_WARMUP_FRAMES, "headless": is_headless()}
+	var out := {"frames": _perf_samples.size(), "warmup_frames_skipped": PERF_WARMUP_FRAMES, "warmup_seconds_skipped": PERF_WARMUP_SECONDS, "headless": is_headless()}
 	for c in range(cols.size()):
 		var vals: Array = []
 		for s: Array in _perf_samples:
