@@ -329,6 +329,21 @@ test('e2e: action-roguelite-3d template gets its recipes and actions, and passes
   assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
 });
 
+test('e2e: military-fps-3d template gets its recipes and actions, and passes every scenario (a bot completes the mission) out of the box', { skip, timeout: 1200000 }, () => {
+  const dir = path.join(tmp(), 'milfps');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'MilFps', '--template', 'military-fps-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /RECIPES 01-topdown-movement, 41-checkpoints, 49-encounter-director, 53-gun-handling, 54-hitscan-zones, 55-regen-health-indicators, 56-aim-assist, 57-cover-shooter-ai/);
+  const pg = fs.readFileSync(path.join(dir, 'project.godot'), 'utf8');
+  for (const a of ['shoot', 'aim', 'reload', 'sprint', 'crouch', 'switch_weapon', 'look_right']) assert.match(pg, new RegExp(`^${a}=\{`, 'm'), a);
+  assert.match(pg, /^aim=\{[\s\S]*?InputEventMouseButton[\s\S]*?"button_index":2/m, 'aim is on the right mouse button');
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 900000 });
+  assert.equal(v.status, 0, v.stdout);
+  const sc = /PASS scenarios \((\d+)\/(\d+) passing\)/.exec(v.stdout);
+  assert.ok(sc && sc[1] === sc[2] && Number(sc[1]) >= 13, v.stdout);
+  assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
+});
+
 test('e2e: fps-3d template adds its own input actions (shoot on the mouse) and passes its scenarios out of the box', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'fps');
   const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'FPS', '--template', 'fps-3d'], { encoding: 'utf8', timeout: 600000 });

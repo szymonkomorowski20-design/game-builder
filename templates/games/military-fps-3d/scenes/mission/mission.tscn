@@ -1,0 +1,640 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/mission/mission.gd" id="1_r"]
+[ext_resource type="Script" path="res://scripts/level/level_block.gd" id="2_r"]
+[ext_resource type="Script" path="res://scripts/mission/encounter_zone.gd" id="3_r"]
+[ext_resource type="Script" path="res://scripts/mission/objective.gd" id="4_r"]
+[ext_resource type="Script" path="res://scripts/ui/mil_hud.gd" id="5_r"]
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="6_r"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/soldier.tscn" id="7_r"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat"]
+sky_top_color = Color(0.36, 0.5, 0.68, 1)
+sky_horizon_color = Color(0.7, 0.72, 0.72, 1)
+ground_horizon_color = Color(0.5, 0.48, 0.44, 1)
+ground_bottom_color = Color(0.2, 0.19, 0.17, 1)
+
+[sub_resource type="Sky" id="Sky"]
+sky_material = SubResource("SkyMat")
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 2
+sky = SubResource("Sky")
+ambient_light_source = 3
+tonemap_mode = 2
+
+[sub_resource type="NavigationMesh" id="NavMesh"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+cell_size = 0.25
+cell_height = 0.25
+agent_height = 1.7
+agent_radius = 0.45
+agent_max_climb = 0.3
+
+[sub_resource type="BoxShape3D" id="ZoneShape0"]
+size = Vector3(4.0, 3.0, 3.0)
+
+[sub_resource type="BoxShape3D" id="ZoneShape1"]
+size = Vector3(4.0, 3.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="ZoneShape2"]
+size = Vector3(2.0, 2.0, 2.0)
+
+[sub_resource type="BoxShape3D" id="RadioShape"]
+size = Vector3(3.0, 2.0, 3.0)
+
+[sub_resource type="StandardMaterial3D" id="RadioMat"]
+albedo_color = Color(0.2, 0.3, 0.22, 1)
+emission_enabled = true
+emission = Color(0.2, 0.9, 0.3, 1)
+emission_energy_multiplier = 0.8
+
+[sub_resource type="BoxMesh" id="RadioMesh"]
+material = SubResource("RadioMat")
+size = Vector3(0.6, 0.4, 0.4)
+
+[sub_resource type="BoxShape3D" id="PadShape"]
+size = Vector3(5.0, 2.0, 5.0)
+
+[sub_resource type="StandardMaterial3D" id="PadMat"]
+albedo_color = Color(0.85, 0.75, 0.2, 1)
+emission_enabled = true
+emission = Color(0.9, 0.75, 0.15, 1)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="CylinderMesh" id="PadMesh"]
+material = SubResource("PadMat")
+top_radius = 2.5
+bottom_radius = 2.5
+height = 0.06
+
+[node name="Mission" type="Node3D"]
+script = ExtResource("1_r")
+soldier_scene = ExtResource("7_r")
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.25, 0.433013, 0, 0.866025, 0.5, -0.5, -0.433013, 0.75, 0, 20, 0)
+shadow_enabled = true
+directional_shadow_max_distance = 60.0
+
+[node name="Level" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavMesh")
+
+[node name="Floor" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, -0.5, -45.0)
+script = ExtResource("2_r")
+size = Vector3(60.0, 1.0, 112.0)
+color = Color(0.3, 0.31, 0.27, 1)
+
+[node name="StartWallL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.5, 1.5, -2.0)
+script = ExtResource("2_r")
+size = Vector3(1.0, 3.0, 17.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="StartWallR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.5, 1.5, -2.0)
+script = ExtResource("2_r")
+size = Vector3(1.0, 3.0, 17.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="StartWallBack" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 1.5, 6.5)
+script = ExtResource("2_r")
+size = Vector3(18.0, 3.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="GateL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.5, 2.0, -10.5)
+script = ExtResource("2_r")
+size = Vector3(7.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="GateR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.5, 2.0, -10.5)
+script = ExtResource("2_r")
+size = Vector3(7.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="GateOuterL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -11.75, 2.0, -10.5)
+script = ExtResource("2_r")
+size = Vector3(5.5, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="GateOuterR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 11.75, 2.0, -10.5)
+script = ExtResource("2_r")
+size = Vector3(5.5, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="PracticeCrate" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.55, -3.0)
+script = ExtResource("2_r")
+size = Vector3(1.2, 1.1, 1.2)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CourtWallL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -14.5, 2.0, -27.5)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 34.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="CourtWallR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 14.5, 2.0, -27.5)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 34.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="WarehouseFrontL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 2.0, -44.5)
+script = ExtResource("2_r")
+size = Vector3(18.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="WarehouseFrontR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 11.0, 2.0, -44.5)
+script = ExtResource("2_r")
+size = Vector3(6.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="CrateA" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.55, -16.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateB" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.55, -18.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateC" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -7.0, 0.55, -24.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateD" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 1.0, 0.55, -25.0)
+script = ExtResource("2_r")
+size = Vector3(2.4, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateE" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.55, -27.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateF" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 0.55, -33.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateG" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.55, -34.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateH" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.0, 0.55, -36.0)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateI" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 0.55, -36.5)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateJ" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.55, -38.5)
+script = ExtResource("2_r")
+size = Vector3(2.4, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="PillarK" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -9.0, 1.5, -29.0)
+script = ExtResource("2_r")
+size = Vector3(1.6, 3.0, 1.6)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="ContainerL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 6.5, 1.3, -30.8)
+script = ExtResource("2_r")
+size = Vector3(3.2, 2.6, 1.4)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="ContainerM" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -9.0, 1.3, -41.0)
+script = ExtResource("2_r")
+size = Vector3(5.0, 2.6, 2.4)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="ContainerN" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.0, 1.3, -40.5)
+script = ExtResource("2_r")
+size = Vector3(4.0, 2.6, 2.4)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="WarehouseWallL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -14.5, 2.0, -58.5)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 28.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="WarehouseWallR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 14.5, 2.0, -58.5)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 28.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="WarehouseBackL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 2.0, -72.5)
+script = ExtResource("2_r")
+size = Vector3(12.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="WarehouseBackR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 2.0, -72.5)
+script = ExtResource("2_r")
+size = Vector3(12.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="Shelf1" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 1.3, -52.0)
+script = ExtResource("2_r")
+size = Vector3(8.0, 2.6, 1.0)
+color = Color(0.38, 0.33, 0.28, 1)
+
+[node name="Shelf2" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.5, 1.3, -56.0)
+script = ExtResource("2_r")
+size = Vector3(7.0, 2.6, 1.0)
+color = Color(0.38, 0.33, 0.28, 1)
+
+[node name="Shelf3" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -6.0, 1.3, -62.0)
+script = ExtResource("2_r")
+size = Vector3(10.0, 2.6, 1.0)
+color = Color(0.38, 0.33, 0.28, 1)
+
+[node name="CrateP" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 2.0, 0.55, -50.5)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateQ" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -2.0, 0.55, -57.0)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.55, -63.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateT" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.0, 0.55, -66.0)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateU" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 0.55, -67.0)
+script = ExtResource("2_r")
+size = Vector3(2.0, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="RadioDesk" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 0.45, -70.5)
+script = ExtResource("2_r")
+size = Vector3(1.4, 0.9, 0.8)
+color = Color(0.38, 0.33, 0.28, 1)
+
+[node name="YardWallL" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -14.5, 2.0, -86.0)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 27.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="YardWallR" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 14.5, 2.0, -86.0)
+script = ExtResource("2_r")
+size = Vector3(1.0, 4.0, 27.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="YardWallBack" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 2.0, -99.5)
+script = ExtResource("2_r")
+size = Vector3(30.0, 4.0, 1.0)
+color = Color(0.45, 0.43, 0.4, 1)
+
+[node name="CrateV" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 0.55, -80.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateW" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.55, -82.0)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateX" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 0.55, -87.5)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateY" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.55, -88.5)
+script = ExtResource("2_r")
+size = Vector3(2.2, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="CrateZ" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.55, -86.0)
+script = ExtResource("2_r")
+size = Vector3(2.4, 1.1, 0.6)
+color = Color(0.5, 0.4, 0.26, 1)
+
+[node name="ContainerLeft" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 1.3, -93.0)
+script = ExtResource("2_r")
+size = Vector3(4.0, 2.6, 2.4)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="ContainerRight" type="StaticBody3D" parent="Level"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.5, 1.3, -92.0)
+script = ExtResource("2_r")
+size = Vector3(3.5, 2.6, 2.4)
+color = Color(0.33, 0.38, 0.42, 1)
+
+[node name="Zones" type="Node3D" parent="."]
+
+[node name="Courtyard" type="Area3D" parent="Zones"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -12.5)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("3_r")
+order = 1
+title = "Dziedziniec"
+waves = Array[int]([3, 2])
+trigger_on_enter = true
+
+[node name="Trigger" type="CollisionShape3D" parent="Zones/Courtyard"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("ZoneShape0")
+
+[node name="Cover" type="Node3D" parent="Zones/Courtyard"]
+
+[node name="C1" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.0, -4.25)
+
+[node name="C2" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.0, -2.75)
+
+[node name="C3" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.0, -6.25)
+
+[node name="C4" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.0, -4.75)
+
+[node name="C5" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -7.0, 0.0, -12.25)
+
+[node name="C6" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -7.0, 0.0, -10.75)
+
+[node name="C7" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 1.0, 0.0, -13.25)
+
+[node name="C8" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 1.0, 0.0, -11.75)
+
+[node name="C9" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.0, -15.25)
+
+[node name="C10" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.0, -13.75)
+
+[node name="C11" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 0.0, -21.25)
+
+[node name="C12" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.0, -22.25)
+
+[node name="C13" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.0, 0.0, -24.25)
+
+[node name="C14" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 0.0, -24.75)
+
+[node name="C15" type="Marker3D" parent="Zones/Courtyard/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -26.75)
+
+[node name="Spawns" type="Node3D" parent="Zones/Courtyard"]
+
+[node name="S1" type="Marker3D" parent="Zones/Courtyard/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -9.0, 0.0, -30.7)
+
+[node name="S2" type="Marker3D" parent="Zones/Courtyard/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.0, 0.0, -30.3)
+
+[node name="S3" type="Marker3D" parent="Zones/Courtyard/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 1.0, 0.0, -37.5)
+
+[node name="S4" type="Marker3D" parent="Zones/Courtyard/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -3.0, 0.0, -35.5)
+
+[node name="Checkpoint" type="Marker3D" parent="Zones/Courtyard"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, 5.5)
+
+[node name="Warehouse" type="Area3D" parent="Zones"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 6.0, 0.0, -46.5)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("3_r")
+order = 2
+title = "Magazyn"
+waves = Array[int]([2, 2])
+trigger_on_enter = true
+
+[node name="Trigger" type="CollisionShape3D" parent="Zones/Warehouse"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("ZoneShape1")
+
+[node name="Cover" type="Node3D" parent="Zones/Warehouse"]
+
+[node name="C1" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.0, -4.75)
+
+[node name="C2" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -4.0, 0.0, -3.25)
+
+[node name="C3" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 0.0, -11.25)
+
+[node name="C4" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 0.0, -9.75)
+
+[node name="C5" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -2.0, 0.0, -17.25)
+
+[node name="C6" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -2.0, 0.0, -15.75)
+
+[node name="C7" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.0, -20.25)
+
+[node name="C8" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.0, -18.75)
+
+[node name="C9" type="Marker3D" parent="Zones/Warehouse/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -16.0, 0.0, -21.25)
+
+[node name="Spawns" type="Node3D" parent="Zones/Warehouse"]
+
+[node name="S1" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -14.0, 0.0, -7.5)
+
+[node name="S2" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 3.0, 0.0, -11.5)
+
+[node name="S3" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -12.0, 0.0, -17.5)
+
+[node name="S4" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 4.0, 0.0, -22.5)
+
+[node name="S5" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -15.0, 0.0, -18.0)
+
+[node name="S6" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -11.0, 0.0, -29.5)
+
+[node name="S7" type="Marker3D" parent="Zones/Warehouse/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -30.0)
+
+[node name="Checkpoint" type="Marker3D" parent="Zones/Warehouse"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, 5.5)
+
+[node name="Extraction" type="Area3D" parent="Zones"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -75.0)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("3_r")
+order = 3
+title = "Lądowisko"
+waves = Array[int]([3])
+trigger_on_enter = false
+dug_in_waves = 0
+
+[node name="Trigger" type="CollisionShape3D" parent="Zones/Extraction"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("ZoneShape2")
+
+[node name="Cover" type="Node3D" parent="Zones/Extraction"]
+
+[node name="C1" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 0.0, -5.75)
+
+[node name="C2" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -5.0, 0.0, -4.25)
+
+[node name="C3" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.0, -7.75)
+
+[node name="C4" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 5.0, 0.0, -6.25)
+
+[node name="C5" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 0.0, -13.25)
+
+[node name="C6" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -8.0, 0.0, -11.75)
+
+[node name="C7" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.0, -14.25)
+
+[node name="C8" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 8.0, 0.0, -12.75)
+
+[node name="C9" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -11.75)
+
+[node name="C10" type="Marker3D" parent="Zones/Extraction/Cover"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -10.25)
+
+[node name="Spawns" type="Node3D" parent="Zones/Extraction"]
+
+[node name="S1" type="Marker3D" parent="Zones/Extraction/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -11.0, 0.0, -20.5)
+
+[node name="S2" type="Marker3D" parent="Zones/Extraction/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 10.5, 0.0, -20.0)
+
+[node name="S3" type="Marker3D" parent="Zones/Extraction/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -23.0)
+
+[node name="S4" type="Marker3D" parent="Zones/Extraction/Spawns"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 12.0, 0.0, -5.0)
+
+[node name="Checkpoint" type="Marker3D" parent="Zones/Extraction"]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -6.0, 0.0, 7.0)
+
+[node name="Radio" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, -10.0, 0.0, -70.0)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("4_r")
+
+[node name="Shape" type="CollisionShape3D" parent="Radio"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("RadioShape")
+
+[node name="Set" type="MeshInstance3D" parent="Radio"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, -0.5)
+mesh = SubResource("RadioMesh")
+
+[node name="ExtractionPad" type="Area3D" parent="."]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.0, -95.0)
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+
+[node name="Shape" type="CollisionShape3D" parent="ExtractionPad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("PadShape")
+
+[node name="Pad" type="MeshInstance3D" parent="ExtractionPad"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 0)
+mesh = SubResource("PadMesh")
+
+[node name="Player" parent="." instance=ExtResource("6_r")]
+transform = Transform3D(1.0, 0, 0.0, 0, 1, 0, 0.0, 0, 1.0, 0.0, 0.05, 2.0)
+
+[node name="Soldiers" type="Node3D" parent="."]
+
+[node name="Effects" type="Node3D" parent="."]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("5_r")

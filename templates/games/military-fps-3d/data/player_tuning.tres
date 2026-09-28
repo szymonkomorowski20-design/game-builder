@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="MilTuning" format=3]
+
+[ext_resource type="Script" path="res://scripts/player/mil_tuning.gd" id="1_t"]
+[ext_resource type="Resource" path="res://data/rifle.tres" id="2_r"]
+[ext_resource type="Resource" path="res://data/pistol.tres" id="3_p"]
+
+[resource]
+script = ExtResource("1_t")
+walk_speed = 5.0
+sprint_speed = 7.5
+crouch_speed = 2.6
+stand_eye = 1.6
+crouch_eye = 0.95
+fov = 90.0
+ads_fov_scale = 0.72
+max_health = 100.0
+regen_delay = 4.0
+regen_rate = 40.0
+danger_below = 0.4
+primary = ExtResource("2_r")
+secondary = ExtResource("3_p")

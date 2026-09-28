@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="SoldierTuning" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/soldier_tuning.gd" id="1_t"]
+
+[resource]
+script = ExtResource("1_t")
+max_health = 100.0
+move_speed = 5.2
+rpm = 450.0
+burst_min = 3
+burst_max = 5
+burst_pause = 0.35
+damage = 8.0
+magazine = 20
+reload_time = 2.2
+peek_wait = 1.2
+peek_time = 1.6
+aim_time = 1.5
+accuracy_min = 0.15
+accuracy_max = 0.35
+flank_after = 7.0
+near = 8.0
+far = 28.0

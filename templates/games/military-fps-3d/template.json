@@ -1,0 +1,23 @@
+{
+  "name": "military-fps-3d",
+  "description": "Military FPS campaign starter (Call of Duty-like, original): one mission from a quiet start yard through a courtyard, a warehouse and a radio objective to extraction. The player has a rifle and a pistol with fire rate, magazines, tactical/empty reloads, spread and bloom, aim down sights, a learnable recoil pattern and falloff; head/body hit zones; sprint, crouch below low cover, regenerating health with direction indicators, pad aim assist. Soldiers take cover, peek in bursts, miss their first shots, get suppressed, flank campers and bark what they do; at most two fire at once; waves spawn out of sight ahead of the player; checkpoints. Built on recipes 41, 49, 53–57 (added with their tests); behaviour scenarios + unit contracts, including a bot that completes the mission.",
+  "dim": "3d",
+  "main_scene": "res://scenes/mission/mission.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut",
+  "recipes": ["41", "49", "53", "54", "55", "56", "57"],
+  "actions": {
+    "shoot": { "keys": ["F"], "mouse": [1], "joy_axis": [5, 1.0] },
+    "aim": { "mouse": [2], "joy_axis": [4, 1.0] },
+    "reload": { "keys": ["R"], "joy_buttons": [2] },
+    "sprint": { "keys": ["Shift"], "joy_buttons": [7] },
+    "crouch": { "keys": ["C", "Ctrl"], "joy_buttons": [1] },
+    "switch_weapon": { "keys": ["Q"], "mouse": [4, 5], "joy_buttons": [3] },
+    "look_left": { "joy_axis": [2, -1.0] },
+    "look_right": { "joy_axis": [2, 1.0] },
+    "look_up": { "joy_axis": [3, -1.0] },
+    "look_down": { "joy_axis": [3, 1.0] }
+  }
+}

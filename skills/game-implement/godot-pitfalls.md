@@ -51,6 +51,9 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 | Enemy "sees" through walls or hits itself with the sight ray | ray not masked/excluded | `PhysicsRayQueryParameters2D.create(from, to, wall_mask, [get_rid()])` |
 | Top-down body slides/floors oddly | `motion_mode` GROUNDED for a top-down game | `motion_mode = MOTION_MODE_FLOATING` |
 | Jump height 3 px higher than the tuning table | full gravity applied on the impulse frame | trapezoid integration: half gravity before and after the position update (platformer template) |
+| A respawned or teleported player instantly triggers the area it just left (a door, a fight's trigger) | after `global_position = …` the physics server still reports the body at its old place for a frame, so `overlaps_body()` and area signals see it there | arm the area a short time after a teleport or reset (0.3 s: the roguelite template's doors, the FPS template's encounter zones) |
+| A 3D hit on the head counts as the body | the head's collision shape sits inside the body capsule (e.g. the capsule grows back after crouching), and the ray meets the capsule first | keep the head sphere above the capsule in every stance; test a headshot after a crouch and stand (FPS template M4) |
+| A hitscan's first shot lands high | the shot was cast after its own recoil kick moved the view | cast along the view as it was when the trigger released the shot; the kick moves the next shot (FPS template M3) |
 
 ## Data, saves, localization, audio
 

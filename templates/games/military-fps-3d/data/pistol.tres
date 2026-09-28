@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="GunStats" format=3]
+
+[ext_resource type="Script" path="res://recipes/53-gun-handling/gun_stats.gd" id="1_gs"]
+
+[resource]
+resource_name = "Pistolet"
+script = ExtResource("1_gs")
+rpm = 400.0
+automatic = false
+magazine = 12
+reserve = 60
+reload_tactical = 1.3
+reload_empty = 1.6
+damage = 36.0
+headshot_mult = 1.4
+limb_mult = 0.8
+falloff_start = 12.0
+falloff_end = 30.0
+falloff_min = 0.6
+hip_spread = 1.8
+ads_spread = 0.35
+bloom_per_shot = 0.6
+bloom_max = 2.5
+ads_time = 0.15
+ads_move_scale = 0.8
+recoil_pattern = Array[Vector2]([Vector2(0.1, 1.6), Vector2(-0.1, 1.5)])
+recoil_recovery = 0.9

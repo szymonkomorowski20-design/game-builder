@@ -86,6 +86,7 @@ Załóż pusty folder (np. `Pulpit/gry/moja-gra`), otwórz w nim Claude Code i n
 | `platformer-3d` | bieg i skok w 3D, kamera na sprężynie, która nie wchodzi w ściany, monety i meta |
 | `fps-3d` | widok z pierwszej osoby, strzał, cele, osłony |
 | `action-roguelite-3d` | gra w stylu Hadesa: hub z manekinem i kapliczką ulepszeń, runy z 5 pokoi, dary do wyboru, drzwi z nagrodami, 2 typy wrogów z czytelnymi zapowiedziami, boss z fazami, śmierć zachowuje walutę; bot przechodzi cały run |
+| `military-fps-3d` | misja w stylu Call of Duty: karabin i pistolet z odrzutem, celowaniem i przeładowaniem, bieg i kucanie, zdrowie z regeneracją; żołnierze chowają się za osłonami, wychylają się seriami, obchodzą i krzyczą, co robią; dziedziniec, magazyn, radiostacja, posiłki, ewakuacja; punkty kontrolne; bot przechodzi całą misję |
 
 Każdy szablon ma już testy i scenariusze bota, który gra za Ciebie.
 

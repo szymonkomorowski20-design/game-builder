@@ -108,6 +108,7 @@ dla konkretnej partii.
 - [x] Tryb pracy „autonomiczny” (0.21.0): bot decyduje polecanymi opcjami (zapisane do przeglądu), spec zatwierdza checker, bramki maszynowe + scenariusz „bot przechodzi grę”, człowiek gra w gotową grę; bez zmian: bezpieczeństwo, licencje, płatne assety za zgodą, commit na słowo
 - [x] Gra-dowód zbudowana pluginem od zera + raport (0.23.0): **Ucieczka z Krypty**, zbudowana autonomicznie w jednej sesji, z darmowymi assetami. Ma 10 komnat, 4 typy wrogów + elitę, 18 darów, Strażnika z 3 fazami, menu i build Windows. Liczby: 126 testów, 31 scenariuszy, 31 mutacji, bot przechodzi grę na 3 ziarnach. Raport w `docs/dogfood/ucieczka-z-krypty.md`. Czeka na werdykt właściciela po zagraniu.
 - [ ] `gb perf`: monitory TIME_PROCESS/TIME_PHYSICS_PROCESS w oknie nie są czasem CPU klatki (18/16 ms w pustej scenie przy klatce 4,17 ms) — zbadać i poprawić budżet
+- [ ] `gb recipe add`: zależności używane tylko przez demo przepisu (np. demo przepisu 41 chodzi ruchem 2D z przepisu 01, więc gra FPS dostaje przepis 01) — oznaczać je jako demo-only albo usamodzielnić dema
 ### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy (w toku)
 - [x] Przepisy 53–57 (0.24.0):
   - obsługa broni: szybkostrzelność, magazynek, przeładowanie taktyczne i z pustego, rozrzut z rozgrzewaniem, celowanie
@@ -118,7 +119,9 @@ dla konkretnej partii.
   - AI żołnierza z osłonami: wybór osłony, wychylanie, przygwożdżenie, obchodzenie, okrzyki, rosnąca celność.
   - `AttackTokens` przeniesione do przepisu 49 (wspólne dla walki wręcz i strzelców).
 - [x] Dokument gatunku `gry-wiedza/wiedza/genre-military-fps.md` (`gb doc genre-military-fps`): 87 faktów z 47 źródeł (0.24.0)
-- [ ] Szablon kampanii FPS: broń z przepisów 53–56, żołnierze z przepisu 57, poziom z punktami osłon i celem misji, bot-scenariusze
+- [x] Szablon `military-fps-3d` (0.25.0): misja od placu startowego przez dziedziniec, magazyn i radiostację do ewakuacji;
+  broń z przepisów 53–56, żołnierze z przepisu 57 (okopani na starcie, posiłki z ukrycia), uczciwe spawny, punkty
+  kontrolne; 10 scenariuszy (bot przechodzi misję), kontrakty TTK, śmiertelności i czytelności, 15 dowodów wykrywania
 - [ ] Gra-dowód FPS zbudowana autonomicznie + raport
 ### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

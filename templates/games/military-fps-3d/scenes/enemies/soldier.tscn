@@ -1,0 +1,97 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/soldier.gd" id="1_s"]
+[ext_resource type="Resource" path="res://data/soldier.tres" id="2_t"]
+
+[sub_resource type="CapsuleShape3D" id="BodyShape"]
+radius = 0.38
+height = 1.4
+
+[sub_resource type="SphereShape3D" id="HeadShape"]
+radius = 0.2
+
+[sub_resource type="CapsuleMesh" id="TorsoMesh"]
+radius = 0.38
+height = 1.4
+
+[sub_resource type="StandardMaterial3D" id="HelmetMat"]
+albedo_color = Color(0.22, 0.24, 0.2, 1)
+
+[sub_resource type="SphereMesh" id="HeadMesh"]
+material = SubResource("HelmetMat")
+radius = 0.2
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="RedMat"]
+albedo_color = Color(0.9, 0.12, 0.08, 1)
+emission_enabled = true
+emission = Color(0.9, 0.1, 0.05, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="BoxMesh" id="VisorMesh"]
+material = SubResource("RedMat")
+size = Vector3(0.3, 0.07, 0.08)
+
+[sub_resource type="CylinderMesh" id="BandMesh"]
+material = SubResource("RedMat")
+top_radius = 0.4
+bottom_radius = 0.4
+height = 0.1
+
+[sub_resource type="StandardMaterial3D" id="GunMat"]
+albedo_color = Color(0.1, 0.1, 0.1, 1)
+
+[sub_resource type="BoxMesh" id="GunMesh"]
+material = SubResource("GunMat")
+size = Vector3(0.08, 0.1, 0.7)
+
+[node name="Soldier" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_s")
+tuning = ExtResource("2_t")
+
+[node name="Body" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("BodyShape")
+metadata/hit_zone = &"body"
+
+[node name="Head" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+shape = SubResource("HeadShape")
+metadata/hit_zone = &"head"
+
+[node name="Agent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.6
+target_desired_distance = 0.4
+radius = 0.45
+height = 1.7
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="Torso" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mesh = SubResource("TorsoMesh")
+
+[node name="Helmet" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+mesh = SubResource("HeadMesh")
+
+[node name="Visor" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -0.17)
+mesh = SubResource("VisorMesh")
+
+[node name="Band" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+mesh = SubResource("BandMesh")
+
+[node name="Gun" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.3, -0.4)
+mesh = SubResource("GunMesh")
+
+[node name="Flash" type="OmniLight3D" parent="Model/Gun"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.45)
+visible = false
+light_color = Color(1, 0.8, 0.4, 1)
+light_energy = 3.0
+omni_range = 3.0

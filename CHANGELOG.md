@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.25.0 — 2026-09-28 · the FPS campaign template (ROADMAP 9.2)
+- **Template `military-fps-3d`** (Call of Duty-like, original): one mission from a quiet start yard through a
+  courtyard and a warehouse to a radio objective, reinforcements and extraction. Built on recipes 41, 49, 53–57.
+  - The player has a rifle and a pistol with the genre's gun handling (53) and head / body zones (54):
+    - sprint (no firing; cancels a reload) and crouch under low cover;
+    - regenerating health with direction arcs and red edges (55);
+    - pad aim assist (56).
+  - The soldiers (57):
+    - the first wave of each arena starts dug in, hidden at cover;
+    - they peek in bursts, and their first shots mostly miss;
+    - they are suppressed by bullets passing close, flank a camping player, and bark what they do;
+    - at most 2 fire at once.
+  - Fair spawns: 12–45 m away, ahead, hidden; a wave waits up to 5 s for a fair point.
+  - Checkpoints; the objective line always says what to do.
+  - 10 scenarios. M8: a careful bot (human reaction, settling aim error, bursts, cover when hurt) completes the
+    mission; M10: running past an arena starts nothing ahead and the objective only moves forward. Unit contracts: TTK, lethality (two soldiers need > 3.5 s to kill a player in the open), readability,
+    fair spawns.
+  - 15 detection proofs. M8 does not catch deadly soldiers, and the lethality contract does (also measured on the
+    real code in M5); the spec says so.
+- **Found by the bot while building the template, now tests:**
+  - the first shot carried its own recoil kick (a 25 m headshot went over the head);
+  - a first wave running to far cover died before firing (21 enemy shots in a whole mission);
+  - suppression counted impacts, not near misses;
+  - a soldier's head ended up inside its body capsule after crouching;
+  - reinforcements appeared in view when the player pushed deep;
+  - (the checker) zones started on any trigger overlap, so running past the courtyard started the warehouse fight
+    and the objective could go back; zones now start only in turn, and arm 0.3 s after a respawn.
+- **godot-pitfalls:** a teleported body still overlaps its old areas for a frame; a head shape inside the body
+  capsule; a hitscan cast after its own recoil kick.
+
 ## 0.24.0 — 2026-09-28 · FPS recipes (ROADMAP 9.2)
 - **Recipes 53–57** (military FPS, like Call of Duty), each with GUT tests:
   - 53 gun handling: `GunStats` (a Resource) and `GunModel`. Fire rate without frame-rate drift, magazine and

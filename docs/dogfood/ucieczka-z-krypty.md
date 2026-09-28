@@ -44,8 +44,8 @@ snapshots listed in its STATUS.md.
 | Bot scenarios | 31: the template's A1–A8, K1–K14, and completability on 3 seeds |
 | Detection proofs (mutations) | 31, all detected in the end. The first versions of three checks missed their mutation and were strengthened (K1 overlay, K3 spear, K9 pillars) |
 | Spec review rounds (checker, spec mode) | 4 (CHANGES-REQUIRED ×3, then NITS) |
-| Phase reviews | P1 CHANGES-REQUIRED → APPROVE; P2 NITS; P3 CHANGES-REQUIRED → APPROVE; P4 CHANGES-REQUIRED (spec text) → final review; P5–P6 final review |
-| Machine playtests | phases 1–2: all OBSERVED (3 look defects fixed); phases 3–6: at the end |
+| Phase reviews | P1 CHANGES-REQUIRED → APPROVE; P2 NITS; P3 CHANGES-REQUIRED → APPROVE; P4 CHANGES-REQUIRED (spec text) → APPROVE; P5 NITS → fixed; P6 CHANGES-REQUIRED → fixed, then a re-check on a clean snapshot found one more (below) → fixed, `gb verify` green on a fresh checkout |
+| Machine playtests | phases 1–6: every Done-when item OBSERVED on a clean snapshot (3 look defects fixed in phases 1–2; one cosmetic overlap left in STATUS.md) |
 
 ## What the machine gates caught (and a human would have found later)
 | Found by | Problem | Fix |
@@ -59,6 +59,7 @@ snapshots listed in its STATUS.md.
 | K11 (completability) | enemies and the bot pushing into pillars | steering around pillars |
 | the playtester | the Warden's telegraph turned it into a flat red shape; the hero at the screen edge; tall readiness bars | telegraph strength, camera follow, thin meters |
 | recipe tests 48/52 | sorting StringNames depends on load order | compare Strings (plugin fix) |
+| the checker on a clean snapshot | the FPS measurement's output path (`res://.ai/verify/perf/fps.json`) failed `gb lint` on every fresh checkout, so `gb verify` never reached the tests; it passed only in the maker's copy, where an old file lay | lint skips generated `.ai/` paths (plugin 0.24.0); the test creates its folder |
 
 ## What the plugin learned (released)
 - **0.21.1:**
@@ -76,6 +77,7 @@ snapshots listed in its STATUS.md.
   - `gb tools update` refreshes the harness too;
   - the template's doors arm and its boon choice ignores a mashed pick;
   - the template bot stops walking when the room changes.
+- **0.24.0:** `gb lint` no longer treats generated `res://.ai/…` paths as broken references.
 
 ## Open
 - **`gb perf` process/physics monitors.** In a window, `TIME_PROCESS` / `TIME_PHYSICS_PROCESS` report ~18 / 16 ms even

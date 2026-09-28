@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="GunStats" format=3]
+
+[ext_resource type="Script" path="res://recipes/53-gun-handling/gun_stats.gd" id="1_gs"]
+
+[resource]
+resource_name = "Karabin"
+script = ExtResource("1_gs")
+rpm = 700.0
+automatic = true
+magazine = 30
+reserve = 150
+reload_tactical = 1.8
+reload_empty = 2.3
+damage = 40.0
+headshot_mult = 1.4
+limb_mult = 0.8
+falloff_start = 20.0
+falloff_end = 45.0
+falloff_min = 0.75
+hip_spread = 3.0
+ads_spread = 0.3
+ads_time = 0.22
+ads_move_scale = 0.6

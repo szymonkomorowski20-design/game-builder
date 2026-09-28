@@ -12,14 +12,14 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
 wydanie.
 
-## Co jest w środku (0.24.0)
+## Co jest w środku (0.25.0)
 
 | Element | Do czego służy |
 |---|---|
 | Proces: `game-start` → `game-discovery` → `game-bootstrap` → `game-spec` → `game-pre-implement` → `game-implement` → `game-test` → `game-playtest` → `game-release` | od pomysłu (wywiad z drabiną zakresu) przez karty decyzji i spec z tabelą strojenia do budowy faza po fazie i wydania; na każdej bramce grasz Ty |
 | Skille tematyczne | audio, assety, balans, level design, game feel, AI postaci, narracja, zapis gry, wydajność, UI i dostępność, efekty, aktualizacja silnika, diagnoza błędów |
 | Role (agenci) | `game-checker` (niezależna recenzja zmian), `game-tester` (testy ze speca przed kodem), `game-playtester` (uruchamia grę, ogląda zrzuty, słucha dźwięku), `game-researcher` (fakty ze źródłami) |
-| 7 szablonów gier | `platformer-2d`, `topdown-2d`, `grid-puzzle-2d`, `cards-2d`, `platformer-3d`, `fps-3d`, `action-roguelite-3d` (jak Hades), każdy z testami i botem-graczem |
+| 8 szablonów gier | `platformer-2d`, `topdown-2d`, `grid-puzzle-2d`, `cards-2d`, `platformer-3d`, `fps-3d`, `action-roguelite-3d` (jak Hades), `military-fps-3d` (misja jak Call of Duty), każdy z testami i botem-graczem |
 | 57 przepisów | przetestowane mechaniki (ruch, walka, ekwipunek, zapis, dialogi, AI, nawigacja, audio, multiplayer, kamera 3D, animacje, minimapa, broń FPS z odrzutem i celowaniem, AI z osłonami…), `gb recipe add` |
 | Narzędzie `gb` | weryfikacja gry bez okna, bot-gracz, nagrania Twojej gry jako testy, zrzuty z wzorcami, wydajność, eksport z próbnym uruchomieniem, licencje/napisy, wyszukiwanie w gry-wiedza |
 | Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy / lekki / autonomiczny), twarde zasady |
