@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.27.0 — 2026-09-28 · the RTS recipes (ROADMAP 9.3)
+- **Recipes 58–65**, each with a README (Problem / Solution / Tuning / Host / Pitfalls / Test) and tests:
+  - **58 selection and orders:**
+    - click within a radius; a box takes own units over buildings;
+    - an enemy is selected alone; a double-click selects the type on screen;
+    - control groups forget the dead;
+    - the smart right-click; the shift queue, STOP, PATROL, and orders that end when their target dies;
+  - **59 economy:**
+    - all-or-nothing costs; supply reserved when an item starts and capped;
+    - resource nodes with gathering slots (saturation);
+    - the worker's loop, which picks the nearest drop-off when its load is ready;
+    - `income_per_minute` for the balance sheet, checked against a simulation;
+  - **60 building and production:** a placement grid that says why it refuses (outside / occupied / blocked /
+    unexplored); queues paid at once, supply-blocked said once, full refunds; a tech tree that locks again;
+  - **61 group movement:** the magic box, formation slots, a crossing-free assignment, the crowd arrival rule;
+  - **62 fog of war:** unexplored / explored / visible, an L8 overlay (200 viewers on 128×128 in a few ms);
+  - **63 combat:** bonus before armour, a type table, a damage floor; target priority (attackers, then units, then
+    buildings; visible only; no twitching); the leash;
+  - **64 skirmish AI:**
+    - a priority list that saves for its top goal and builds farms before supply blocks;
+    - waves that grow, and a retreat;
+    - difficulty as reaction time and an openly named income multiplier;
+  - **65 camera:** edge, key and drag pan scaled by zoom, bounds, jump-to, the ground point under the cursor (an
+    engine scenario).
+- **Detection proofs:** 29 breaks, all detected. The first run missed two, and their tests were strengthened (a
+  control group's count after the dead leave; a slot assignment that follows list order).
+- **`gb doc genre-rts`:** the RTS genre document in gry-wiedza (88 facts from 47 sources).
+- **godot-pitfalls:** helpers named `_set`, and a `%` in a formatted test message.
+
 ## 0.26.1 — 2026-09-28 · what the FPS proof game's last phase found
 - **`military-fps-3d`: tracers share one mesh and one material per colour.** A new material per shot made the worst
   physics step of each second ~8 ms in a busy fight (measured in "Operacja Pył"; shared: 1.7 ms) while the average

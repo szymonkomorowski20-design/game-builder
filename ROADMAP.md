@@ -123,5 +123,14 @@ dla konkretnej partii.
   broń z przepisów 53–56, żołnierze z przepisu 57 (okopani na starcie, posiłki z ukrycia), uczciwe spawny, punkty
   kontrolne; 10 scenariuszy (bot przechodzi misję), kontrakty TTK, śmiertelności i czytelności, 15 dowodów wykrywania
 - [x] Gra-dowód FPS zbudowana autonomicznie + raport (0.26.1): **Operacja Pył** — 3 misje na Księżycu (silnik kroków misji: dotarcie, walka, przytrzymanie, ładunki, obrona, ucieczka), 4 typy żołnierzy z granatami i ciężkim w pancerzu, menu, ustawienia, zapis, build Windows. Liczby: 90 testów, 34 scenariusze (bot przechodzi całą kampanię przez menu), 54 mutacje. Raport w `docs/dogfood/operacja-pyl.md`. Czeka na werdykt właściciela po zagraniu.
-### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność
+### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność (w toku)
+- [x] Dokument gatunku `gry-wiedza/wiedza/genre-rts.md` (`gb doc genre-rts`): 88 faktów z 47 źródeł (0.27.0)
+- [x] Przepisy 58–65 (0.27.0): zaznaczanie i rozkazy (klik, ramka — jednostki przed budynkami, grupy, sprytny prawy klik,
+  kolejka z Shiftem), ekonomia (magazyn, zaopatrzenie, nasycenie złóż, pętla robotnika, dochód na minutę), budowanie i
+  produkcja (siatka z powodami odmowy, kolejka płatna od razu, blokada zaopatrzenia, drzewko technologii), ruch grupy
+  („magiczne pudełko”, sloty formacji, przydział bez krzyżowania, dotarcie tłumu), mgła wojny, walka (premie przed
+  pancerzem, tabela typów, minimum obrażeń, priorytet celów), AI (lista priorytetów, fale, odwrót, jawna trudność),
+  kamera RTS; 272 testy GUT przepisów, 29 dowodów wykrywania
+- [ ] Szablon `rts-3d` (baza, robotnicy, 2 surowce, koszary, 3 jednostki z kontrami, mgła, AI; bot wygrywa potyczkę)
+- [ ] Gra-dowód RTS zbudowana autonomicznie + raport
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

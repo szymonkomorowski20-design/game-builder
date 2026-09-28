@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 221/221 GUT tests, 23/23 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-28).
+Last full run: 272/272 GUT tests, 24/24 bot scenarios, Godot 4.7.2 (2026-09-28).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -81,6 +81,14 @@ Last full run: 221/221 GUT tests, 23/23 bot scenarios (also 5× via --repeat), G
 | [55-regen-health-indicators](55-regen-health-indicators/README.md) | Regenerating health and damage direction indicators | regen that starts mid-fight, deaths with no warning, hits from behind with no idea where from | test_r55_regen.gd |
 | [56-aim-assist](56-aim-assist/README.md) | Aim assist for pads (slowdown and pull in a cone, only while moving the stick) | a pad player who can't track anything, or an aimbot that snaps through walls | test_r56_aim_assist.gd |
 | [57-cover-shooter-ai](57-cover-shooter-ai/README.md) | Cover-shooter AI (cover finder, peek, suppression, flank, barks, accuracy ramp) | enemies standing in the open or killing from 40 m with the first shot; flanks nobody hears coming | test_r57_cover_ai.gd |
+| [58-rts-selection-orders](58-rts-selection-orders/README.md) | RTS selection and orders (click, box, groups, smart right-click, shift queue) | a box that grabs the town hall with the army, enemies mixed into a selection, groups keeping the dead, orders lost when a target dies | test_r58_selection_orders.gd |
+| [59-rts-economy](59-rts-economy/README.md) | RTS economy (stockpile, supply, resource nodes with saturation, the gathering loop) | purchases half-paid, supply overfilled by two queues, ten workers on one mine earning ten times, workers walking past a new town hall | test_r59_economy.gd |
+| [60-rts-build-produce](60-rts-build-produce/README.md) | RTS building and production (placement grid, production queue, tech tree) | overlapping or fogged buildings, a red ghost with no reason, pay-at-the-end queues, supply-blocked spam, tech that never locks again | test_r60_build_produce.gd |
+| [61-rts-group-move](61-rts-group-move/README.md) | RTS group movement (the magic box, formation slots, crossing-free assignment, arrival) | twenty units fighting over one point, formations collapsing into a ball, crossing paths, crowds that never settle | test_r61_group_move.gd |
+| [62-rts-fog-of-war](62-rts-fog-of-war/README.md) | RTS fog of war (unexplored / explored / visible on a grid, an overlay texture) | per-unit raycasts every frame, enemies drawn after they leave sight, buildings in the black, hard-edged overlays | test_r62_fog.gd |
+| [63-rts-combat](63-rts-combat/README.md) | RTS combat (damage with bonuses, type table and armour; target priority; leash) | no counters, immune armour, units shooting walls while archers kill them, twitching between targets, endless chases | test_r63_combat.gd |
+| [64-rts-ai](64-rts-ai/README.md) | RTS skirmish AI (a priority list, attack waves, retreat, honest difficulty) | an AI that supply-blocks, never techs, trickles units, fights to the last man, or secretly sees the map | test_r64_ai.gd |
+| [65-rts-camera](65-rts-camera/README.md) | RTS camera (edge / key / drag pan, zoom limits, bounds, jump-to, the ground point under the cursor) | a pan that ignores the zoom, fast corners, a view off the map, clicks landing away from where the player looks | test_r65_camera.gd, r65_rts_camera.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —
