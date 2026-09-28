@@ -17,4 +17,9 @@ MIT) has ~200 variants per category with text descriptions.
 **Pitfalls:** `play_stream()` before the player is playing → engine error (`_ready` starts it); `max_polyphony`
 on the player is a different mechanism (same stream overlapping) — don't combine; randomizer weights default to 1.
 
+**Deterministic games:** `AudioStreamRandomizer` draws its variant from the global RNG and its pitch and volume on the
+audio thread, so a game whose tests replay a seeded match plays differently whenever a sound is heard. Give the bank
+its own `rng` (a `RandomNumberGenerator`): it then picks the variant (never the same one twice in a row), the pitch
+and the volume itself, on the main thread (found by the proof game Kamienna Marchia).
+
 **Test:** `tests/unit/test_r35_sfx_variants.gd`.

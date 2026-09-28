@@ -36,6 +36,14 @@ test('pixel art: low base resolution, viewport stretch, nearest filter, pixel sn
   assert.match(pg, /config\/features=PackedStringArray\("4\.7", "GL Compatibility"\)/);
 });
 
+test('a template sets its own project settings: rts-3d keeps navigation deterministic in tests, threaded in exports', () => {
+  const pg = sc.projectGodot(sc.parseScaffoldArgs(['--template', 'rts-3d', '--name', 'R', '--engine', '4.7']));
+  assert.match(pg, /\n\[navigation\]\n\nworld\/map_use_async_iterations=false\n/);
+  assert.match(pg, /^avoidance\/thread_model\/avoidance_use_multiple_threads=false$/m);
+  assert.match(pg, /^avoidance\/thread_model\/avoidance_use_multiple_threads\.template=true$/m);
+  assert.doesNotMatch(sc.projectGodot(opts()), /\[navigation\]/, 'a plain game gets none');
+});
+
 test('invalid options are rejected with a clear message', () => {
   assert.throws(() => sc.parseScaffoldArgs(['--dim', '4d']), /2d or 3d/);
   assert.throws(() => sc.parseScaffoldArgs(['--renderer', 'vulkan']), /renderer must be/);

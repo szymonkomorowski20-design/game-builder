@@ -12,7 +12,7 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
 wydanie.
 
-## Co jest w środku (0.28.0)
+## Co jest w środku (0.29.0)
 
 | Element | Do czego służy |
 |---|---|
@@ -24,12 +24,16 @@ wydanie.
 | Narzędzie `gb` | weryfikacja gry bez okna, bot-gracz, nagrania Twojej gry jako testy, zrzuty z wzorcami, wydajność, eksport z próbnym uruchomieniem, licencje/napisy, wyszukiwanie w gry-wiedza |
 | Hooki sesji | na starcie każdej sesji w repo gry: etap procesu, wynik ostatniej weryfikacji, tryb pracy (standardowy / lekki / autonomiczny), twarde zasady |
 | `docs/` | instrukcja obsługi, tryby pracy (standardowy / lekki / autonomiczny: bot buduje, Ty grasz w gotową grę), moduły opcjonalne, raporty z budowy gier |
-| Wiedza (w repo [gry-wiedza](https://github.com/szymonkomorowski20-design/gry-wiedza), `gb doc <nazwa>`) | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne, dokument gatunku (action roguelite jak Hades) |
+| Wiedza (w repo [gry-wiedza](https://github.com/szymonkomorowski20-design/gry-wiedza), `gb doc <nazwa>`) | teoria projektowania, platformy (web, itch.io, Android), import assetów, paczki startowe, gry referencyjne, dokumenty gatunków (action roguelite jak Hades, militarny FPS jak Call of Duty, RTS jak Warcraft) z pomiarami z gier-dowodów |
 
 Dowody działania:
 - gra *Lodowy Loch*, zbudowana pluginem w 5 fazach i przejdziona przez człowieka ([raport](docs/dogfood/lodowy-loch.md));
 - gra *Ucieczka z Krypty* (jak Hades), zbudowana w trybie autonomicznym od jednozdaniowego pomysłu do buildu na
-  Windows, z darmowymi assetami ([raport](docs/dogfood/ucieczka-z-krypty.md)).
+  Windows, z darmowymi assetami ([raport](docs/dogfood/ucieczka-z-krypty.md));
+- gra *Operacja Pył* (FPS jak Call of Duty): 3 misje na Księżycu, bot przechodzi całą kampanię przez menu
+  ([raport](docs/dogfood/operacja-pyl.md));
+- gra *Kamienna Marchia* (RTS jak Warcraft): 3 misje i potyczka z komputerem na 3 poziomach, bot przechodzi kampanię
+  przez menu, poziomy trudności zmierzone na kilku ziarnach ([raport](docs/dogfood/kamienna-marchia.md)).
 
  Plan i stan: [ROADMAP.md](ROADMAP.md), zmiany: [CHANGELOG.md](CHANGELOG.md).
 

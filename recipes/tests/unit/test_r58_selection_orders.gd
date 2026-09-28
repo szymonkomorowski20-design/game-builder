@@ -208,3 +208,14 @@ func test_r58_a_dead_target_ends_its_order() -> void:
 	assert_eq(o.current().kind, RtsOrders.Kind.MOVE, "the attack is over; the queued move follows")
 	o.done()
 	assert_true(o.idle())
+
+
+class Bare:
+	extends RefCounted
+	var team := 1
+	var alive := true
+
+
+func test_r58_smart_on_a_target_without_is_resource() -> void:
+	var o := RtsOrders.smart(0, false, false, Bare.new(), Vector3.ZERO)
+	assert_eq(o.kind, RtsOrders.Kind.ATTACK, "an enemy unit or building has no is_resource: still an attack")

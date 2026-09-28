@@ -65,7 +65,7 @@ extends Resource
 
 @export var resources := {
 	&"gold": {"amount": 5000, "slots": 2},
-	&"wood": {"amount": 300, "slots": 2},
+	&"wood": {"amount": 450, "slots": 2},      # 300 ran out by minute 9 in the proof game and bot games stalled
 }
 
 

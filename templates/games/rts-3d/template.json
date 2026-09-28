@@ -8,6 +8,14 @@
   "stretch": "canvas_items",
   "tests": "gut",
   "recipes": ["58", "59", "60", "61", "62", "63", "64", "65"],
+  "settings": {
+    "navigation": {
+      "world/map_use_async_iterations": false,
+      "world/region_use_async_iterations": false,
+      "avoidance/thread_model/avoidance_use_multiple_threads": false,
+      "avoidance/thread_model/avoidance_use_multiple_threads.template": true
+    }
+  },
   "actions": {
     "attack_move": { "keys": ["A"] },
     "stop": { "keys": ["S"] },

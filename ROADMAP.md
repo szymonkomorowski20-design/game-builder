@@ -123,7 +123,7 @@ dla konkretnej partii.
   broń z przepisów 53–56, żołnierze z przepisu 57 (okopani na starcie, posiłki z ukrycia), uczciwe spawny, punkty
   kontrolne; 10 scenariuszy (bot przechodzi misję), kontrakty TTK, śmiertelności i czytelności, 15 dowodów wykrywania
 - [x] Gra-dowód FPS zbudowana autonomicznie + raport (0.26.1): **Operacja Pył** — 3 misje na Księżycu (silnik kroków misji: dotarcie, walka, przytrzymanie, ładunki, obrona, ucieczka), 4 typy żołnierzy z granatami i ciężkim w pancerzu, menu, ustawienia, zapis, build Windows. Liczby: 90 testów, 34 scenariusze (bot przechodzi całą kampanię przez menu), 54 mutacje. Raport w `docs/dogfood/operacja-pyl.md`. Czeka na werdykt właściciela po zagraniu.
-### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność (w toku)
+### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność (zrobione)
 - [x] Dokument gatunku `gry-wiedza/wiedza/genre-rts.md` (`gb doc genre-rts`): 88 faktów z 47 źródeł (0.27.0)
 - [x] Przepisy 58–65 (0.27.0): zaznaczanie i rozkazy (klik, ramka — jednostki przed budynkami, grupy, sprytny prawy klik,
   kolejka z Shiftem), ekonomia (magazyn, zaopatrzenie, nasycenie złóż, pętla robotnika, dochód na minutę), budowanie i
@@ -135,5 +135,13 @@ dla konkretnej partii.
   koszary i stajnia, piechur / łucznik / jeździec w trójkącie kontr, mgła z nakładką, minimapa, grupy, szyki, komputer
   na 3 poziomach; 9 scenariuszy R1–R9 (R9: bot wygrywa potyczkę) + kontrakty liczb (trójkąt kontr przy równym koszcie),
   13 z 15 celowych usterek wykrytych (dwie pozostałe opisane jako niepotrzebne testu), budżet wydajności bitwy 40 na 40
-- [ ] Gra-dowód RTS zbudowana autonomicznie + raport
+- [x] Gra-dowód RTS zbudowana autonomicznie + raport (0.29.0): **Kamienna Marchia** — marchia przeciw Umarłym, 3 misje
+  (samouczek z najazdami, wypad bez gospodarki na trzy strzeżone obozy, pełna gra od połowy) i potyczka, komputer na
+  3 poziomach, menu, ustawienia, zapis, build Windows. Liczby: 155 testów, 29 scenariuszy (bot przechodzi kampanię i
+  potyczkę przez menu), bot wygrał misję 3 w 14 z 15 gier. Raport w `docs/dogfood/kamienna-marchia.md`. Czeka na
+  werdykt właściciela po zagraniu.
+- [x] Poprawki z gry-dowodu w przepisach 35, 58, 64 i szablonie `rts-3d` (0.29.0): nawyki komputera (farmy z
+  wyprzedzeniem, produkcja bez przestojów, zagrożenie tylko na swojej połowie, uczciwa baza wroga), dwa nowe pokrętła
+  trudności (budynki produkcji, sufit żywności armii), odpowiadanie napastnikowi, walczący patrol, powtarzalne testy
+  przy szybkim eksporcie; `gb scaffold` z ustawieniami projektu z szablonu, `gb export --smoke` odporny na Smart App Control
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

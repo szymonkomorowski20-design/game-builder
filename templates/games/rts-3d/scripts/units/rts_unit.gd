@@ -16,6 +16,7 @@ const LEASH := 12.0
 const ACQUIRE_EXTRA := 3.0
 const GIVE_UP_AFTER := 3                 ## fresh paths tried when stuck far from the goal before stopping there
 const SCAN_EVERY := 0.25               ## s between target scans (staggered per unit; at once when the target dies)
+const ANSWER_WINDOW := 5.0             ## s after a hit a unit with no unit to fight still answers that attacker
 
 var team := 0
 var kind: StringName = &""
@@ -41,6 +42,7 @@ var _last_dist := INF
 var _repaths := 0
 var _think := 0.0
 var _had_target := false
+var _hit_at := -INF                    ## game time of the last hit (answer a seen attacker only for a while)
 var _body: MeshInstance3D
 var _order_gather: RtsResourceNode = null
 var _sidestep := 0.0
@@ -112,6 +114,8 @@ func take_damage(amount: float, by: Node3D) -> void:
 		return
 	hp -= amount
 	attacking_me = by
+	_hit_at = game.elapsed
+	game.reveal_attacker(team, by)
 	game.notify_attacked(team, global_position)
 	if hp <= 0.0:
 		_die()
@@ -152,8 +156,15 @@ func _physics_process(delta: float) -> void:
 		_idle(delta)
 		return
 	match o.kind:
-		RtsOrders.Kind.MOVE, RtsOrders.Kind.PATROL:
+		RtsOrders.Kind.MOVE:
 			if _walk_to(o.at, delta):
+				orders.done()
+		RtsOrders.Kind.PATROL:                  # a patrol fights what it meets (an attack-move between its points)
+			_scan(delta)
+			_answer()
+			if _valid(target):
+				_fight(target, delta)
+			elif _walk_to(o.at, delta):
 				orders.done()
 		RtsOrders.Kind.ATTACK:
 			var t: Node3D = o.target
@@ -163,6 +174,7 @@ func _physics_process(delta: float) -> void:
 				_fight(t, delta)
 		RtsOrders.Kind.ATTACK_MOVE:
 			_scan(delta)
+			_answer()
 			if _valid(target):
 				_fight(target, delta)
 			elif _walk_to(o.at, delta):
@@ -186,6 +198,7 @@ func _idle(delta: float) -> void:
 		_stand()
 		return
 	_scan(delta)
+	_answer()                                   # (idle, it chases within the leash)
 	if _valid(target):
 		if _chase_from == Vector3.INF:
 			_chase_from = global_position
@@ -198,6 +211,15 @@ func _idle(delta: float) -> void:
 		_fight(target, delta)
 	else:
 		_stand()
+
+
+## No unit to fight (no target, or a building), and a seen attacker hit it in the last ANSWER_WINDOW s: it answers that
+## attacker, even beyond its acquire range. Idle units, and units on attack-move or patrol. Without it an idle footman
+## shot from 7.5 m stands still (acquire = range + 3 + radius), and melee units attack-moving into a base keep hitting a
+## wall while archers behind it shoot them (found by the proof game Kamienna Marchia). An explicit attack order is kept.
+func _answer() -> void:
+	if (not _valid(target) or target is RtsBuilding) and game.elapsed - _hit_at <= ANSWER_WINDOW and _valid(attacking_me) and game.visible_to(team, attacking_me as Node3D):
+		target = attacking_me
 
 
 func _scan(delta: float) -> void:

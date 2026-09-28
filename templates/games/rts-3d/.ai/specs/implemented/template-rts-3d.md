@@ -71,18 +71,31 @@ The art is placeholder (primitives: units told apart by silhouette and size, tea
     buildings once seen, and mines, trees and rocks once explored;
   - a building's reach is to its walls (`closest_point`), and workers walk to the near side of a mine;
   - a team with no buildings left loses; the end screen shows who won and the time;
-  - exports: `ai_enabled`, `ai_level` (0 easy · 1 normal · 2 hard), `reveal_map`, `bot_team` (tests).
+  - **fog honesty:** every team remembers the enemy buildings it has seen (`seen_by`, which the computer uses too); a
+    hit shows the attacker to the victim's team for `reveal_on_hit` s (an archer stops at its reach, at or past a
+    footman's sight); a team with buildings but no finished town hall for 60 s has them shown to the enemy
+    (`reveal_hall_less`, Warcraft III's rule — a last farm nobody saw made a bot game endless);
+  - **determinism for tests:** while the harness runs the navigation mesh is baked on the same frame, and a removed
+    building is baked out two physics frames later (it leaves the tree at the end of its frame); the project keeps the
+    navigation server's async iterations and threaded avoidance off, except threaded avoidance in exported builds
+    (`template.json` "settings": a `.template` feature override) — single-threaded it can strain a big battle's physics
+    budget on a loaded machine, threaded it makes bot games differ run to run;
+  - exports: `ai_enabled`, `ai_level` (0 easy · 1 normal · 2 hard), `reveal_map`, `bot_team` (tests),
+    `reveal_on_hit`, `reveal_hall_less`.
   - Observable: `winner`, `elapsed`, `units`, `buildings`, `mines`, `stockpile(t)`, `fog(t)`, `count(t, kind)`.
 - **Rules** (`scripts/core/rts_rules.gd`, `data/rules.tres`): every number of the skirmish in one place — units and
   buildings as data (cost, supply, time, hit points, armour and its type, tags, attack with bonuses, range, cooldown,
   speed, sight), the type table, the start bank, resources. The tech tree comes from what buildings need and train.
 - **Map** (`scripts/world/rts_map.gd`, built in code): 72 × 72 m, two mirrored bases in opposite corners, each with
-  two gold mines (5000 gold, 2 workers at a time) and a tree line (300 wood a tree, 2 at a time); rocks in the middle
+  two gold mines (5000 gold, 2 workers at a time) and a tree line (450 wood a tree, 2 at a time); rocks in the middle
   split the way into lanes.
 - **Units** (`scripts/units/rts_unit.gd`): worker, footman, archer, rider. They carry out their order queue (58):
   MOVE, ATTACK, ATTACK_MOVE, HOLD, STOP, GATHER (59), BUILD, PATROL.
   - They look for targets every 0.25 s (staggered; at once when their target dies): whoever attacks them first, units
     before buildings, only what their team sees (63). Idle, they chase within a leash and come back.
+  - A unit with no unit to fight — idle, on attack-move or on patrol, or hitting a building — answers a seen attacker
+    that hit it in the last 5 s, even beyond its acquire range (an explicit attack order is kept). Patrols fight what
+    they meet.
   - The navigation agent's avoidance keeps them apart; gatherers switch it off on their loop. A unit making no
     progress steps aside, then asks for a fresh path; it stops short only when close to its goal among others who
     arrived, or after three fresh paths.
@@ -91,11 +104,19 @@ The art is placeholder (primitives: units told apart by silhouette and size, tea
   it (hit points grow with the work), then supply, tech and training (60), with a rally point. Destroyed: its cells
   free, its supply and tech go, the navigation mesh is rebuilt.
 - **Computer player** (`scripts/ai/rts_ai_player.gd`, recipe 64's brain): workers gathering (about 60% gold, 40%
-  wood), a build order, farms before supply runs out, growing attack waves at the enemy's town hall, retreat when a
-  wave loses, defence when its base is attacked, up to four barracks to spend a growing bank. It sees through its own
-  fog only; difficulty changes think speed, wave size and income, never what it may see.
-  - `player_bot` (tests) plays the player's side with a counter-minded order (archers first, riders later) and
-    defends at home until its first wave is ready.
+  wood), a build order, farms before supply runs out, growing attack waves at the enemy base, retreat when a wave
+  loses, defence when its base is attacked. It sees through its own fog only: the enemy base is a building it has seen,
+  else the enemy's start. Measured in the proof game Kamienna Marchia and kept here:
+  - no wave before 4 minutes, and the first wave is at most its difficulty's wave size (the rest defend at home);
+  - a threat is a visible enemy **on its half** near its buildings (both sides build toward each other; an army idling
+    at its own rally set off the other side's whole army);
+  - farms ahead of the army (the free-food margin grows 3 per barracks; up to 3 farms at once when the wood is there)
+    and production that never idles (an idle barracks trains while the order waits, keeping 300 gold);
+  - difficulty is honest and bites: think speed, wave size, income, **and** the production buildings it runs (2 / 3 /
+    4) and its army's food ceiling (70 / 85 / 100) — with income alone it only grew its bank.
+  - `player_bot` (tests) plays the player's side: after its opening it reads the enemy's army (only what its team
+    sees) and trains the counter (out of wood with gold in the bank: footmen); it defends at home until its first wave
+    is ready.
 - **Player's hands** (`scripts/ui/rts_player_input.gd`): recipes 58, 60, 61, 65 — see Input below. Observable:
   `selection`, `mode`, `placing`, `ghost_why`, `drag_rect()`.
 - **HUD** (`scripts/ui/rts_hud.gd`, built in code): resources and food at the top; messages ("Za mało surowców",
@@ -132,12 +153,16 @@ The art is placeholder (primitives: units told apart by silhouette and size, tea
 | rider | 120 g + 20 w · 3 food · 18 s · 150 hp · armour 1 medium, mounted · 12 blade (+6 vs ranged) · 1.2 s · 5.0 m/s | — | rules | — |
 | town hall / farm / barracks / stable | 400 g 200 w, 1500 hp / 60 w, 300 hp / 160 g 60 w, 700 hp / 150 g 100 w, 600 hp | — | rules `buildings` | — |
 | type table | blade: light 1.25, medium 1.0, heavy 0.8, fortified 0.7 · pierce: light 1.0, medium 0.8, heavy 2.0, fortified 0.4 | × | rules `type_table` | keep the counter contract green |
-| gold mine / tree | 5000 / 300, 2 workers each | — | rules `resources` | — |
+| gold mine / tree | 5000 / 450, 2 workers each | — | rules `resources` | 300 ran out by minute 9 |
 | target scan | 0.25 | s | rts_unit.gd `SCAN_EVERY` | 0.2–0.5 |
 | leash | 12 | m | rts_unit.gd `LEASH` | 8–16 |
+| a unit answers its attacker for | 5 | s after the hit | rts_unit.gd `ANSWER_WINDOW` | 3–10 |
+| a hit reveals the attacker for | 2 | s | rts_game.gd `reveal_on_hit` | 1–4 |
+| a team without a town hall is revealed after | 60 | s | rts_game.gd `REVEAL_WITHOUT_HALL` | 30–120 |
 | fog | 2 m cells, 10 updates a second (5 per team) | — | rts_game.gd | — |
-| AI easy / normal / hard | think 2.0 / 1.0 / 0.5 s · first wave 5 / 6 / 8 · growth 1 / 2 / 3 · income × 0.8 / 1.0 / 1.3 | — | recipe 64 `preset` | — |
-| AI workers / supply margin / barracks | 14 / 4 / up to 4 | — | rts_ai_player.gd | — |
+| AI easy / normal / hard | think 2.0 / 1.0 / 0.5 s · first wave 5 / 6 / 8 · growth 1 / 2 / 3 · income × 0.8 / 1.0 / 1.3 · barracks 2 / 3 / 4 · army food 70 / 85 / 100 | — | recipe 64 `preset` | — |
+| AI first wave not before | 240 | s | rts_ai_player.gd `first_wave_not_before` | 180–360 |
+| AI workers / free-food margin / farms at once / idle-production reserve | 14 / 4 + 3 per barracks / up to 3 / 300 gold | — | rts_ai_player.gd | — |
 | AI wave cap | 20 (and never above what the supply allows) | units | recipe 64 `max_wave_size` | 12–30 |
 | camera | pitch 58°, distance 16–48 (32) | — | skirmish.tscn CameraRig | — |
 
@@ -156,7 +181,12 @@ The art is placeholder (primitives: units told apart by silhouette and size, tea
   the start workers fit the town hall's food; the ceiling is reachable (at most 20 farms).
 - **Sieges:** ten footmen raze a town hall within a minute and five a farm within 20 s; a lone worker needs more than
   five minutes for a town hall.
-- **Winnable:** R9's bot beats the normal computer within 20 minutes (between 6 and 16 minutes in the runs so far).
+- **Winnable:** R9's bot beats the normal computer within 20 minutes.
+- **Fog honesty** (`test_fog_honesty.gd`): the computer's `enemy_base()`, `threat()` and `enemy_power_near()` ignore
+  what its team hasn't seen; a hit reveals the attacker for `reveal_on_hit` s; a team without a town hall is revealed
+  both ways after 60 s (off with `reveal_hall_less`); an idle unit answers its attacker only within the window.
+- **The computer's habits** (`test_ai_habits.gd`), one at a time: a threat is an enemy on its half; idle production
+  trains keeping its reserve; the food margin per barracks; the production cap and the food ceiling per difficulty.
 
 ## Behaviours (test IDs)
 | ID | Behaviour | Test |
@@ -168,7 +198,7 @@ The art is placeholder (primitives: units told apart by silhouette and size, tea
 | R5 | Equal-cost groups meet with attack-move: archers beat footmen, riders beat archers, footmen beat riders; five footmen raze a farm within a minute | `r5_counters.gd` |
 | R6 | Twelve footmen, box-selected and right-clicked across the map, are each sent to their own slot (the group's shape kept), walk around the rocks, all arrive near the goal, nobody on anybody, most on their slot | `r6_group_move.gd` |
 | R7 | The enemy base starts hidden and can't be built on; a scout reveals it and its workers; after it leaves, the buildings stay drawn, the units hide, the ground is explored | `r7_fog.gd` |
-| R8 | The computer alone keeps its workers busy, builds a barracks and farms by three minutes, and its wave reaches the player's base by seven | `r8_ai.gd` |
+| R8 | The computer alone keeps its workers busy, builds a barracks and farms by three minutes, sends no wave before four, and its wave reaches the player's base by seven | `r8_ai.gd` |
 | R9 | A bot on the player's side beats the normal computer within 20 minutes; a log every minute shows both economies | `r9_bot_wins.gd` |
 
 ## Next steps when a game starts from this

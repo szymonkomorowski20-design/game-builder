@@ -49,3 +49,20 @@ func test_r35_randomizer_settings() -> void:
 	assert_eq(r.streams_count, 3)
 	assert_almost_eq(r.random_pitch, 1.06, 0.0001)
 	assert_eq(r.playback_mode, AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS)
+
+
+func test_r35_own_rng_never_repeats_a_variant() -> void:
+	var bank := SfxBank.new()
+	add_child_autofree(bank)
+	bank.rng = RandomNumberGenerator.new()
+	bank.rng.seed = 7
+	bank.add_sound(&"hit", [AudioStreamWAV.new(), AudioStreamWAV.new(), AudioStreamWAV.new()])
+	var last := -1
+	var seen := {}
+	for i in 40:
+		bank.play(&"hit")
+		var now := int(bank._last[&"hit"])
+		assert_ne(now, last, "play %d: not the same variant twice in a row" % i)
+		last = now
+		seen[now] = true
+	assert_eq(seen.size(), 3, "every variant is used")

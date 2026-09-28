@@ -30,7 +30,7 @@ static func make(kind: Kind, at: Vector3 = Vector3.ZERO, target: Object = null) 
 static func smart(team: int, can_gather: bool, can_build: bool, target: Variant, ground: Vector3) -> Dictionary:
 	if target != null and is_instance_valid(target) and _alive(target):
 		var t := int(target.get(&"team"))
-		if bool(target.get(&"is_resource")):
+		if target.get(&"is_resource") == true:       # units and buildings have no such property: get() is null
 			if can_gather:
 				return make(Kind.GATHER, ground, target)
 		elif t >= 0 and t != team:

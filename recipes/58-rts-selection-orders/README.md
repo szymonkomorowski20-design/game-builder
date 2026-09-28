@@ -53,6 +53,9 @@ optionally `alive: bool`, `is_resource: bool` and `finished: bool`.
 - a freed target read into a typed variable or parameter (`var t: Object = order.target`): Godot refuses a freed
   instance there with a script error, and the order never ends. Read it as a Variant, then `is_instance_valid`;
 - a method named `_set` (it overrides `Object._set` and fails to parse).
+- reading an optional property with `bool(target.get(&"is_resource"))`: a unit or a building has no such property, `get()`
+  returns null and `bool(null)` is a script error — the right click on an enemy never gave an attack order (found by
+  the proof game Kamienna Marchia). Compare with `== true`.
 
 **Test:** `tests/unit/test_r58_selection_orders.gd`:
 - the click radius, shift-toggle, an enemy selected alone;

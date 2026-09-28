@@ -119,7 +119,7 @@ W folderze gry: `node tools/gb/gb.js <komenda>`
 | `record skok` | **Ty grasz**, `gb` nagrywa. Nagranie staje się testem regresji |
 | `shot --name menu` | zrzut ekranu (z `--compare` porównuje z zaakceptowanym wzorcem) |
 | `perf` | czas klatki i wydajność względem budżetu |
-| `export --preset "Windows Desktop" --smoke` | buduje `.exe` i uruchamia go na próbę |
+| `export --preset "Windows Desktop" --smoke` | buduje `.exe` i uruchamia go na próbę; gdy Windows (Smart App Control) zablokuje nowy exe, sprawdza sam plik `.pck` edytorowym Godotem i mówi to wprost |
 | `export --preset "Web"` | wersja przeglądarkowa |
 | `credits` | napisy z licencjami; blokuje assety, których nie wolno wydać |
 | `kb "coyote time"` / `assets "wybuch" --typ audio` | wyszukiwanie w bazie wiedzy i darmowych assetach |

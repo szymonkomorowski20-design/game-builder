@@ -1,7 +1,8 @@
 extends GbScenario
 ## R8 — the computer player alone (recipe 64 in the game; the player does nothing): it keeps its workers busy, builds
-## farms before its supply runs out, a barracks and a stable, trains an army, and by six minutes sends a wave that
-## reaches the player's base (the player hears "Jesteśmy atakowani!").
+## farms before its supply runs out, a barracks and a stable, trains an army, sends no wave before four minutes (a rush
+## that ends a match in 2–3 minutes is the genre's pitfall), and then a wave that reaches the player's base by seven
+## (the player hears "Jesteśmy atakowani!").
 
 const GB_MINUTES := 9
 
@@ -21,6 +22,7 @@ func run() -> void:
 	expect_gt(busy, workers.size() - 2, "R8 … and keeps them busy")
 	expect(hands.team_building(1, &"barracks") != null and hands.team_building(1, &"barracks").finished, "R8 a barracks by 3 minutes")
 	expect_gt(g.stockpile(1).supply_cap, 10, "R8 farms raise its food")
+	expect_eq(ai.waves_sent(), 0, "R8 no wave before 4 minutes")
 	var came := await wait_until(func() -> bool: return attacked[0], 240.0)
 	note("wave: sent %d, elapsed %.0f s" % [ai.waves_sent(), g.elapsed])
 	expect(ai.waves_sent() >= 1, "R8 it sends a wave")

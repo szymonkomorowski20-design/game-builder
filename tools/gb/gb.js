@@ -753,6 +753,22 @@ function smokeRun(ctx, exe, platform, frames = 180) {
   fs.mkdirSync(ctx.outDir, { recursive: true });
   fs.rmSync(log, { force: true });
   const r = spawnSync(exe, ['--headless', '--quit-after', String(frames), '--log-file', log], { cwd: path.dirname(exe), encoding: 'utf8', timeout: 120000 });
+  const pck = exe.replace(/\.exe$/i, '.pck');
+  if (r.error && process.platform === 'win32' && pck !== exe && fs.existsSync(pck) && ctx.bin) {
+    // Windows refused the exe. Application control (Smart App Control) keeps its verdict per file: a newly written copy
+    // of the stock template can be blocked while an identical, older copy runs (measured in Kamienna Marchia, 4.7.2).
+    // The game is the pack beside it: run the pack under the Godot binary gb already runs, and say the exe didn't run.
+    const packLog = path.join(ctx.outDir, `smoke-${path.basename(pck)}.log`);
+    fs.rmSync(packLog, { force: true });
+    const rp = spawnSync(ctx.bin, ['--main-pack', pck, '--headless', '--quit-after', String(frames), '--log-file', packLog], { cwd: path.dirname(exe), encoding: 'utf8', timeout: 120000 });
+    const parsedPack = parseLog(safeRead(packLog) || `${rp.stdout || ''}\n${rp.stderr || ''}`, ctx.ignores);
+    const note = `the exe did not start (${r.error.message}: Windows application control such as Smart App Control can block a newly written unsigned exe; don't turn it off) — the pack ran under ${path.basename(ctx.bin)} instead`;
+    if (!rp.error && safeRead(packLog) && !parsedPack.errors.length) return { status: 'ok', via: 'pack', note, frames, log: packLog, exit: rp.status };
+    const packReasons = [note];
+    if (rp.error || !safeRead(packLog)) packReasons.push('the pack wrote no log file under the editor binary either');
+    if (parsedPack.errors.length) packReasons.push(`${parsedPack.errors.length} error(s) in the exported build's log (its pack, under the editor binary): ${parsedPack.errors.slice(0, 3).map((e) => e.message || e).join(' | ')}`);
+    return { status: 'fail', via: 'pack', reasons: packReasons, frames, log: packLog, exit: rp.status };
+  }
   const text = safeRead(log) || `${r.stdout || ''}\n${r.stderr || ''}`;
   const parsed = parseLog(text, ctx.ignores);
   const reasons = [];
@@ -900,7 +916,7 @@ function printStep(s) {
   else if ((s.step === 'scenarios' || s.step === 'replays') && s.count) extra = ` (${s.count - (s.results || []).filter((x) => x.result === 'FAIL').length}/${s.count} passing)`;
   else if (s.step === 'shot' && s.file) extra = ` (${s.name} → ${s.file}${s.diff ? `, ${s.diff.differing} px (${(s.diff.ratio * 100).toFixed(2)}%) differ from the baseline` : ''}${s.baseline ? ', baseline accepted' : ''}${s.audio ? `, audio peak ${s.audioPeakDb} dBFS` : ''})`;
   else if (s.step === 'perf' && s.summary) extra = ` (${s.window ? 'window' : 'headless'}: frame p95 ${fmtNum(s.summary.frame_ms && s.summary.frame_ms.p95)} ms, process p95 ${fmtNum(s.summary.process_ms && s.summary.process_ms.p95)} ms, nodes max ${fmtNum(s.summary.nodes && s.summary.nodes.max, 0)}, draw calls max ${fmtNum(s.summary.draw_calls && s.summary.draw_calls.max, 0)})`;
-  else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output}${s.smoke ? `, smoke run ${s.smoke.status}${s.smoke.status === 'ok' ? ` (${s.smoke.frames} frames headless, log clean)` : ''}` : ''})`;
+  else if (s.step.startsWith('export:') && s.bytes) extra = ` (${(s.bytes / 1e6).toFixed(1)} MB → ${s.output}${s.smoke ? `, smoke run ${s.smoke.status}${s.smoke.status === 'ok' ? ` (${s.smoke.frames} frames headless, log clean${s.smoke.via === 'pack' ? `; ${s.smoke.note}` : ''})` : ''}` : ''})`;
   process.stdout.write(`${tag} ${s.step}${extra} — ${s.ms} ms${s.reasons.length ? ' — ' + s.reasons.join('; ') : ''}\n`);
   for (const e of s.errors.slice(0, 10)) process.stdout.write(`     ${e.kind}: ${e.message}${e.at ? `  [${e.at}]` : ''}\n`);
   if (s.errors.length > 10) process.stdout.write(`     … ${s.errors.length - 10} more\n`);

@@ -222,6 +222,146 @@ func test_r64_presets_from_easy_to_hard() -> void:
 	assert_gt(normal.think_interval, hard.think_interval)
 	assert_lt(easy.income_multiplier, hard.income_multiplier)
 	assert_almost_eq(float(normal.income_multiplier), 1.0, 0.0001, "normal plays fair")
+	assert_true(int(easy.production) < int(normal.production) and int(normal.production) < int(hard.production), "production buildings rise with the level")
+	assert_true(int(easy.max_supply) < int(normal.max_supply) and int(normal.max_supply) < int(hard.max_supply), "… and so does the army's food ceiling")
 	var b := RtsAiBrain.new()
 	b.apply_preset(2)
 	assert_almost_eq(b.think_interval, 0.5, 0.0001)
+
+
+func test_r64_a_stalled_army_attacks_with_what_it_has() -> void:
+	var w := FakeWorld.new()
+	var b := _brain(w)
+	b.wave_size = 3
+	for i in 3:
+		w.army_units.append(i)
+	b.think()
+	assert_eq(b.waves_sent, 1, "the first wave goes")
+	w.army_units.clear()
+	b.think()
+	assert_false(b.attacking, "… and is gone")
+	for i in 2:
+		w.army_units.append(10 + i)                   # 2 at home, the next wave wants 5, and the gold is gone
+	for i in 30:
+		b.think()
+	assert_eq(b.waves_sent, 1, "30 s without growth: still home")
+	for i in 40:
+		b.think()
+	assert_eq(b.waves_sent, 2, "stall_after s without growth: the wave goes with its 2")
+
+
+func test_r64_the_stall_rule_waits_for_the_first_wave() -> void:
+	var w := FakeWorld.new()
+	var b := _brain(w)
+	b.wave_size = 12
+	for i in 2:
+		w.army_units.append(i)
+	for i in 120:
+		b.think()
+	assert_eq(b.waves_sent, 0, "no first wave from a stall: the start's saving pauses don't send 2 units")
+
+
+func test_r64_a_retreated_army_rebuilds_before_it_goes_again() -> void:
+	var w := FakeWorld.new()
+	var b := _brain(w)
+	b.wave_size = 3
+	for i in 4:
+		w.army_units.append(i)
+	b.think()
+	assert_eq(b.waves_sent, 1, "a wave goes")
+	w.enemy_power = 1000.0
+	b.think()
+	assert_eq(w.retreats, 1, "outmatched: it retreats")
+	w.enemy_power = 0.0
+	for i in 50:
+		b.think()
+	assert_eq(b.waves_sent, 1, "within stall_after s of the retreat it is not sent back")
+
+
+func test_r64_a_slowly_growing_army_never_stalls() -> void:
+	var w := FakeWorld.new()
+	var b := _brain(w)
+	b.wave_size = 3
+	for i in 3:
+		w.army_units.append(i)
+	b.think()
+	w.army_units.clear()
+	b.think()
+	b.wave_size = 20
+	for step in 6:
+		w.army_units.append(100 + step)               # one more every 50 s
+		for i in 50:
+			b.think()
+	assert_eq(b.waves_sent, 1, "growing (slowly): no stall wave, it waits for its size")
+
+
+func test_r64_no_wave_before_the_floor_and_a_capped_first_wave() -> void:
+	var w := FakeWorld.new()
+	var b := _brain(w)
+	b.wave_size = 3
+	b.first_wave_not_before = 240.0
+	b.cap_first_wave = true
+	for i in 7:
+		w.army_units.append(i)
+	for i in 239:
+		b.tick(1.0)
+	assert_eq(b.waves_sent, 0, "a big enough army waits for the floor (239 s)")
+	b.tick(1.0)
+	assert_eq(b.waves_sent, 1, "the first wave leaves at the floor")
+	assert_eq(w.attacks, 1, "… once")
+	b.tick(1.0)
+	assert_eq(w.attacks, 2, "and keeps pushing")
+	assert_eq(b._first.size(), 3, "with its 3 units only: the other 4 stay home")
+	w.army_units.remove_at(0)
+	w.army_units.remove_at(0)
+	w.army_units.remove_at(0)
+	b.tick(1.0)
+	assert_false(b.attacking, "the first wave is gone: no longer attacking")
+	assert_eq(b._first.size(), 0, "… and the home army is not sent after it")
+
+
+func test_r64_the_first_wave_retreats_by_what_it_meets() -> void:
+	var w := WaveWorld.new()
+	var b := _brain(w)
+	b.wave_size = 2
+	b.cap_first_wave = true
+	for i in 6:
+		w.army_units.append(i)
+	b.think()
+	assert_eq(b._first.size(), 2, "the first wave is 2 of the 6")
+	w.danger_at = Vector3(50, 0, 50)
+	w.enemy_power = 1000.0
+	b.think()
+	assert_eq(w.retreats, 1, "a strong enemy where the wave is: it retreats (the home units don't hide it)")
+
+
+func test_r64_home_units_defend_while_the_first_wave_is_out() -> void:
+	var w := WaveWorld.new()
+	var b := _brain(w)
+	b.wave_size = 2
+	b.cap_first_wave = true
+	for i in 6:
+		w.army_units.append(i)
+	b.think()
+	w.danger = Vector3(-5, 0, -5)
+	var before := w.attacks
+	b.think()
+	assert_eq(w.attacks - before, 2, "the wave keeps pushing and the home units go at the threat")
+	assert_eq(w.attack_at, Vector3(-5, 0, -5), "… at the threat")
+	assert_eq(w.last_units, [2, 3, 4, 5], "… the home units, not the wave")
+
+
+class WaveWorld:
+	extends FakeWorld
+	var danger_at := Vector3.INF
+	var last_units: Array = []
+
+	func attack(units: Array, at: Vector3) -> void:
+		super(units, at)
+		last_units = units.duplicate()
+
+	func centre_of(units: Array) -> Vector3:
+		return Vector3(50, 0, 50) if units.size() <= 2 else Vector3.ZERO
+
+	func enemy_power_near(at: Vector3) -> float:
+		return enemy_power if at == danger_at else 0.0

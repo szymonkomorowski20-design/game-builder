@@ -18,6 +18,10 @@ signal alert(at: Vector3)                      ## the player's things are under 
 @export var fog_rate := 10.0                   ## fog updates per second, one team each (so each team's at half this)
 @export var ai_enabled := true                 ## tests: a sandbox without the computer player
 @export var reveal_map := false                ## tests and the end screen: everything explored for the player
+@export var reveal_on_hit := 2.0               ## s a hit makes the attacker visible to the victim's team
+@export var reveal_hall_less := true           ## a team without a town hall is revealed (off on a map with no halls)
+
+const REVEAL_WITHOUT_HALL := 60.0              ## s a team may be without a town hall before its buildings are shown
 
 var stockpiles: Array[RtsStockpile] = []
 var techs: Array[RtsTechTree] = []
@@ -37,7 +41,11 @@ var nav: NavigationRegion3D
 var _fog_t := 0.0
 var _fog_team := 0
 var _rebake := false
+var _rebake_in := 0                            ## physics frames until a rebake (a removed building must be gone first)
 var _alert_cool := 0.0
+var _revealed: Array = []                      ## [team, attacker (Variant), until]: a hit shows the attacker to the victim's team
+var _hall_less: Array[float] = [0.0, 0.0]
+var revealed_team: Array[bool] = [false, false]
 
 @onready var world_root: Node3D = $World
 
@@ -84,6 +92,10 @@ func _ready() -> void:
 	for t in 2:
 		income_multiplier[t] = 1.0
 	income_multiplier[1] = float(RtsAiBrain.preset(ai_level).income_multiplier)
+	if ai_enabled:
+		# The computer's army ceiling at its difficulty (recipe 64's `max_supply`): with income alone a computer bound
+		# by production and the food ceiling only grows its bank (measured in the proof game Kamienna Marchia).
+		stockpiles[1].max_supply = mini(rules.max_supply, int(RtsAiBrain.preset(ai_level).get("max_supply", rules.max_supply)))
 
 
 func _physics_process(delta: float) -> void:
@@ -91,14 +103,19 @@ func _physics_process(delta: float) -> void:
 		return
 	elapsed += delta
 	_alert_cool = maxf(_alert_cool - delta, 0.0)
+	_check_hall_less(delta)
 	_fog_t -= delta
 	if _fog_t <= 0.0:
 		_fog_t = 1.0 / fog_rate
 		_fog_team = 1 - _fog_team
 		_update_fog(_fog_team)                   # one team a tick halves the spike
+	if _rebake_in > 0:
+		_rebake_in -= 1
+		if _rebake_in == 0:
+			_rebake = true
 	if _rebake and not nav.is_baking():
 		_rebake = false
-		nav.bake_navigation_mesh(true)
+		nav.bake_navigation_mesh(not _harness_active())      # tests: on this frame, so a scenario plays the same every run
 
 
 func stockpile(t: int) -> RtsStockpile:
@@ -123,7 +140,17 @@ func _update_fog(only: int = -1) -> void:
 		for b in buildings:
 			if b.team == t:
 				viewers.append({"at": b.global_position, "sight": float(b.def.sight) * (1.0 if b.finished else 0.5)})
+		for i in range(_revealed.size() - 1, -1, -1):
+			var r: Array = _revealed[i]
+			var who = r[1]                         # a Variant: attackers die
+			if float(r[2]) < elapsed or not is_instance_valid(who):
+				_revealed.remove_at(i)
+			elif int(r[0]) == t:
+				viewers.append({"at": (who as Node3D).global_position, "sight": 1.0})     # one cell around the attacker
 		fogs[t].update(viewers)
+		for b in buildings:                        # every team remembers the enemy buildings it has seen (the AI too)
+			if b.team != t and fogs[t].is_visible(b.global_position):
+				b.seen_by[t] = true
 	if only == 1:
 		return
 	# The player's view: enemy units only in sight; enemy buildings once seen.
@@ -145,6 +172,14 @@ func _update_fog(only: int = -1) -> void:
 
 func visible_to(t: int, node: Node3D) -> bool:
 	return fogs[t].is_visible(node.global_position)
+
+
+## A hit on team `victim`'s unit or building by `by`: the attacker is shown to the victim's team for `reveal_on_hit` s
+## (an archer stops at its reach, at or past a footman's sight: without this a lone footman may never see who shoots it).
+func reveal_attacker(victim: int, by: Node3D) -> void:
+	if by == null or not is_instance_valid(by) or int(by.get(&"team")) == victim:
+		return
+	_revealed.append([victim, by, elapsed + reveal_on_hit])
 
 
 # ---- spawning and building ----
@@ -269,7 +304,7 @@ func on_building_died(b: RtsBuilding) -> void:
 		techs[b.team].remove(b.kind)
 	if b.production.started and not b.production.queue.is_empty():
 		stockpiles[b.team].release(int(b.production.queue[0].supply))      # the unit being made is lost with it
-	_rebake = true
+	_rebake_in = 2                             # the node leaves the tree at the end of this frame: bake after that
 	_check_winner()
 
 
@@ -305,6 +340,43 @@ func _check_winner() -> void:
 	elif alive_teams.is_empty():
 		winner = 2
 		game_over.emit(winner)
+
+
+## A team with buildings but no finished town hall for REVEAL_WITHOUT_HALL s has its buildings shown to the enemy
+## (Warcraft III's rule): without it a last farm the other side never saw makes a game endless (found by the bot in the
+## proof game Kamienna Marchia: a bot match ran 20 minutes with the winner's army idle at the loser's empty start).
+func _check_hall_less(delta: float) -> void:
+	if not reveal_hall_less:
+		return
+	for t in 2:
+		var has_buildings := false
+		var has_hall := false
+		for b in buildings:
+			if b.team == t and b.alive:
+				has_buildings = true
+				if b.kind == &"town_hall" and b.finished:
+					has_hall = true
+		if has_hall or not has_buildings:
+			_hall_less[t] = 0.0
+			revealed_team[t] = false
+			continue
+		_hall_less[t] += delta
+		if _hall_less[t] < REVEAL_WITHOUT_HALL:
+			continue
+		if not revealed_team[t]:
+			revealed_team[t] = true
+			_say(0, "Wróg nie ma ratusza: jego budynki są widoczne" if t == 1 else "Nie masz ratusza: wróg widzi twoje budynki")
+		for b in buildings:
+			if b.team == t and not b.seen_by.has(1 - t):
+				b.seen_by[1 - t] = true
+				if t == 1:
+					b.visible = true
+
+
+## The test harness is running (scenarios, replays): nothing may depend on thread timing.
+func _harness_active() -> bool:
+	var h := get_node_or_null("/root/GbHarness")
+	return h != null and bool(h.get(&"active"))
 
 
 func _say(t: int, text: String) -> void:

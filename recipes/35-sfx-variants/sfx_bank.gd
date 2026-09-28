@@ -9,7 +9,10 @@ extends Node
 @export var volume_variation_db := 1.5
 
 var player: AudioStreamPlayer
+var rng: RandomNumberGenerator = null     ## set: variants, pitch and volume come from it (deterministic, main thread)
 var _sounds: Dictionary = {}               ## StringName -> AudioStreamRandomizer
+var _variants: Dictionary = {}             ## StringName -> Array of AudioStream (for `rng`)
+var _last: Dictionary = {}                 ## StringName -> the last variant's index (no repeats, as the randomizer)
 
 
 func _ready() -> void:
@@ -31,6 +34,7 @@ func add_sound(name: StringName, variants: Array) -> void:
 	r.random_volume_offset_db = volume_variation_db
 	r.playback_mode = AudioStreamRandomizer.PLAYBACK_RANDOM_NO_REPEATS
 	_sounds[name] = r
+	_variants[name] = variants.duplicate()
 
 
 func has_sound(name: StringName) -> bool:
@@ -44,6 +48,18 @@ func play(name: StringName, volume_db: float = 0.0) -> int:
 	var pb := player.get_stream_playback() as AudioStreamPlaybackPolyphonic
 	if pb == null:
 		return AudioStreamPlaybackPolyphonic.INVALID_ID
+	if rng != null:
+		# The randomizer draws from the global RNG, and its pitch and volume on the audio thread: with `rng`, pick
+		# here instead, so gameplay randomness never depends on sounds.
+		var list: Array = _variants[name]
+		var i := rng.randi() % list.size()
+		if list.size() > 1 and i == int(_last.get(name, -1)):
+			i = (i + 1 + rng.randi() % (list.size() - 1)) % list.size()
+		_last[name] = i
+		var s: AudioStream = list[i]
+		var pitch := rng.randf_range(1.0 / pitch_variation, pitch_variation)
+		var vol := rng.randf_range(-volume_variation_db, volume_variation_db)
+		return pb.play_stream(s, 0.0, volume_db + vol, pitch)
 	return pb.play_stream(_sounds[name], 0.0, volume_db)
 
 

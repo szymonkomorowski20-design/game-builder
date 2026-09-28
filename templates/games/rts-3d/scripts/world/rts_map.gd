@@ -29,9 +29,9 @@ static func build(g: RtsGame) -> NavigationRegion3D:
 	nm.geometry_collision_mask = 1
 	nm.cell_size = 0.25
 	nm.cell_height = 0.25
-	nm.agent_radius = 0.6
+	nm.agent_radius = 0.75                         # a multiple of the cell (0.6 is ceiled to 0.75 anyway, with a warning GUT counts)
 	nm.agent_height = 1.5
-	nm.agent_max_climb = 0.3
+	nm.agent_max_climb = 0.25                      # a multiple of the cell height (0.3 is floored to 0.25, with a warning)
 	nav.navigation_mesh = nm
 	g.world_root.add_child(nav)
 	var ground := StaticBody3D.new()

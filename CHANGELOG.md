@@ -1,5 +1,44 @@
 # Changelog
 
+## 0.29.0 — 2026-09-28 · what the RTS proof game found (ROADMAP 9.3)
+The proof game **Kamienna Marchia** (three missions and a skirmish, built autonomously on `rts-3d`; its report is
+`docs/dogfood/kamienna-marchia.md`) fed its fixes back:
+- **Recipe 64 (RTS AI):**
+  - no early rush: no wave before `first_wave_not_before` s;
+  - a capped first wave (`cap_first_wave`) whose units kept home defend the base while it is out;
+  - a stalled army attacks with what it has after `stall_after` s;
+  - the retreat measured where the wave is (`centre_of`);
+  - two more difficulty knobs, `production` (2 / 3 / 4) and `max_supply` (70 / 85 / 100) — with income alone a
+    computer bound by its production and the food ceiling only grew its bank;
+  - the README gives the host's habits (farms ahead, production that never idles, a threat on our half, an honest
+    enemy base) and the one-seed pitfall.
+- **Recipe 58:** the smart right-click on a unit or a building works — `bool(target.get("is_resource"))` was a script
+  error on targets without that property, so right-clicking an enemy never attacked.
+- **Recipe 35:** an optional own `rng`: variants (never the same twice in a row), pitch and volume picked on the main
+  thread, so a seeded game plays the same whatever it hears.
+- **Template `rts-3d`:**
+  - the computer's habits from the proof game: farms ahead of the army, production that never idles, a threat is an
+    enemy on its half, the enemy base from what it has seen, the difficulty's production cap and food ceiling;
+  - the player's bot reads the enemy's army and trains the counter;
+  - units with no unit to fight (idle, attack-move, patrol, or hitting a building) answer a seen attacker for 5 s;
+    patrols fight;
+  - fog honesty: a hit shows the attacker for 2 s; a team without a town hall is revealed after 60 s;
+  - determinism for tests: a synchronous navigation bake while the harness runs, a removed building rebaked two
+    frames later, the navigation server's async iterations and threaded avoidance off — except threaded avoidance in
+    exported builds (a `.template` feature override);
+  - navigation agent radius and climb in exact cell multiples (the old values logged a warning GUT counts);
+  - 450 wood a tree (300 ran out by minute 9);
+  - R8 checks the first-wave floor; new unit tests `test_fog_honesty.gd` and `test_ai_habits.gd`;
+  - a fresh scaffold: verify PASS — gut 88/88, scenarios 11/11 (R8: the first wave at 256 s; R9: the bot wins at
+    405 s); the 40-against-40 battle within its budget (process p95 2.5 ms, as with 0.28.0's scripts);
+- **`gb scaffold`:** a template may set its own project settings (`template.json` "settings": { section: { key: value } },
+  feature overrides included).
+- **`gb export --smoke`:** when Windows refuses the exe (Smart App Control keeps its verdict per file, so a newly
+  written copy of the stock template can be blocked while an identical older one runs), the smoke run runs the pack
+  under the editor binary (`--main-pack`) and says that the exe didn't run.
+- **Pitfalls:** the per-file application-control verdict; one seed is not a proof; deterministic navigation against a
+  big battle's budget (measure more than once); `bool(get())` on a missing property.
+
 ## 0.28.0 — 2026-09-28 · the `rts-3d` template (ROADMAP 9.3)
 - **`rts-3d`: a real-time strategy skirmish** (Warcraft / StarCraft-like, original) against a computer opponent on a
   mirrored 72 m map, built on recipes 58–65 (added with their tests):

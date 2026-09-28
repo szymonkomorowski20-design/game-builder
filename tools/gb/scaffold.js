@@ -70,6 +70,14 @@ function projectGodot(o) {
     `renderer/rendering_method.mobile="${o.renderer === 'forward_plus' ? 'mobile' : o.renderer}"`,
   ];
   if (pixel) lines.push('textures/canvas_textures/default_texture_filter=0', '2d/snap/snap_2d_transforms_to_pixel=true');
+  // A template's own project settings (template.json "settings": { section: { key: value } }), in sections scaffold
+  // doesn't write itself. Booleans and numbers are written as they are; a string is written raw (quote it in the
+  // manifest when Godot wants a string). Feature overrides are keys too ("key.template": true).
+  const extra = (o.templateInfo && o.templateInfo.settings) || {};
+  for (const section of Object.keys(extra)) {
+    lines.push('', `[${section}]`, '');
+    for (const [k, v] of Object.entries(extra[section])) lines.push(`${k}=${String(v)}`);
+  }
   return lines.join('\n') + '\n';
 }
 
