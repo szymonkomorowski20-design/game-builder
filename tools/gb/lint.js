@@ -109,6 +109,7 @@ function lint(root, { harnessRequired = true } = {}) {
     for (const m of t.matchAll(/res:\/\/([^"'\s)\]]+)/g)) {
       let target = m[1].replace(/[,;]+$/, '');
       if (target.includes('*') || target.includes('%') || target.includes('{')) continue;
+      if (target.startsWith('.ai/') || target.startsWith('.godot/')) continue; // generated (git-ignored): written at run time
       if (!fs.existsSync(path.join(root, target))) errors.push({ rule: 'broken-ref', file: rel(root, f), message: `res://${target} does not exist` });
     }
   }

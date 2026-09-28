@@ -90,13 +90,15 @@ Załóż pusty folder (np. `Pulpit/gry/moja-gra`), otwórz w nim Claude Code i n
 Każdy szablon ma już testy i scenariusze bota, który gra za Ciebie.
 
 ## 5. Przepisy (gotowe, przetestowane mechaniki)
-Plugin ma **52 przepisy**, na przykład:
+Plugin ma **57 przepisów**, na przykład:
 - ruch, kamera, trzęsienie ekranu;
 - zdrowie, trafienia, pociski, broń;
 - ekwipunek, sklep, zapis gry, dialogi, zadania;
 - AI wrogów, nawigacja, mapa kafelkowa, generowany loch;
 - muzyka adaptacyjna, lokalizacja, dostępność dla daltonistów;
-- multiplayer, kamera 3D, punkty kontrolne, ruchome platformy, zryw, animacje postaci, minimapa.
+- multiplayer, kamera 3D, punkty kontrolne, ruchome platformy, zryw, animacje postaci, minimapa;
+- walka jak w Hadesie: kombinacje ciosów, dary, fale wrogów, bossowie z fazami, efekty statusów;
+- strzelanka jak Call of Duty: broń z odrzutem, rozrzutem, celowaniem i przeładowaniem, strefy trafień, zdrowie z regeneracją, wspomaganie celowania na padzie, żołnierze chowający się za osłonami.
 
 Bot kopiuje przepis razem z jego testami:
 ```

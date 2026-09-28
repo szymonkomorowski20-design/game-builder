@@ -60,7 +60,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
-  doc [name]               knowledge documents in gry-wiedza/wiedza (no name: list) — design-theory, platforms, asset-pipeline, starter-packs, reference-games
+  doc [name]               knowledge documents in gry-wiedza/wiedza (no name: list) — design-theory, platforms, asset-pipeline, starter-packs, reference-games, genre-action-roguelite, genre-military-fps
   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
 Options: --path <project dir> (default: nearest dir with project.godot) · --json
 Env: GODOT_BIN (Godot executable; on Windows prefer *_console.exe) · GAME_BUILDER_KB (BAZA-AI folder) · GAME_BUILDER_WIEDZA (gry-wiedza clone for gb doc)
@@ -780,9 +780,10 @@ function docCommand(args) {
   if (!name) {
     const docs = fs.readdirSync(dir).filter((f) => f.endsWith('.md') && f.toLowerCase() !== 'readme.md').sort();
     process.stdout.write(`Knowledge documents in ${dir} (gb doc <name>):\n`);
+    const width = Math.max(...docs.map((f) => f.length - 3)) + 2;
     for (const f of docs) {
       const title = ((safeRead(path.join(dir, f)) || '').match(/^#\s+(.+)$/m) || [, ''])[1];
-      process.stdout.write(`  ${f.replace(/\.md$/, '').padEnd(18)}${title}\n`);
+      process.stdout.write(`  ${f.replace(/\.md$/, '').padEnd(width)}${title}\n`);
     }
     return 0;
   }

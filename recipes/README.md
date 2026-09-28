@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 193/193 GUT tests, 23/23 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-27).
+Last full run: 221/221 GUT tests, 23/23 bot scenarios (also 5× via --repeat), Godot 4.7.2 (2026-09-28).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -72,10 +72,15 @@ Last full run: 193/193 GUT tests, 23/23 bot scenarios (also 5× via --repeat), G
 | [46-multiplayer-spawn-sync](46-multiplayer-spawn-sync/README.md) | Multiplayer spawning + sync (MultiplayerSpawner, MultiplayerSynchronizer) | avatars must appear for late joiners, vanish everywhere when their owner leaves and move without clients teleporting themselves | test_r46_net_world.gd, r46_net_world.gd |
 | [47-melee-combo](47-melee-combo/README.md) | Melee combo (windup / active / recovery, input buffer, dash-cancel) | mushy melee: eaten presses, hitboxes on for the whole swing, one swing hitting five times | test_r47_combo.gd, r47_melee_combo.gd |
 | [48-boons-modifiers](48-boons-modifiers/README.md) | Stat modifiers and boons (rarity, synergies, seeded offers) | build variety that breaks: order-dependent stacking, repeated offers, synergies before their parts, unreproducible offers | test_r48_boons.gd, r48_boons.gd |
-| [49-encounter-director](49-encounter-director/README.md) | Encounter director (threat budget, waves, room cleared) | hand-placed rooms don't scale and random spawns are unfair or repetitive | test_r49_encounters.gd, r49_encounter.gd |
+| [49-encounter-director](49-encounter-director/README.md) | Encounter director (threat budget, waves, room cleared) + AttackTokens (at most N attack at once) | hand-placed rooms don't scale, random spawns are unfair or repetitive, and five overlapping tells are unreadable | test_r49_encounters.gd, r49_encounter.gd |
 | [50-run-meta](50-run-meta/README.md) | Run structure and meta progression | blind doors, bad pacing, death erasing all progress, broken upgrade economy | test_r50_run_meta.gd, r50_run_meta.gd |
 | [51-boss-phases](51-boss-phases/README.md) | Boss phases and telegraphed attacks | bosses that are an HP pile: phases skipped by burst, unreadable or repetitive attacks | test_r51_boss.gd, r51_boss.gd |
 | [52-status-effects](52-status-effects/README.md) | Status effects (damage over time, stacks, stat changes) | burns ticking once too often, doubled slows that never end, uncapped stacks | test_r52_status.gd |
+| [53-gun-handling](53-gun-handling/README.md) | Gun handling (fire rate, magazine, tactical/empty reload, spread and bloom, ADS, recoil pattern, damage falloff) | guns that fire at the frame rate, reloads that eat rounds, random recoil nobody can learn, hip fire as accurate as aiming | test_r53_gun.gd |
+| [54-hitscan-zones](54-hitscan-zones/README.md) | Hitscan with hit zones (spread → ray, head / body / limb) | rays from the camera hitting the shooter, headshots that never register, spread applied in world space | test_r54_hitscan.gd |
+| [55-regen-health-indicators](55-regen-health-indicators/README.md) | Regenerating health and damage direction indicators | regen that starts mid-fight, deaths with no warning, hits from behind with no idea where from | test_r55_regen.gd |
+| [56-aim-assist](56-aim-assist/README.md) | Aim assist for pads (slowdown and pull in a cone, only while moving the stick) | a pad player who can't track anything, or an aimbot that snaps through walls | test_r56_aim_assist.gd |
+| [57-cover-shooter-ai](57-cover-shooter-ai/README.md) | Cover-shooter AI (cover finder, peek, suppression, flank, barks, accuracy ramp) | enemies standing in the open or killing from 40 m with the first shot; flanks nobody hears coming | test_r57_cover_ai.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —

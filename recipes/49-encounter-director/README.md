@@ -31,6 +31,15 @@ fail in the other direction:
 
 Elites are separate kinds with a higher cost and modifiers (recipe 48).
 
+**`AttackTokens` (fairness):** at most `limit` enemies attack at the same time: melee enemies winding up or striking,
+shooters peeking and firing (recipe 57).
+- An enemy calls `take(self)` before its telegraph and `give_back(self)` when the strike is over, on a stagger and on
+  death.
+- Without a token it keeps moving and tries again.
+
+Overlapping tells without priority are what make a fight unreadable. In game-builder's proof game, 2 tokens turned a
+crowded chamber from ~50 lost HP of 60 into ~10 for a careful bot. Tuning: `limit` 1–3 per room.
+
 **Host:** spawn `EnemyKind.scene` at spawn points, show a short spawn telegraph (a glow, then the enemy appears ~0.5 s
 later, so nothing materialises on top of the player), connect each enemy's death to `enemy_died()`. The demo stands
 in for combat: `action` removes the oldest enemy, so the flow is visible.

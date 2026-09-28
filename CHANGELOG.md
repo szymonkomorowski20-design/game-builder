@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.24.0 — 2026-09-28 · FPS recipes (ROADMAP 9.2)
+- **Recipes 53–57** (military FPS, like Call of Duty), each with GUT tests:
+  - 53 gun handling: `GunStats` (a Resource) and `GunModel`. Fire rate without frame-rate drift, magazine and
+    reserve, tactical vs empty reload (cancellable), hip / ADS spread with bloom and first-shot accuracy, a learnable
+    recoil pattern, damage falloff by distance and zone multipliers;
+  - 54 hitscan with hit zones: spread → ray direction in the camera basis, the shooter excluded, head / body / limb
+    from the collision shape or `hit_zone` meta;
+  - 55 regenerating health (delay, rate, segments, danger threshold) and damage direction indicators;
+  - 56 aim assist for pads: slowdown and pull inside a cone, only while the stick moves;
+  - 57 cover-shooter AI: `CoverFinder` (hidden when crouched, sees when standing, a distance band, occupied points,
+    flank angles) and `ShooterBrain` (move, cover, peek, reload, flank, suppression, barks, an accuracy ramp that
+    makes the first shots miss). A flank waits for the body to pick the new cover.
+- **`AttackTokens` moved into recipe 49** (shared by melee enemies and shooters). The template
+  `action-roguelite-3d` gets it from there.
+- **`gb lint`: `res://.ai/…` and `res://.godot/…` are not broken references.** These folders are generated and
+  git-ignored. A perf test that writes its result to `.ai/verify/perf/` failed lint on every clean checkout, so
+  `gb verify` never reached the tests. The proof game's checker found it on a clean snapshot. Tested.
+- **Genre doc `genre-military-fps`** (gry-wiedza, `gb doc genre-military-fps`): 87 facts from 47 sources on gun feel,
+  cover AI, regenerating health, encounters (the door problem), aim assist and FOV, readability and pitfalls, with a
+  list of what could not be established. Recipe 53's defaults are now its sourced rifle (700 rpm, 40 → 30 damage,
+  headshot × 1.4). `gb doc` lists long names without running them into the title.
+
 ## 0.23.0 — 2026-09-27 · the proof game is built
 - **ROADMAP 9.1 proof game "Ucieczka z Krypty"** (a Hades-like, autonomous mode):
   - built from the one-line pitch to a Windows build in one session;

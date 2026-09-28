@@ -108,6 +108,17 @@ dla konkretnej partii.
 - [x] Tryb pracy „autonomiczny” (0.21.0): bot decyduje polecanymi opcjami (zapisane do przeglądu), spec zatwierdza checker, bramki maszynowe + scenariusz „bot przechodzi grę”, człowiek gra w gotową grę; bez zmian: bezpieczeństwo, licencje, płatne assety za zgodą, commit na słowo
 - [x] Gra-dowód zbudowana pluginem od zera + raport (0.23.0): **Ucieczka z Krypty**, zbudowana autonomicznie w jednej sesji, z darmowymi assetami. Ma 10 komnat, 4 typy wrogów + elitę, 18 darów, Strażnika z 3 fazami, menu i build Windows. Liczby: 126 testów, 31 scenariuszy, 31 mutacji, bot przechodzi grę na 3 ziarnach. Raport w `docs/dogfood/ucieczka-z-krypty.md`. Czeka na werdykt właściciela po zagraniu.
 - [ ] `gb perf`: monitory TIME_PROCESS/TIME_PHYSICS_PROCESS w oknie nie są czasem CPU klatki (18/16 ms w pustej scenie przy klatce 4,17 ms) — zbadać i poprawić budżet
-### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy
+### 9.2 Jak Call of Duty — FPS: broń (odrzut, rozrzut, celowanie, przeładowanie), AI z osłonami, poziomy (w toku)
+- [x] Przepisy 53–57 (0.24.0):
+  - obsługa broni: szybkostrzelność, magazynek, przeładowanie taktyczne i z pustego, rozrzut z rozgrzewaniem, celowanie
+    (ADS), wzór odrzutu, spadek obrażeń z odległością;
+  - hitscan ze strefami trafień (głowa / tułów / kończyny);
+  - zdrowie z regeneracją i wskaźniki kierunku obrażeń;
+  - wspomaganie celowania na padzie;
+  - AI żołnierza z osłonami: wybór osłony, wychylanie, przygwożdżenie, obchodzenie, okrzyki, rosnąca celność.
+  - `AttackTokens` przeniesione do przepisu 49 (wspólne dla walki wręcz i strzelców).
+- [x] Dokument gatunku `gry-wiedza/wiedza/genre-military-fps.md` (`gb doc genre-military-fps`): 87 faktów z 47 źródeł (0.24.0)
+- [ ] Szablon kampanii FPS: broń z przepisów 53–56, żołnierze z przepisu 57, poziom z punktami osłon i celem misji, bot-scenariusze
+- [ ] Gra-dowód FPS zbudowana autonomicznie + raport
 ### 9.3 Jak Warcraft — RTS: zaznaczanie, rozkazy, surowce, budowanie, produkcja, mgła wojny, AI, wydajność
 ### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat

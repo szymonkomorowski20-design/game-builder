@@ -47,6 +47,12 @@ test('lint: broken res:// references are errors, existing ones are not', () => {
   assert.deepEqual(r.errors.map((e) => e.message), ['res://gone.gd does not exist']);
 });
 
+test('lint: generated output paths under res://.ai/ are not broken references (a clean checkout has none yet)', () => {
+  const d = tmpProject({ 'project.godot': PG, 'main.tscn': '', 'addons/gb_harness/harness.gd': '',
+    'tests/perf/probe.gd': 'var p := "res://.ai/verify/perf/fps.json"\nvar q := "res://missing.tres"\n' });
+  assert.deepEqual(lint(d).errors.map((e) => e.message), ['res://missing.tres does not exist']);
+});
+
 test('lint: an asset without a licence-register row is an error; a folder row covers its files', () => {
   const d = tmpProject({
     'project.godot': PG, 'main.tscn': 'res://assets/sfx/jump.wav', 'addons/gb_harness/harness.gd': '',
