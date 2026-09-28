@@ -6,6 +6,9 @@ extends Node
 ## Override `run()`. Time is counted in PHYSICS frames, so a scenario plays out identically on every
 ## run and every machine (physics is deterministic; the harness seeds the RNG).
 ##
+## A scenario is stopped after 5 simulated minutes. A longer one (a whole campaign played by a bot) declares its
+## own limit, up to 30: `const GB_MINUTES := 12`.
+##
 ##   func run() -> void:
 ##       var player := node("Player") as CharacterBody2D
 ##       var start_x := player.position.x

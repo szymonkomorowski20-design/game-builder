@@ -343,6 +343,19 @@ function stepTest(ctx) {
 
 const PLUGIN_ROOT = path.resolve(HERE, '..', '..');
 const HARNESS_ARGS_FRAME_CAP = 60 * 300; // hard stop after 5 simulated minutes
+const SCENARIO_MAX_MINUTES = 30;
+
+/**
+ * The frame cap and process timeout for one scenario. The cap is 5 simulated minutes unless the scenario declares
+ * more in its source — `const GB_MINUTES := 12` — for a long run such as a whole campaign played by a bot (1–30).
+ * A windowed run plays in real time, so its timeout grows with the minutes; headless runs are much faster.
+ */
+function scenarioBudget(source, window, baseTimeout) {
+  const m = /^const\s+GB_MINUTES\s*(?::\s*int\s*)?:?=\s*(\d+)/m.exec(source || '');
+  const minutes = m ? Math.min(SCENARIO_MAX_MINUTES, Math.max(1, Number(m[1]))) : 5;
+  if (!m) return { minutes, cap: HARNESS_ARGS_FRAME_CAP, timeout: baseTimeout };
+  return { minutes, cap: minutes * 60 * 60, timeout: Math.max(baseTimeout, (window ? minutes * 60 : minutes * 20) * 1000 + 120000) };
+}
 
 function hasHarness(dir) {
   const pg = safeRead(path.join(dir, 'project.godot')) || '';
@@ -423,7 +436,8 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
   const results = [];
   const errors = [];
   for (const f of files) {
-    const r = gameRun(ctx, { window: window || endShot, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`, ...(endShot ? ['--gb-end-shot'] : [])] });
+    const budget = scenarioBudget(safeRead(path.join(ctx.dir, f.replace(/^res:\/\//, ''))), window || endShot, ctx.timeouts.run);
+    const r = gameRun(ctx, { window: window || endShot, cap: budget.cap, timeout: budget.timeout, userArgs: [`--gb-scenario=${f}`, `--gb-out=${path.join(ctx.outDir, 'shots')}`, ...(endShot ? ['--gb-end-shot'] : [])] });
     const m = /GB_SCENARIO name=\S+ result=(PASS|FAIL) failures=(\d+)/.exec(r.log);
     const expectFails = [...r.log.matchAll(/^GB_EXPECT_FAIL (.*)$/gm)].map((x) => x[1].trim());
     const notes = [...r.log.matchAll(/^GB_NOTE (.*)$/gm)].map((x) => x[1].trim());
@@ -432,7 +446,7 @@ function stepScenarios(ctx, { only = null, window = false, accept = false, compa
     for (const s of shots.filter((x) => x.result === 'FAIL')) errors.push({ kind: 'SHOT', message: `${path.basename(f)}: ${s.name} — ${s.reason}`, at: null });
     const pass = !!m && m[1] === 'PASS' && !logErrors.length && !r.timedOut && !shots.some((x) => x.result === 'FAIL');
     results.push({ scenario: f, result: pass ? 'PASS' : 'FAIL', expectFails, logErrors: logErrors.length, finished: !!m, shots, notes });
-    if (!m) errors.push({ kind: 'SCENARIO', message: `${f}: did not finish (no GB_SCENARIO line — crash, timeout or frame cap)`, at: null });
+    if (!m) errors.push({ kind: 'SCENARIO', message: `${f}: did not finish (no GB_SCENARIO line — crash, timeout or the ${budget.minutes}-minute frame cap; a longer run declares const GB_MINUTES := N)`, at: null });
     for (const e of expectFails) errors.push({ kind: 'EXPECT', message: `${path.basename(f)}: ${e}`, at: null });
     for (const e of logErrors) errors.push({ ...e, message: `${path.basename(f)}: ${e.message}` });
   }
@@ -1259,7 +1273,7 @@ function safeRead(f) {
   }
 }
 
-module.exports = { findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, findWiedza, kbVersionNote, exportBytes, versionFromName, wavPeakDb, TOOL_FILES };
+module.exports = { scenarioBudget, findProjectDir, projectEngineVersion, projectMainScene, candidateBinaries, parseGodotVersion, parseLog, detectTestFramework, findKnowledgeBase, findWiedza, kbVersionNote, exportBytes, versionFromName, wavPeakDb, TOOL_FILES };
 
 if (require.main === module) {
   try {

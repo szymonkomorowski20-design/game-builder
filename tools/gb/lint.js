@@ -96,6 +96,25 @@ function pngSize(file) {
   }
 }
 
+/**
+ * How many bytes a WAV file is missing: { data } past the end of the data chunk it declares (Godot fails the import),
+ * { riff } past the RIFF size it declares (Godot only warns). Measured: 62 of the 63 mrbid Sound-Effects WAVs have a
+ * RIFF size 2–8 bytes too large, and a few also a data chunk that runs past the end.
+ */
+function wavShortBy(file) {
+  let b;
+  try { b = fs.readFileSync(file); } catch { return { data: 0, riff: 0 }; }
+  if (b.length < 12 || b.toString('ascii', 0, 4) !== 'RIFF' || b.toString('ascii', 8, 12) !== 'WAVE') return { data: 0, riff: 0 };
+  let data = 0;
+  let off = 12;
+  while (off + 8 <= b.length) {
+    const size = b.readUInt32LE(off + 4);
+    if (b.toString('ascii', off, off + 4) === 'data') { data = Math.max(off + 8 + size - b.length, 0); break; }
+    off += 8 + size + (size % 2);
+  }
+  return { data, riff: Math.max(b.readUInt32LE(4) + 8 - b.length, 0) };
+}
+
 function lint(root, { harnessRequired = true } = {}) {
   const files = walk(root, root);
   const errors = [];
@@ -150,6 +169,14 @@ function lint(root, { harnessRequired = true } = {}) {
   for (const f of files.filter((x) => /\.png$/i.test(x) && !rel(root, x).startsWith('addons/'))) {
     const s = pngSize(f);
     if (s && (s[0] > 4096 || s[1] > 4096)) warnings.push({ rule: 'texture-size', file: rel(root, f), message: `${s[0]}×${s[1]} — over 4096 px; downscale or check the target GPU` });
+  }
+
+  // 5b. WAV files shorter than their RIFF header says: Godot refuses them on the FIRST import only, so a warm
+  // import cache hides the error in the maker's copy while every fresh clone, CI run and export fails.
+  for (const f of files.filter((x) => /\.wav$/i.test(x) && !rel(root, x).startsWith('addons/'))) {
+    const short = wavShortBy(f);
+    if (short.data > 0) errors.push({ rule: 'wav-header', file: rel(root, f), message: `its data chunk runs ${short.data} byte(s) past the end of the file — Godot fails its first import; pad it with zero bytes to the declared length or re-export it` });
+    else if (short.riff > 0) warnings.push({ rule: 'wav-header', file: rel(root, f), message: `${short.riff} byte(s) shorter than its RIFF size declares — Godot imports it with a warning; pad it to silence the warning` });
   }
 
   // 6. harness autoload — required in a game-builder repo (stamped AGENTS.md); elsewhere (e.g. the

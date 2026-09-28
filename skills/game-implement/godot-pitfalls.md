@@ -7,6 +7,7 @@ Every entry below was hit while building game-builder (harness, Pong dogfood, pl
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| The first import after adding assets fails (`p_position > length` in `file_access_memory`), the second passes | a WAV whose data chunk runs past the end of the file: Godot refuses it on the first import only, and the warm cache hides it afterwards — every fresh clone, CI run and export fails | `gb lint` reports it (`wav-header`); pad the file with zero bytes to its declared length or re-export it; reproduce any failed import on a clean copy (`gb snapshot checkout`) before dismissing it |
 | Game "passes" with exit code 0 but logged `SCRIPT ERROR` | runtime script errors don't change Godot's exit code | read the log — `gb run/verify` does this for you; never trust the exit code alone |
 | `Identifier "Events" not declared` only under `gb check` / `--script` | autoload names are not compiled as identifiers outside a running game | in code that may be checked standalone use `get_node("/root/Events")` |
 | A scenario presses an action but `_unhandled_input` never fires | `Input.action_press()` sets state but emits no event | the harness uses `Input.parse_input_event()` too; in your own tools do the same |

@@ -11,6 +11,18 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const gb = require('../tools/gb/gb.js');
 
+test('scenarioBudget: 5 simulated minutes by default; a scenario can declare more, up to 30', () => {
+  const d = gb.scenarioBudget('extends GbScenario\n\nfunc run() -> void:\n\tpass\n', false, 180000);
+  assert.equal(d.cap, 60 * 300, 'the default cap');
+  assert.equal(d.timeout, 180000, 'the default timeout is kept');
+  const long = gb.scenarioBudget('extends GbScenario\nconst GB_MINUTES := 12\n', false, 180000);
+  assert.equal(long.cap, 12 * 3600, '12 minutes at 60 frames per second');
+  assert.ok(long.timeout >= 12 * 20 * 1000, 'headless: the timeout grows with it');
+  assert.ok(gb.scenarioBudget('const GB_MINUTES := 12\n', true, 180000).timeout >= 12 * 60 * 1000, 'windowed: real time');
+  assert.equal(gb.scenarioBudget('const GB_MINUTES: int = 99\n', false, 180000).minutes, 30, 'capped at 30');
+  assert.equal(gb.scenarioBudget('# const GB_MINUTES := 12 (a comment)\n', false, 180000).cap, 60 * 300, 'only a real declaration counts');
+});
+
 const GB = path.join(__dirname, '..', 'tools', 'gb', 'gb.js');
 const FIX = path.join(__dirname, 'fixtures');
 

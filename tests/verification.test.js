@@ -53,6 +53,31 @@ test('lint: generated output paths under res://.ai/ are not broken references (a
   assert.deepEqual(lint(d).errors.map((e) => e.message), ['res://missing.tres does not exist']);
 });
 
+test('lint: a WAV whose data chunk runs past the file end is an error (Godot fails its first import); a RIFF size overrun alone is a warning', () => {
+  const wav = (declaredData, actualData) => {
+    const b = Buffer.alloc(44 + actualData);
+    b.write('RIFF', 0, 'ascii'); b.writeUInt32LE(36 + declaredData, 4); b.write('WAVE', 8, 'ascii');
+    b.write('fmt ', 12, 'ascii'); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+    b.writeUInt32LE(22050, 24); b.writeUInt32LE(44100, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34);
+    b.write('data', 36, 'ascii'); b.writeUInt32LE(declaredData, 40);
+    return b;
+  };
+  const d = tmpProject({ 'project.godot': PG, 'main.tscn': 'res://assets/a.wav res://assets/b.wav', 'addons/gb_harness/harness.gd': '',
+    '.ai/assets/REGISTER.md': '| Path | Source |\n|---|---|\n| assets | test |\n' });
+  fs.mkdirSync(path.join(d, 'assets'), { recursive: true });
+  fs.writeFileSync(path.join(d, 'assets', 'a.wav'), wav(100, 100));
+  fs.writeFileSync(path.join(d, 'assets', 'b.wav'), wav(100, 92));
+  const c = wav(100, 100);
+  c.writeUInt32LE(36 + 108, 4);            // only the RIFF size is too large
+  fs.writeFileSync(path.join(d, 'assets', 'c.wav'), c);
+  fs.writeFileSync(path.join(d, 'main.tscn'), 'res://assets/a.wav res://assets/b.wav res://assets/c.wav');
+  const r = lint(d);
+  const errs = r.errors.filter((e) => e.rule === 'wav-header');
+  assert.deepEqual(errs.map((e) => e.file), ['assets/b.wav']);
+  assert.match(errs[0].message, /runs 8 byte\(s\) past the end/);
+  assert.deepEqual(r.warnings.filter((w) => w.rule === 'wav-header').map((w) => w.file), ['assets/c.wav']);
+});
+
 test('lint: an asset without a licence-register row is an error; a folder row covers its files', () => {
   const d = tmpProject({
     'project.godot': PG, 'main.tscn': 'res://assets/sfx/jump.wav', 'addons/gb_harness/harness.gd': '',

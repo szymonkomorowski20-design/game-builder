@@ -12,7 +12,7 @@ kończy się grywalną wersją, którą **sprawdza silnik** (`gb verify`), a **o
 Opisuje instalację, pierwszą grę krok po kroku, co mówić na bramkach, szablony, przepisy, `gb`, licencje i
 wydanie.
 
-## Co jest w środku (0.25.0)
+## Co jest w środku (0.26.0)
 
 | Element | Do czego służy |
 |---|---|

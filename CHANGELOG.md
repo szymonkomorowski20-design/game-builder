@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.26.0 — 2026-09-28 · a WAV the first import refuses; long scenarios
+- **A scenario can declare a longer run: `const GB_MINUTES := 12`** (1–30 simulated minutes; the default stays 5).
+  - For a whole campaign played by a bot through the real menus: three missions take a careful bot about 5.6
+    simulated minutes, past the old fixed cap. Found building the FPS proof game's phase 5 test (`p5_campaign`).
+  - The process timeout grows with the declared minutes (real time in a window); "did not finish" now names the
+    cap and the way to raise it. `scenario.gd`'s header says how.
+  - Tested (`scenarioBudget`).
+- **`gb lint`: `wav-header`.**
+  - An error for a WAV whose `data` chunk runs past the end of the file: Godot 4.7 fails its *first* import, so a
+    warm import cache hides it in the maker's copy while every fresh clone, CI run and export fails.
+  - A warning when only the RIFF size is larger than the file (Godot imports it with a warning).
+  - Found in the FPS proof game "Operacja Pył": the checker's clean-copy verify failed at import; the maker's copy
+    passed because its cache was warm. Measured: 62 of the 63 WAVs in mrbid's Sound-Effects pack have a RIFF size
+    2–8 bytes too large, and a few also a data chunk past the end.
+  - Tested.
+- **godot-pitfalls:** a failing first import is reproduced on a clean copy before it is dismissed.
+
 ## 0.25.0 — 2026-09-28 · the FPS campaign template (ROADMAP 9.2)
 - **Template `military-fps-3d`** (Call of Duty-like, original): one mission from a quiet start yard through a
   courtyard and a warehouse to a radio objective, reinforcements and extraction. Built on recipes 41, 49, 53–57.
