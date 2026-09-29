@@ -8,7 +8,7 @@ where needed, a README (**Problem / Solution / Tuning / Pitfalls / Test**) and a
 node tools/recipes.js          # installs harness + GUT into recipes/, then gb verify --path recipes
 ```
 
-Last full run: 280/280 GUT tests, 24/24 bot scenarios, Godot 4.7.2 (2026-09-28).
+Last full run: 336/336 GUT tests, 27/27 bot scenarios, Godot 4.7.2 (2026-09-29).
 
 ## How an agent uses a recipe
 1. Find it below, or `node <plugin>/tools/gb/gb.js recipe list` (or `gb kb "<problem>"` for background).
@@ -89,6 +89,14 @@ Last full run: 280/280 GUT tests, 24/24 bot scenarios, Godot 4.7.2 (2026-09-28).
 | [63-rts-combat](63-rts-combat/README.md) | RTS combat (damage with bonuses, type table and armour; target priority; leash) | no counters, immune armour, units shooting walls while archers kill them, twitching between targets, endless chases | test_r63_combat.gd |
 | [64-rts-ai](64-rts-ai/README.md) | RTS skirmish AI (a priority list, attack waves, retreat, honest difficulty) | an AI that supply-blocks, never techs, trickles units, fights to the last man, or secretly sees the map | test_r64_ai.gd |
 | [65-rts-camera](65-rts-camera/README.md) | RTS camera (edge / key / drag pan, zoom limits, bounds, jump-to, the ground point under the cursor) | a pan that ignores the zoom, fast corners, a view off the map, clicks landing away from where the player looks | test_r65_camera.gd, r65_rts_camera.gd |
+| [66-stealth-movement](66-stealth-movement/README.md) | Stealth movement (profiles with noise, edges that hold, falls with soft landings) | one speed for everything, silent sprints, walking off roofs by accident, falls that mean nothing or wall the player in | test_r66_movement.gd, r66_stealth_movement.gd |
+| [67-climb-ledges](67-climb-ledges/README.md) | Climbing and ledges (a markup-free ledge probe, hang, climb, shimmy, side jump, mantle, vault, parkour down) | sticky climbing, invisible holds, no way down but a fall, climbing through walls, hand-placed markers on every ledge | test_r67_ledges.gd, r67_climbing.gd |
+| [68-stealth-perception](68-stealth-perception/README.md) | Stealth perception (vision zones, an awareness meter, hearing along paths) | detection that feels random: a plain cone, instant detection, unpredictable rays, hearing through walls | test_r68_perception.gd, r68_perception.gd |
+| [69-guard-alert](69-guard-alert/README.md) | Guard alert and search (states, a shared board, one investigator, search points, calling for support) | a whole level converging on one noise, guards who know too much, endless or instant searches, unstoppable alarms | test_r69_guard_alert.gd |
+| [70-crowd](70-crowd/README.md) | Crowd (lanes, moods that only worsen, four-phase reactions, steering by speed, distance bands, blending, slots) | chaotic wandering, crowds swinging between calm and panic, robotic turns, costly crowds, hiding nobody trusts | test_r70_crowd.gd |
+| [71-counter-melee](71-counter-melee/README.md) | Counter-based melee (a weighted stage manager, strike timelines, counter / block / dodge, target picking) | one-button counters that win every fight, overlapping tells, eaten or mashed presses, attacks pulled across the room | test_r71_counter_melee.gd |
+| [72-notoriety](72-notoriety/README.md) | Notoriety and the chase (levels with named effects, witnesses who report, a search circle, escaping) | all-or-nothing consequences, wanted states that never end, unreported crimes the guards know about | test_r72_notoriety.gd |
+| [73-contracts](73-contracts/README.md) | Contracts and viewpoints (sync to reveal, a target's routine, phases where detection changes, not fails) | icon-filled maps, unreadable routines, missions failed on sight, bonuses that dictate how to play | test_r73_contracts.gd |
 
 Tests: `tests/unit/test_rNN_*.gd` (GUT, logic and time via `advance(delta)`), `tests/scenarios/rNN_*.gd`
 (bot player through the harness: real physics, real input actions). Tier A (player progress): recipe 13 —

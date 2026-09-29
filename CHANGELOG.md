@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.30.0 — 2026-09-29 · the stealth and parkour recipes 66–73 (ROADMAP 9.4)
+The first part of the "like Assassin's Creed" pack: eight recipes, from the genre doc `gb doc genre-stealth-parkour`
+(gry-wiedza, 173 facts from five researched lists; no shipped game publishes its cone angles or climbing distances,
+so every number is a starting value).
+- **66 — stealth movement:**
+  - `MoveProfiles`: sneak / walk / run / sprint, each with a speed, a noise radius and a high-profile flag;
+  - `EdgeGuard`: roof edges hold unless the player jumps, drops or sprints (the sprint leaps);
+  - `FallRule`: named safe and deadly heights, hay and water as soft landings;
+  - `StealthMover`: a camera-relative body with a buffered jump and coyote time. It reports `noise_made` and
+    `stealth_cues()` (sneaking, high profile, still, shadow, blended);
+  - `GreyboxBlock` for blockouts.
+- **67 — climbing:**
+  - `LedgeProbe`: a markup-free hold probe. The farthest wall hit is the face; a wall's own top counts when its edge
+    is open above; lips on the face count too, and holds above the window are passed through. Capsule checks give
+    room to hang and to stand;
+  - `Climber`: grab by jump or sprint, never by running into a wall. It hangs, climbs hold by hold, shimmies,
+    side-jumps, climbs over a top, mantles low tops and vaults thin ones, and turns the drop intent at a roof's edge
+    into a hang.
+- **68 — perception:**
+  - `VisionCone`: near / main / peripheral zones; the main angle narrows with distance; the time to notice grows
+    linearly with distance; multipliers for shadow, sneaking, high profile, standing still, blending, and a hunting or
+    cautious guard;
+  - `AwarenessMeter`: rises while the player is seen, falls slowly, latches detection;
+  - `Hearing`: the walkable path, or straight distance off the mesh;
+  - `GuardSenses`: chest and head test points with a line of sight.
+- **69 — guard alert:**
+  - `GuardBrain`: patrol → suspicious → investigate → alert → search → return with caution. It remembers the player
+    for 2.5 s after losing sight, and its call for support arrives after 1.5 s, so it can be silenced first;
+  - `AlertBoard`: one investigator per stimulus, at most 3 searchers, search points hidden from the last seen place
+    first, and alarms within a radius.
+- **70 — crowd:** lanes merged at crossings; moods that only worsen; four-phase reactions with a cooldown; steering
+  that slows instead of turning; update bands by distance; blending into a group of two; smart slots (a full bench
+  hides a third).
+- **71 — counter melee:** a weighted stage manager (attackers take turns, cooldowns); strike timelines (normal /
+  unblockable / combo); counter, perfect, block and dodge, with mashing that shrinks the window; target picking whose
+  reach shrinks with the angle.
+- **72 — notoriety:** levels with named effects; a civilian witness reports after a delay and can be stopped;
+  posters and heralds; a search circle at the last seen place, left or hidden in to escape.
+- **73 — contracts:** viewpoints that sync once and reveal their radius, and walking up to a place reveals it too;
+  deterministic target routines; contracts where detection alerts the target but fails nothing.
+- **Proof:** 336 GUT tests and 27 bot scenarios pass on the recipes project. 92 of 93 deliberate faults are
+  detected; the one left is an early exit with no behaviour of its own, and the reason is recorded in recipe 67's
+  README.
+- **Recipes project:** new input actions `sprint`, `sneak` and `drop`.
+- **Pitfalls:**
+  - `_input` joins `_set` and `_get` as helper names that collide with engine virtuals;
+  - enum-typed parameters inside the same `class_name` script (4.7.2);
+  - `:=` from a Variant comparison;
+  - float comparisons in tests;
+  - StringName sorting;
+  - processing order between a node and the node it drives;
+  - a shared mesh with different override materials logging an error headless.
+- **`gb doc`:** lists `genre-stealth-parkour`.
+
 ## 0.29.0 — 2026-09-28 · what the RTS proof game found (ROADMAP 9.3)
 The proof game **Kamienna Marchia** (three missions and a skirmish, built autonomously on `rts-3d`; its report is
 `docs/dogfood/kamienna-marchia.md`) fed its fixes back:

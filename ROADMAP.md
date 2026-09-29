@@ -144,4 +144,18 @@ dla konkretnej partii.
   wyprzedzeniem, produkcja bez przestojów, zagrożenie tylko na swojej połowie, uczciwa baza wroga), dwa nowe pokrętła
   trudności (budynki produkcji, sufit żywności armii), odpowiadanie napastnikowi, walczący patrol, powtarzalne testy
   przy szybkim eksporcie; `gb scaffold` z ustawieniami projektu z szablonu, `gb export --smoke` odporny na Smart App Control
-### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat
+### 9.4 Jak Assassin's Creed — 3. osoba: wspinaczka/parkour, skradanie, walka z kontrami, tłum, duży świat (w toku)
+- [x] Dokument gatunku `gry-wiedza/wiedza/genre-stealth-parkour.md` (`gb doc genre-stealth-parkour`): 173 fakty z pięciu
+  badań (wspinaczka, percepcja i poszukiwania, walka z kontrami, tłum, otwarty świat i misje), sprawdzony przez
+  niezależnego agenta; żadna gra nie publikuje kątów stożków ani odległości wspinaczki, więc liczby w przepisach to
+  wartości startowe (0.30.0)
+- [x] Przepisy 66–73 (0.30.0): ruch skradankowy (profile z hałasem, krawędzie, upadki z miękkim lądowaniem),
+  wspinaczka bez znaczników (sonda krawędzi, zwis, wspinanie, przesuwanie, skok w bok, wejście na dach, wskoczenie,
+  przeskok, zwis z krawędzi dachu), percepcja (strefy widzenia, miernik uwagi, słuch po ścieżce), alarm i
+  poszukiwania (stany strażnika, wspólna tablica, jeden sprawdzający, punkty poszukiwań, wezwanie wsparcia z
+  opóźnieniem), tłum (pasy, nastroje, reakcje w 4 fazach, strefy odległości, wtapianie się, miejsca z rezerwacją),
+  walka z kontrami (reżyser sceny z wagami, osie czasu ataków, kontra/blok/unik, wybór celu), rozgłos i pościg
+  (świadkowie, plakaty, krąg poszukiwań), kontrakty i punkty widokowe; 336 testów GUT, 27 scenariuszy, 92 z 93
+  dowodów wykrywania
+- [ ] Szablon (mała dzielnica: dachy, strażnicy, tłum, cel z trasą, punkt widokowy; bot wykonuje kontrakt)
+- [ ] Gra-dowód zbudowana autonomicznie + raport

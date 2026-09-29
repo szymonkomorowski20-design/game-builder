@@ -62,7 +62,7 @@ const USAGE = `Usage: node tools/gb/gb.js <command> [options]
   recipe list  ·  recipe add <NN|name…>   copy tested recipes (+ dependencies + their tests) into recipes/ and tests/
  Knowledge
   kb <query...>            search the gry-wiedza knowledge base (BAZA-AI)
-  doc [name]               knowledge documents in gry-wiedza/wiedza (no name: list) — design-theory, platforms, asset-pipeline, starter-packs, reference-games, genre-action-roguelite, genre-military-fps, genre-rts
+  doc [name]               knowledge documents in gry-wiedza/wiedza (no name: list) — design-theory, platforms, asset-pipeline, starter-packs, reference-games, genre-action-roguelite, genre-military-fps, genre-rts, genre-stealth-parkour
   assets <query...> [--typ audio|model_3d|animation|animation_clip|sprite_2d|ui_skin]
 Options: --path <project dir> (default: nearest dir with project.godot) · --json
 Env: GODOT_BIN (Godot executable; on Windows prefer *_console.exe) · GAME_BUILDER_KB (BAZA-AI folder) · GAME_BUILDER_WIEDZA (gry-wiedza clone for gb doc)
