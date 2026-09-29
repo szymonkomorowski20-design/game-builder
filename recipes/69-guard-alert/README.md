@@ -39,6 +39,11 @@
 
 **Host (the game):**
 - Each frame, call `tick(now, {level, seen, seen_at, true_pos}, position)` from recipe 68's `GuardSenses`.
+  - Pass `seen_at = senses.meter.last_seen`: the position at the senses' last look. The `seen` flag is up to
+    `think_every` old, and a live position read with it records where the player went after the look (the stealth
+    template's guard once "saw" a player who had already left).
+  - When the goal lies off the navigation mesh (a spot on a stall, a roof edge), pass `goal` as the position once
+    the path is done as close as the mesh allows. Otherwise the guard never "arrives" and never searches.
 - In `PATROL`, walk the route. Otherwise go to `goal`, run when `running`, and face `look_at` when standing.
 - Set `senses.guard_state = brain.guard_state(now)`. When `wants_reset` is set, reset the meter and clear the flag.
 - Give each guard a slightly different `search_time` (±25%), so the guards go back gradually, not all at once

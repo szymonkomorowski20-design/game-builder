@@ -40,6 +40,14 @@ func run() -> void:
 	await wait(1.0)
 	var lit := a.meter.value
 	expect_near(in_shadow / lit, a.cone.in_shadow, 0.1, "shadow slows noticing to its multiplier")
+	a.meter.reset()
+	a.look(0.5)
+	var one_look := a.meter.value
+	a.notice_scale = 2.0
+	a.meter.reset()
+	a.look(0.5)
+	a.notice_scale = 1.0
+	expect_near(a.meter.value / one_look, 2.0, 0.001, "notice_scale (notoriety, difficulty) multiplies the rate")
 	p.blended = true
 	a.meter.reset()
 	await wait(2.0)

@@ -67,6 +67,18 @@ func run() -> void:
 	await tap("drop")
 	await wait_until(func() -> bool: return p.is_on_floor(), 2.0)
 
+	p.teleport(Vector3(16, 0.05, 2.0))
+	await wait(0.3)
+	_tops.clear()
+	hold("move_up")
+	await wait(0.6)
+	await tap("jump")
+	await wait_until(func() -> bool: return c.state == &"hang", 2.0)
+	release("move_up")
+	expect_eq(_decimetres(), [22], "a knee-high lip is skipped: the grab takes the hold above it")
+	await tap("drop")
+	await wait_until(func() -> bool: return p.is_on_floor(), 2.0)
+
 	p.teleport(Vector3(9, 0.05, 6))
 	await wait(0.3)
 	var m0 := c.moves

@@ -20,6 +20,8 @@ var cone := VisionCone.new()
 var meter := AwarenessMeter.new()
 ## Set by the brain (recipe 69): &"alert", &"caution" or &"".
 var guard_state: StringName = &""
+## The game's multiplier on the rate: notoriety (recipe 72's `effect().notice`), difficulty.
+var notice_scale := 1.0
 var seen := false
 var zone_seen: StringName = &""
 var clock := 0.0
@@ -50,7 +52,7 @@ func look(dt: float) -> void:
 			var z := cone.zone(global_position, forward, p)
 			if z == &"" or not _line_clear(p, target):
 				continue
-			var r := cone.rate(z, global_position.distance_to(p), cues, guard_state)
+			var r := cone.rate(z, global_position.distance_to(p), cues, guard_state) * notice_scale
 			if r > best:
 				best = r
 				best_zone = z

@@ -368,6 +368,23 @@ test('e2e: rts-3d template gets its recipes, actions and perf budget, and passes
   assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
 });
 
+test('e2e: stealth-parkour-3d template gets its recipes, actions and perf budget, and passes every scenario (a bot completes the contract) out of the box', { skip, timeout: 1200000 }, () => {
+  const dir = path.join(tmp(), 'stealth');
+  const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'Stealth', '--template', 'stealth-parkour-3d'], { encoding: 'utf8', timeout: 600000 });
+  assert.equal(s.status, 0, s.stdout + s.stderr);
+  assert.match(s.stdout, /RECIPES 40-orbit-camera-3d, 66-stealth-movement, 67-climb-ledges, 68-stealth-perception, 69-guard-alert, 70-crowd, 71-counter-melee, 72-notoriety, 73-contracts/);
+  const pg = fs.readFileSync(path.join(dir, 'project.godot'), 'utf8');
+  for (const a of ['sprint', 'sneak', 'drop', 'strike', 'counter', 'camera_left', 'camera_down']) assert.match(pg, new RegExp(`^${a}=\{`, 'm'), a);
+  assert.match(pg, /^strike=\{[\s\S]*?InputEventMouseButton[\s\S]*?"button_index":1/m, 'strike is on the left mouse button');
+  // The template's own budget (the busiest district: every guard hunting) wins over the generic one.
+  assert.match(fs.readFileSync(path.join(dir, '.ai', 'perf-budget.json'), 'utf8'), /perf_alarm\.tscn/);
+  const v = spawnSync(process.execPath, [GB, 'verify', '--path', dir], { encoding: 'utf8', timeout: 900000 });
+  assert.equal(v.status, 0, v.stdout);
+  const sc = /PASS scenarios \((\d+)\/(\d+) passing\)/.exec(v.stdout);
+  assert.ok(sc && sc[1] === sc[2] && Number(sc[1]) >= 16, v.stdout);
+  assert.match(v.stdout, /PASS test \(gut: (\d+)\/\1 passing\)/);
+});
+
 test('e2e: fps-3d template adds its own input actions (shoot on the mouse) and passes its scenarios out of the box', { skip, timeout: 900000 }, () => {
   const dir = path.join(tmp(), 'fps');
   const s = spawnSync(process.execPath, [GB, 'scaffold', '--dir', dir, '--name', 'FPS', '--template', 'fps-3d'], { encoding: 'utf8', timeout: 600000 });

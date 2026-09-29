@@ -13,6 +13,10 @@ func _ready() -> void:
 		add_child(GreyboxBlock.make(lip[0], lip[1], HOLD))
 	add_child(GreyboxBlock.make(Vector3(9, 0.55, 3), Vector3(1.5, 1.1, 1.5), HOLD))
 	add_child(GreyboxBlock.make(Vector3(-9, 0.5, 3), Vector3(3, 1.0, 0.2), HOLD))
+	# A wall with a knee-high lip under a real hold: the grab must skip the low one.
+	add_child(GreyboxBlock.make(Vector3(16, 2, -1.5), Vector3(4, 4, 3), STONE))
+	for top: float in [0.9, 2.2]:
+		add_child(GreyboxBlock.make(Vector3(16, top - 0.075, 0.06), Vector3(4, 0.15, 0.12), HOLD))
 
 
 ## [centre, size] of each lip: 0.15 m thick, sticking 0.12 m out of the face.

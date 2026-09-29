@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.31.0 — 2026-09-29 · the `stealth-parkour-3d` template (ROADMAP 9.4)
+- **`stealth-parkour-3d`: stealth and parkour in a city district** (Assassin's Creed-like, original), built on recipes
+  40 and 66–73 (added with their tests), with the genre doc `gb doc genre-stealth-parkour`:
+  - the district: 70 m, two streets, a block of houses with lipped faces and 2 m alleys to leap, the target's palazzo,
+    a viewpoint tower over a hay pile, a market square with a crowd, a bench, stalls, posters;
+  - the player: sprint, sneak and the drop intent; climbing, hanging, climbing down; hiding in hay and on the bench;
+    the strike (an assassination of an unaware victim within 1.6 m, otherwise a hit); a tap of counter counters,
+    holding it blocks, drop dodges; health in hits, falls that cost health;
+  - five guards: senses, a brain on a shared board, navigation, bodies found, strikes on a stage; the palazzo's door
+    guard is heavy (every second strike unblockable);
+  - the crowd on lanes, with moods, panic after a kill, and blending;
+  - notoriety (witnesses report after 6 s; posters lower it; guards notice faster), the chase and its escape;
+  - one contract: the viewpoint reveals the target's house; the target walks a 90 s routine; detection sends it
+    running for the palazzo (there the contract fails); the strike starts the escape; 20 m from the body with nobody
+    chasing, it is done;
+  - a Polish HUD: goal, health, notoriety, the chase, messages.
+- **Proof:** 11 scenarios S1–S11 (S9: a bot completes the contract unseen, in the live district), 8 unit contracts
+  on the layout, 16 scenarios and 61 GUT tests pass in a fresh scaffold, stable over `--repeat 3`. 20 of 20
+  deliberate faults are detected. The busiest district (every guard hunting) measured frame p95 4.2 ms, process p95
+  5.5 ms and physics p95 0.65 ms over 120 s.
+- **Recipe 67:** a knee-high lip under a real hold no longer stops a grab; the climber looks above it.
+- **Recipe 68:** `notice_scale`, the game's multiplier on the rate (notoriety, difficulty).
+- **Recipe 69:** the host notes: pass the position of the senses' last look, not the live one, and treat a goal off
+  the navigation mesh as reached when the path ends.
+- **Pitfalls:**
+  - a `CharacterBody3D` pushing within 15° of a wall's normal stops instead of sliding (`wall_min_slide_angle`,
+    grounded 3D motion too);
+  - navigation path points 0.5 m above the ground never reached (`path_height_offset`);
+  - a sighting flag older than the position read with it;
+  - a short performance run measures the scene's start.
+- **Lists:** the template in the README, the manual and the bootstrap's decision engine; an e2e test scaffolds it and
+  runs every scenario.
+
 ## 0.30.0 — 2026-09-29 · the stealth and parkour recipes 66–73 (ROADMAP 9.4)
 The first part of the "like Assassin's Creed" pack: eight recipes, from the genre doc `gb doc genre-stealth-parkour`
 (gry-wiedza, 173 facts from five researched lists; no shipped game publishes its cone angles or climbing distances,

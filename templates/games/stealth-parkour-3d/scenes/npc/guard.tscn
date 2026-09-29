@@ -1,0 +1,85 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/npc/guard_agent.gd" id="1_guard"]
+[ext_resource type="Script" path="res://recipes/68-stealth-perception/guard_senses.gd" id="2_senses"]
+
+[sub_resource type="CapsuleShape3D" id="Capsule_body"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_guard"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_tunic"]
+albedo_color = Color(0.62, 0.16, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="Helmet"]
+size = Vector3(0.44, 0.22, 0.44)
+
+[sub_resource type="StandardMaterial3D" id="Mat_iron"]
+albedo_color = Color(0.55, 0.57, 0.6, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="BoxMesh" id="Spear"]
+size = Vector3(0.06, 2.2, 0.06)
+
+[sub_resource type="BoxMesh" id="Bar"]
+size = Vector3(0.8, 0.07, 0.02)
+
+[sub_resource type="StandardMaterial3D" id="Mat_bar"]
+shading_mode = 0
+albedo_color = Color(1, 0.8, 0.2, 1)
+no_depth_test = true
+billboard_mode = 1
+
+[node name="Guard" type="CharacterBody3D" groups=["guard"]]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_guard")
+
+[node name="Collision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("Capsule_body")
+
+[node name="Body" type="Node3D" parent="."]
+
+[node name="Mesh" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CapsuleMesh_guard")
+surface_material_override/0 = SubResource("Mat_tunic")
+
+[node name="Helmet" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.78, 0)
+mesh = SubResource("Helmet")
+surface_material_override/0 = SubResource("Mat_iron")
+
+[node name="Spear" type="MeshInstance3D" parent="Body"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.42, 1.1, -0.1)
+mesh = SubResource("Spear")
+surface_material_override/0 = SubResource("Mat_iron")
+
+[node name="Senses" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+script = ExtResource("2_senses")
+
+[node name="Agent" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.75
+target_desired_distance = 0.75
+path_height_offset = 0.5
+
+[node name="Mark" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.45, 0)
+billboard = 1
+no_depth_test = true
+modulate = Color(1, 0.85, 0.2, 1)
+outline_modulate = Color(0.05, 0.05, 0.05, 1)
+font_size = 96
+outline_size = 14
+
+[node name="Meter" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+visible = false
+mesh = SubResource("Bar")
+surface_material_override/0 = SubResource("Mat_bar")

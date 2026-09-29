@@ -24,8 +24,9 @@
   - `capsule_free(space, feet)` is the same check, for other uses.
 - **`Climber`** (a child `Node` of a `StealthMover`, recipe 66). It runs before the mover each physics frame.
   - **On the ground:** jump at a wall, or sprint into it, to grab the hold in front. A top up to `mantle_max` is
-    stepped onto (a mantle); a thin one is vaulted, because its stand point lies past it. Running into a wall
-    without sprint or jump never climbs.
+    stepped onto (a mantle); a thin one is vaulted, because its stand point lies past it. A knee-high lip that can
+    be neither stood on nor hung from is skipped for the hold above it (on a roof under a taller wall, for example).
+    Running into a wall without sprint or jump never climbs.
   - **At a roof's edge** (the mover stopped there, recipe 66), the drop intent hangs from the edge: the genre's
     "parkour down".
   - **In the air**, with jump pressed or sprint held, it catches a hold at hand height.

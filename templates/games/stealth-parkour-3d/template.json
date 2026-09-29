@@ -1,0 +1,30 @@
+{
+  "name": "stealth-parkour-3d",
+  "description": "Third-person stealth and parkour starter (Assassin's Creed-like, original): one greybox city district with climbable facades, rooftops and hay; guards who see, hear, search and call for support; a crowd to blend into; a counter-based fight when found; notoriety with posters; a viewpoint that reveals the district; and one assassination contract (a target with a routine, the strike, the escape). Built on recipes 40, 66-73 (added with their tests); behaviour scenarios + unit contracts, including a bot that completes the contract.",
+  "dim": "3d",
+  "main_scene": "res://scenes/district/district.tscn",
+  "viewport": [1280, 720],
+  "window": [1280, 720],
+  "stretch": "canvas_items",
+  "tests": "gut",
+  "recipes": ["40", "66", "67", "68", "69", "70", "71", "72", "73"],
+  "settings": {
+    "navigation": {
+      "world/map_use_async_iterations": false,
+      "world/region_use_async_iterations": false,
+      "avoidance/thread_model/avoidance_use_multiple_threads": false,
+      "avoidance/thread_model/avoidance_use_multiple_threads.template": true
+    }
+  },
+  "actions": {
+    "sprint": { "keys": ["Shift"], "joy_buttons": [10] },
+    "sneak": { "keys": ["C", "Ctrl"], "joy_buttons": [9] },
+    "drop": { "keys": ["X"], "joy_buttons": [1] },
+    "strike": { "keys": ["F"], "mouse": [1], "joy_buttons": [3] },
+    "counter": { "keys": ["Q"], "mouse": [2], "joy_axis": [5, 1.0] },
+    "camera_left": { "joy_axis": [2, -1.0] },
+    "camera_right": { "joy_axis": [2, 1.0] },
+    "camera_up": { "joy_axis": [3, -1.0] },
+    "camera_down": { "joy_axis": [3, 1.0] }
+  }
+}

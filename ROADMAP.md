@@ -157,5 +157,8 @@ dla konkretnej partii.
   walka z kontrami (reżyser sceny z wagami, osie czasu ataków, kontra/blok/unik, wybór celu), rozgłos i pościg
   (świadkowie, plakaty, krąg poszukiwań), kontrakty i punkty widokowe; 336 testów GUT, 27 scenariuszy, 92 z 93
   dowodów wykrywania
-- [ ] Szablon (mała dzielnica: dachy, strażnicy, tłum, cel z trasą, punkt widokowy; bot wykonuje kontrakt)
+- [x] Szablon `stealth-parkour-3d` (0.31.0): dzielnica 70 m — dom z występami, dachy z alejkami do przeskoku, pałac celu,
+  wieża widokowa nad sianem, rynek z tłumem; 5 strażników (patrole, drzwi, dach, rynek), cel z trasą, kontrakt z
+  ucieczką; 11 scenariuszy S1–S11 (S9: bot wykonuje kontrakt niezauważony) + kontrakty układu, 20 z 20 dowodów
+  wykrywania, budżet wydajności dzielnicy w alarmie
 - [ ] Gra-dowód zbudowana autonomicznie + raport

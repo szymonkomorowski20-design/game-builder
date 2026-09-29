@@ -95,13 +95,18 @@ func _try_start() -> void:
 				return
 		if not (jump or sprint):
 			return
-		var l := probe.find(_space(), feet, dir, feet.y + grab_min, feet.y + grab_max, _exclude())
-		if l.is_empty():
-			return
-		if l.kind == &"top" and float(l.height) <= mantle_max and l.can_stand:
-			_start_move(l.stand, l, &"stand", 0.0)
-		elif l.can_hang and float(l.height) > mantle_max:
-			_start_move(l.hang, l, &"hang", 0.0)
+		var low := feet.y + grab_min
+		for attempt in 3:
+			var l := probe.find(_space(), feet, dir, low, feet.y + grab_max, _exclude())
+			if l.is_empty():
+				return
+			if l.kind == &"top" and float(l.height) <= mantle_max and l.can_stand:
+				_start_move(l.stand, l, &"stand", 0.0)
+				return
+			if l.can_hang and float(l.height) > mantle_max:
+				_start_move(l.hang, l, &"hang", 0.0)
+				return
+			low = float(l.top_y) + 0.3    # a hold too low to use (a knee-high lip): look above it
 	elif jump or sprint:
 		var l := probe.find(_space(), feet, dir, feet.y + air_grab_min, feet.y + air_grab_max, _exclude())
 		if not l.is_empty() and l.can_hang:

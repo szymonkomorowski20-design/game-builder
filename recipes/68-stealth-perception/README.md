@@ -39,7 +39,7 @@
 **Hooking up:**
 - Give `sight_mask` the world and the player's layer, so a ray that reaches the player counts as clear, and leave the
   guards off it.
-- Set `guard_state` from the brain.
+- Set `guard_state` from the brain, and `notice_scale` from notoriety (recipe 72's `effect().notice`) or difficulty.
 - Draw the meter over the guard's head, and the reason next to it (genre doc §12).
 - Set the player's `in_shadow` from lights or zones, and `blended` from recipe 70.
 
